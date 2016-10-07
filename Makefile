@@ -8,10 +8,17 @@ install:
 format:
 	clang-format -i include/fst/print
 
+.PHONY: xcode
+xcode:
+	@mkdir -p cmake-xcode
+	cd cmake-xcode && cmake -GXcode .. && open fst.xcodeproj
+
 .PHONY: example
 example: 
 	@mkdir -p build
 	clang++ -std=c++11 example/main.cpp -I include/ -o build/example
 
 clean:
-	rm -rf build/
+	rm -rf build
+	rm -rf cmake-build
+	rm -rf cmake-xcode

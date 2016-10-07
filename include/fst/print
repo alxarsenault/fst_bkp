@@ -1,9 +1,15 @@
 #pragma once
 
+#include <fst/def>
 #include <unistd.h> // write.
 #include <cstring> // strcpy.
 #include <cstdio> // sprintf.
 #include <ctime> // time_t and localtime.
+
+#ifdef __FST_USE_STDLIB__
+#include <string>
+#include <type_traits>
+#endif // __FST_USE_STDLIB__
 
 namespace fst {
 /// List of basic ansi escape color sequence.
@@ -40,6 +46,17 @@ template <typename T, typename... P> inline void errprint(T t, P... p);
 
 template <typename T, typename... P> inline void warnprint(T t, P... p);
 
+template <typename T, typename... P> inline const char* stream(T t, P... p);
+
+struct streamer {
+	inline streamer(const char* str)
+	{
+		strcpy(value, str);
+	}
+
+	char value[1024];
+};
+
 struct CallerInfo {
 	inline CallerInfo(
 		const char* caller_fct, const char* caller_path, int caller_line)
@@ -73,6 +90,8 @@ struct TimeInfo {
 // Private inline implementation.
 namespace fst {
 namespace { // internal.
+	template <bool Mode> class StreamerCheck;
+
 	static const char* color_string_array[] = {
 		"\033[0m", // Reset.
 
@@ -317,7 +336,8 @@ namespace { // internal.
 	template <typename T>
 	inline int p_format(char* str_buffer, int str_len, T value)
 	{
-		return str_len;
+		return StreamerCheck<std::is_convertible<T, streamer>::value>::format(
+			str_buffer, str_len, value);
 	}
 
 	template <>
@@ -379,6 +399,18 @@ namespace { // internal.
 			+ (int)strftime(str_buffer + str_len, 24, "[%T] ", value.tt);
 	}
 
+#ifdef __FST_USE_STDLIB__
+	template <>
+	inline int p_format<std::string>(
+		char* str_buffer, int str_len, std::string value)
+	{
+		strcpy(str_buffer + str_len, value.c_str());
+		int t_len = str_len + (int)value.size();
+		*(str_buffer + t_len) = ' ';
+		return t_len + 1;
+	}
+#endif // __FST_USE_STDLIB__
+
 	inline void PrintChild(char* str_buffer, int str_len)
 	{
 		/// @todo Check str_len == 0.
@@ -402,10 +434,29 @@ namespace { // internal.
 		write(2, str_buffer, str_len);
 	}
 
+	inline const char* StreamChild(char* str_buffer, int str_len)
+	{
+		/// @todo Check str_len == 0.
+		/// @todo Check str_len == 0.
+		//		*(str_buffer + str_len - 1) = '\n';
+		*(str_buffer + str_len - 1) = '\0';
+
+		// The values 0, 1, 2 can also be given, for standard input,
+		// standard output & standard error, respectively.
+		//		write(2, str_buffer, str_len);
+		return str_buffer;
+	}
+
 	template <typename T, typename... P>
 	inline void PrintChild(char* str_buffer, int str_len, T t, P... p)
 	{
 		PrintChild(str_buffer, p_format(str_buffer, str_len, t), p...);
+	}
+
+	template <typename T, typename... P>
+	inline const char* StreamChild(char* str_buffer, int str_len, T t, P... p)
+	{
+		return StreamChild(str_buffer, p_format(str_buffer, str_len, t), p...);
 	}
 
 	inline void CPrintChild(char* str_buffer, int str_len)
@@ -424,6 +475,32 @@ namespace { // internal.
 	{
 		CPrintChild(str_buffer, p_format(str_buffer, str_len, t), p...);
 	}
+
+	template <bool Mode> class StreamerCheck {
+	public:
+		template <typename T, bool M = Mode,
+			typename std::enable_if<M>::type* = nullptr>
+		static inline int format(char* str_buffer, int str_len, T value)
+		{
+			streamer p = (streamer)value;
+			strcpy(str_buffer + str_len, p.value);
+			int t_len = str_len + (int)strlen(p.value);
+			*(str_buffer + t_len) = ' ';
+			return t_len + 1;
+		}
+
+		template <typename T, bool M = Mode,
+			typename std::enable_if<!M>::type* = nullptr>
+		static inline int format(
+			char* str_buffer, int str_len, T value _FST_UNUSED)
+		{
+			const char* unknown = "<unknown type>";
+			strcpy(str_buffer + str_len, unknown);
+			int t_len = str_len + (int)strlen(unknown);
+			*(str_buffer + t_len) = ' ';
+			return t_len + 1;
+		}
+	};
 } // internal.
 
 template <typename T, typename... P> inline void print(T t, P... p)
@@ -467,5 +544,11 @@ template <typename T, typename... P> inline void warnprint(T t, P... p)
 	int str_len = p_format(str_buffer, 0, color::bold_yellow);
 	str_len = p_format(str_buffer, str_len, "[WARNING] :");
 	CPrintChild(str_buffer, p_format(str_buffer, str_len, t), p...);
+}
+
+template <typename T, typename... P> inline const char* stream(T t, P... p)
+{
+	char str_buffer[1024];
+	return StreamChild(str_buffer, p_format(str_buffer, 0, t), p...);
 }
 } // fst.
