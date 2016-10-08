@@ -16,7 +16,7 @@ xcode:
 .PHONY: example
 example: 
 	@mkdir -p build
-	clang++ -std=c++11 example/main.cpp -I include/ -o build/example
+	clang++ -std=c++11 example/print/main.cpp -I include/ -o build/print
 
 clean:
 	rm -rf build

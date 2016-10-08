@@ -1,5 +1,6 @@
 #include <fst/print>
 #include <string>
+#include <vector>
 
 class MyClass {
 public:
@@ -82,5 +83,16 @@ int main()
 	fst::print("print stream :", ss);
 
 	fst::print(fst::stream("John", 1986));
+
+	std::vector<int> vec = {0, 1, 2, 3, 4};
+	std::vector<double> vecf = {0.0, 1.0, 2.0, 3.0, 4.0};
+
+	fst::print("vec :", vec);
+	fst::print("vec :", fst::iterable(vec.data(), vec.size()));
+	fst::print("vec :", fst::iterable(&vec[0], &vec[vec.size()]));
+	fst::print("vec :", fst::iterable(&vecf[0], &vecf[vecf.size()]));
+
+	int bomb[] = {9, 8, 7, 6, 5, 4, 3, 2, 1};
+	fst::print("array :", fst::iterable(bomb, sizeof(bomb) / sizeof(int)));
 	return 0;
 }
