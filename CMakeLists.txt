@@ -48,3 +48,5 @@ install(FILES ${FST_HEADER_FILES} DESTINATION /usr/local/include/fst/)
 
 # Examples.
 add_subdirectory(example/print)
+add_subdirectory(example/visitor)
+add_subdirectory(example/multi_vector)

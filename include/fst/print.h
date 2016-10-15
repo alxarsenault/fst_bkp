@@ -1,6 +1,7 @@
 #pragma once
 
-#include "def"
+#include "def.h"
+#include "math.h"
 #include <unistd.h> // write.
 #include <cstring> // strcpy.
 #include <cstdio> // sprintf.
@@ -185,59 +186,6 @@ namespace { // internal.
 		"\033[1m\033[37m" // Bold White.
 	};
 
-	inline int mul2(int v)
-	{
-		// v * 2
-		return v << 1;
-	}
-
-	inline int mul10(int v)
-	{
-		// v * 8 + v * 2
-		return (v << 3) + (v << 1);
-	}
-
-	inline int mul100(int v)
-	{
-		// v * 64 + v * 32 + v * 4
-		return (v << 6) + (v << 5) + (v << 2);
-	}
-
-	// http://www.hackersdelight.org/divcMore.pdf
-	inline unsigned int divu10(unsigned int n)
-	{
-		unsigned int q, r;
-		q = (n >> 1) + (n >> 2);
-		q = q + (q >> 4);
-		q = q + (q >> 8);
-		q = q + (q >> 16);
-		q = q >> 3;
-		r = n - mul10(q);
-		return q + ((r + 6) >> 4);
-	}
-
-	inline unsigned int divu100(unsigned int n)
-	{
-		unsigned int q, r;
-		q = (n >> 1) + (n >> 3) + (n >> 6) - (n >> 10) + (n >> 12) + (n >> 13) - (n >> 16);
-		q = q + (q >> 20);
-		q = q >> 6;
-		r = n - mul100(q);
-		return q + ((r + 28) >> 7);
-	}
-
-	inline int remu10(unsigned int n)
-	{
-		static char table[16] = { 0, 1, 2, 2, 3, 3, 4, 5, 5, 6, 7, 7, 8, 8, 9, 0 };
-		n = (0x19999999 * n + (n >> 1) + (n >> 3)) >> 28;
-		return table[n];
-	}
-
-	inline unsigned int remu100(int n)
-	{
-		return ((unsigned int)n) - (unsigned int)mul100((int)(divu100((unsigned int)n)));
-	}
-
 	const char digit_pairs[201] = { "00010203040506070809"
 									"10111213141516171819"
 									"20212223242526272829"
@@ -317,15 +265,15 @@ namespace { // internal.
 		c += size - 1;
 
 		while (val >= 100) {
-			int pos = (int)remu100(val);
-			val = divu100(val);
-			*(short*)(c - 1) = *(short*)(digit_pairs + mul2(pos));
+			int pos = (int)math::remu100(val);
+			val = math::divu100(val);
+			*(short*)(c - 1) = *(short*)(digit_pairs + math::mul2(pos));
 			c -= 2;
 		}
 
 		while (val > 0) {
-			*c-- = '0' + remu10(val);
-			val = divu10(val);
+			*c-- = '0' + math::remu10(val);
+			val = math::divu10(val);
 		}
 
 		return ++size;
@@ -394,8 +342,8 @@ namespace { // internal.
 		}
 
 		while (val > 0) {
-			*c-- = '0' + remu10(val);
-			val = divu10(val);
+			*c-- = '0' + math::remu10(val);
+			val = math::divu10(val);
 		}
 
 		return ++size;
