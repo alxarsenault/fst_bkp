@@ -116,7 +116,7 @@ public:
 		return this->template get<K>();
 	}
 
-	template <typename K, typename Op> inline void Visit(Op op)
+	template <typename K, typename Op> inline void visit(Op op)
 	{
 		this->template visit<K, Op>(op);
 	}

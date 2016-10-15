@@ -73,8 +73,8 @@ int main() {
 	guns.visit(gun_interface.Reload());
 	guns.visit(gun_interface.AddAmmo(10));
 	
-	
 	fst::print("Add ammo in rifles.");
-	guns.Visit<Rifle>([](auto& gun) { return gun.AddAmmo(20); });
+//	guns.visit<Rifle>([](auto& gun) { retu`rn gun.AddAmmo(20); });
+	fst::print("Add ammo in rifles.");
 	return 0;
 }
