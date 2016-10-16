@@ -170,7 +170,6 @@ int main() {
 	guns.push_back(Pistol());
 
 
-	
 //	fst::print("Add ammo in rifles.");
 	GunInterface gun_interface;
 	guns.visit(gun_interface.Shot());
