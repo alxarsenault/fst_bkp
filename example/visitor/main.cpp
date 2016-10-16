@@ -143,21 +143,21 @@ int main() {
 	std::vector<virt::A> virt_a;
 	std::vector<virt::B> virt_b;
 	std::vector<virt::C> virt_c;
-	
+
 	for(int i = 0; i < N_ELEM; i++) {
 		virt_a.push_back(virt::A(i));
 		virt_b.push_back(virt::B(i + N_ELEM));
 		virt_c.push_back(virt::C(i + 2 * N_ELEM));
 	}
-	
+
 	for(int i = 0; i < N_ELEM; i++) {
 		virt_vec.push_back(&virt_a[i]);
 	}
-	
+
 	for(int i = 0; i < N_ELEM; i++) {
 		virt_vec.push_back(&virt_b[i]);
 	}
-	
+
 	for(int i = 0; i < N_ELEM; i++) {
 		virt_vec.push_back(&virt_c[i]);
 	}
@@ -172,7 +172,6 @@ int main() {
 		Bench::end("My method");
 		fst::print("Sum :", sum);
 	}
-
 
 	Bench::start("");
 	{
