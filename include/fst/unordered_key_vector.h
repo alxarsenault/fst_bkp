@@ -11,7 +11,7 @@ namespace fst {
 			static_assert(N != 0, "Size must not be zero.");
 			_key_map.set_empty_key(-1);
 		}
-		
+
 		inline std::size_t size() const { return _size; }
 		
 		inline const T &data() const { return _data; }
