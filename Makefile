@@ -6,9 +6,7 @@ install:
 
 .PHONY: format
 format:
-	clang-format -i include/fst/print.h
-	clang-format -i include/fst/math.h
-	clang-format -i include/fst/multi_vector.h
+	find ./ -iname *.hpp -o -iname *.h -o -iname *.cpp | xargs clang-format -i
 
 .PHONY: xcode
 xcode:

@@ -40,8 +40,18 @@ namespace internal {
 			return internal_get<std::is_same<T, K>::value, K>();
 		}
 
+		template <typename K> inline const std::vector<K>& get() const
+		{
+			return internal_get<std::is_same<T, K>::value, K>();
+		}
+
 		// visit.
-		template <typename K, typename Op> inline void visit(Op op)
+		template <typename K, typename Op> inline void Visit(Op op)
+		{
+			return internal_visit<std::is_same<T, K>::value, K, Op>(op);
+		}
+
+		template <typename K, typename Op> inline void Visit(Op op) const
 		{
 			return internal_visit<std::is_same<T, K>::value, K, Op>(op);
 		}
@@ -69,15 +79,34 @@ namespace internal {
 			this->multi_vector<N + 1, Ts...>::add(v);
 		}
 
+		//
 		// Get.
+		//
+
+		// Return vec.
 		template <bool M, typename K, typename std::enable_if<M>::type* = nullptr>
 		inline std::vector<K>& internal_get()
 		{
 			return vec;
 		}
 
+		// Keep looping.
 		template <bool M, typename K, typename std::enable_if<!M>::type* = nullptr>
 		inline std::vector<K>& internal_get()
+		{
+			return this->multi_vector<N + 1, Ts...>::template get<K>();
+		}
+
+		// Return vector.
+		template <bool M, typename K, typename std::enable_if<M>::type* = nullptr>
+		inline const std::vector<K>& internal_get() const
+		{
+			return vec;
+		}
+
+		// Keep looping.
+		template <bool M, typename K, typename std::enable_if<!M>::type* = nullptr>
+		inline const std::vector<K>& internal_get() const
 		{
 			return this->multi_vector<N + 1, Ts...>::template get<K>();
 		}
@@ -93,6 +122,20 @@ namespace internal {
 
 		template <bool M, typename K, typename Op, typename std::enable_if<!M>::type* = nullptr>
 		inline void internal_visit(Op op)
+		{
+			return this->multi_vector<N + 1, Ts...>::template Visit<K, Op>(op);
+		}
+
+		template <bool M, typename K, typename Op, typename std::enable_if<M>::type* = nullptr>
+		inline void internal_visit(Op op) const
+		{
+			for (const auto& n : vec) {
+				op(n);
+			}
+		}
+
+		template <bool M, typename K, typename Op, typename std::enable_if<!M>::type* = nullptr>
+		inline void internal_visit(Op op) const
 		{
 			return this->multi_vector<N + 1, Ts...>::template visit<K, Op>(op);
 		}
@@ -116,9 +159,19 @@ public:
 		return this->template get<K>();
 	}
 
+	template <typename K> inline const std::vector<K>& Get() const
+	{
+		return this->template get<K>();
+	}
+
 	template <typename K, typename Op> inline void visit(Op op)
 	{
-		this->template visit<K, Op>(op);
+		this->template Visit<K, Op>(op);
+	}
+
+	template <typename K, typename Op> inline void visit(Op op) const
+	{
+		this->template Visit<K, Op>(op);
 	}
 
 	template <typename Op> inline void visit(Op op)
