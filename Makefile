@@ -2,7 +2,7 @@ all: example
 
 .PHONY: install
 install:
-	cp -r include/fst /usr/local/include/
+	cp -r include/* /usr/local/include/
 
 .PHONY: format
 format:

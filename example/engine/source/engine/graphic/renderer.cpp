@@ -60,7 +60,7 @@ namespace graphic {
 
 	void Renderer::SwapBuffer()
 	{
-		glfwPollEvents();
+		//		glfwPollEvents();
 		glfwSwapBuffers(_content->window);
 	}
 

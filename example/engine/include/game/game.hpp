@@ -8,6 +8,6 @@
 #include "game/component/dont_touch.hpp"
 
 namespace game {
-using EngineCore = engine::Core<game::component::Triangle, game::component::Square, game::component::XMover,
-	game::component::YMover, game::component::ZRotator, game::component::DontTouch>;
+using EngineCore = engine::Core<game::component::XMover, game::component::YMover, game::component::ZRotator,
+	game::component::DontTouch, game::component::Triangle, game::component::Square>;
 }

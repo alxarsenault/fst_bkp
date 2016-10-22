@@ -1,4 +1,5 @@
 #include "engine/event/manager.hpp"
+#include "engine/event/keyboard.hpp"
 
 #include <fst/print.h>
 #include <GLFW/glfw3.h>
@@ -22,22 +23,32 @@ namespace event {
 		bool pressed = action == GLFW_PRESS || action == GLFW_REPEAT;
 
 		if (key == GLFW_KEY_DOWN && pressed) {
-			evt_manager->events.visit<DownKeyDown>([](DownKeyDown evt) { evt.Call(); });
+			//			evt_manager->events.visit<DownKeyDown>([](DownKeyDown evt) { evt.Call(); });
+			evt_manager->_evt_dispatcher->push_event(0, keyboard::OnDownKeyDown);
 		}
 		else if (key == GLFW_KEY_UP && pressed) {
-			evt_manager->events.visit<UpKeyDown>([](UpKeyDown evt) { evt.Call(); });
+			//			evt_manager->events.visit<UpKeyDown>([](UpKeyDown evt) { evt.Call(); });
+			evt_manager->_evt_dispatcher->push_event(0, keyboard::OnUpKeyDown);
 		}
 		else if (key == GLFW_KEY_LEFT && pressed) {
-			evt_manager->events.visit<LeftKeyDown>([](LeftKeyDown evt) { evt.Call(); });
+			//			evt_manager->events.visit<LeftKeyDown>([](LeftKeyDown evt) { evt.Call(); });
+			evt_manager->_evt_dispatcher->push_event(0, keyboard::OnLeftKeyDown);
 		}
 		else if (key == GLFW_KEY_RIGHT && pressed) {
-			evt_manager->events.visit<RightKeyDown>([](RightKeyDown evt) { evt.Call(); });
+			//			evt_manager->events.visit<RightKeyDown>([](RightKeyDown evt) { evt.Call(); });
+			evt_manager->_evt_dispatcher->push_event(0, keyboard::OnRightKeyDown);
 		}
 	}
 
-	Manager::Manager()
+	Manager::Manager(fst::evt::dispatcher<engine::Entity>* evt_dispatcher)
+		: _evt_dispatcher(evt_dispatcher)
 	{
 		_content.reset(new Content());
+	}
+
+	void Manager::PollEvents()
+	{
+		glfwPollEvents();
 	}
 
 	void Manager::SetWindowHandle(void* handle)

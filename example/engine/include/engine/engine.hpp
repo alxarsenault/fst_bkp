@@ -2,21 +2,16 @@
 
 #include "def.hpp"
 #include "math.hpp"
+#include "engine/entity.hpp"
 #include "engine/graphic/renderer.hpp"
 #include "engine/event/manager.hpp"
 
 #include <fst/multi_key_vector.h>
+#include <fst/event.h>
 #include <sparsehash/dense_hash_map>
 #include <vector>
 
 namespace engine {
-typedef long Entity;
-
-struct PairEntityIndex {
-	Entity entity;
-	std::size_t index;
-};
-
 struct Data {
 	struct Node {
 		std::vector<Entity> parent;
@@ -45,6 +40,7 @@ struct Data {
 
 template <typename T, typename... Ts> struct Core {
 	Core()
+		: event(&evt_dispatcher)
 	{
 	}
 
@@ -60,12 +56,15 @@ template <typename T, typename... Ts> struct Core {
 
 	void NextIteration()
 	{
+		event.PollEvents();
+		evt_dispatcher.call_events();
 		renderer.SwapBuffer();
 	}
 
 	Data data;
-	fst::multi_key_vector<2048, engine::Entity, T, Ts...> component;
+	fst::multi_key_vector<8192, engine::Entity, T, Ts...> component;
 	graphic::Renderer renderer;
+	fst::evt::dispatcher<engine::Entity> evt_dispatcher;
 	event::Manager event;
 };
 }

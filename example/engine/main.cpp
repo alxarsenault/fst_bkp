@@ -7,6 +7,7 @@
 #include "engine/graphic/renderer.hpp"
 #include "engine/graphic/shader.hpp"
 #include "engine/graphic/vertex_buffer.hpp"
+#include "engine/event/keyboard.hpp"
 
 #include "game/game.hpp"
 
@@ -99,43 +100,42 @@ struct Player {
 			entity_info.entity, game::component::Square(&engine_core->data, entity_info, &square_data->shader,
 									&square_data->vbuf));
 
-		//		const float rot_speed = GetRandomValue(-1.0f, 1.0f) * 0.3;
 		engine_core->component.push_back(
 			entity_info.entity, game::component::ZRotator(&engine_core->data, entity_info.entity, -0.3));
 
 		entity = entity_info.entity;
+		engine_core->evt_dispatcher.connect(
+			0, engine::event::keyboard::OnDownKeyDown, fst::evt::function(this, &Player::OnDownKeyDown));
+		engine_core->evt_dispatcher.connect(
+			0, engine::event::keyboard::OnUpKeyDown, fst::evt::function(this, &Player::OnUpKeyDown));
+		engine_core->evt_dispatcher.connect(
+			0, engine::event::keyboard::OnLeftKeyDown, fst::evt::function(this, &Player::OnLeftKeyDown));
+		engine_core->evt_dispatcher.connect(
+			0, engine::event::keyboard::OnRightKeyDown, fst::evt::function(this, &Player::OnRightKeyDown));
+	}
 
-		engine_core->event.Connect(engine::event::DownKeyDown{
-			[](void* data) {
-				Player* player = (Player*)data;
-				const std::size_t index = player->engine_core->data.GetIndex(player->entity);
-				player->engine_core->data.position.y[index] -= 0.05;
-			},
-			this });
+	void OnDownKeyDown()
+	{
+		const std::size_t index = engine_core->data.GetIndex(entity);
+		engine_core->data.position.y[index] -= 0.05;
+	}
 
-		engine_core->event.Connect(engine::event::UpKeyDown{
-			[](void* data) {
-				Player* player = (Player*)data;
-				const std::size_t index = player->engine_core->data.GetIndex(player->entity);
-				player->engine_core->data.position.y[index] += 0.05;
-			},
-			this });
+	void OnUpKeyDown()
+	{
+		const std::size_t index = engine_core->data.GetIndex(entity);
+		engine_core->data.position.y[index] += 0.05;
+	}
 
-		engine_core->event.Connect(engine::event::LeftKeyDown{
-			[](void* data) {
-				Player* player = (Player*)data;
-				const std::size_t index = player->engine_core->data.GetIndex(player->entity);
-				player->engine_core->data.position.x[index] -= 0.05;
-			},
-			this });
+	void OnLeftKeyDown()
+	{
+		const std::size_t index = engine_core->data.GetIndex(entity);
+		engine_core->data.position.x[index] -= 0.05;
+	}
 
-		engine_core->event.Connect(engine::event::RightKeyDown{
-			[](void* data) {
-				Player* player = (Player*)data;
-				const std::size_t index = player->engine_core->data.GetIndex(player->entity);
-				player->engine_core->data.position.x[index] += 0.05;
-			},
-			this });
+	void OnRightKeyDown()
+	{
+		const std::size_t index = engine_core->data.GetIndex(entity);
+		engine_core->data.position.x[index] += 0.05;
 	}
 
 	game::EngineCore* engine_core;
@@ -160,7 +160,7 @@ int main()
 	Player player(&engine_core, &square_data);
 
 	// Create triangles.
-	for (int i = 0; i < 1000; i++) {
+	for (int i = 0; i < 2000; i++) {
 		const engine::PairEntityIndex entity_info = engine_core.data.Create(0);
 		const float x = GetRandomValue(-1.0f, 1.0f) * 0.95;
 		const float z = GetRandomValue(-1.0f, 1.0f) * 0.95;
@@ -169,7 +169,7 @@ int main()
 			game::component::Triangle(&engine_core.data, entity_info, &triangle_data.shader,
 				&triangle_data.vbuf, engine::math::Vec3{ x, y, z }));
 
-		const float scale = (((rand() % 100) / 100.0f) * 0.1) + 0.01;
+		const float scale = (((rand() % 100) / 100.0f) * 0.05) + 0.01;
 		engine_core.data.scale.x[entity_info.index] = scale;
 		engine_core.data.scale.y[entity_info.index] = scale;
 
@@ -190,7 +190,7 @@ int main()
 	}
 
 	// Create squares.
-	for (int i = 0; i < 1000; i++) {
+	for (int i = 0; i < 2000; i++) {
 		const engine::PairEntityIndex entity_info = engine_core.data.Create(0);
 		const float x = GetRandomValue(-1.0f, 1.0f) * 0.95;
 		const float z = GetRandomValue(-1.0f, 1.0f) * 0.95;
@@ -199,7 +199,7 @@ int main()
 			entity_info.entity, game::component::Square(&engine_core.data, entity_info, &square_data.shader,
 									&square_data.vbuf, engine::math::Vec3{ x, y, z }));
 
-		const float scale = GetRandomValue(0.0f, 1.0f) * 0.1 + 0.01;
+		const float scale = GetRandomValue(0.0f, 1.0f) * 0.05 + 0.01;
 		engine_core.data.scale.x[entity_info.index] = scale;
 		engine_core.data.scale.y[entity_info.index] = scale;
 
