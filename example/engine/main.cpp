@@ -104,12 +104,16 @@ struct Player {
 			entity_info.entity, game::component::ZRotator(&engine_core->data, entity_info.entity, -0.3));
 
 		entity = entity_info.entity;
+
 		engine_core->evt_dispatcher.connect(
 			0, engine::event::keyboard::OnDownKeyDown, fst::evt::function(this, &Player::OnDownKeyDown));
+
 		engine_core->evt_dispatcher.connect(
 			0, engine::event::keyboard::OnUpKeyDown, fst::evt::function(this, &Player::OnUpKeyDown));
+
 		engine_core->evt_dispatcher.connect(
 			0, engine::event::keyboard::OnLeftKeyDown, fst::evt::function(this, &Player::OnLeftKeyDown));
+
 		engine_core->evt_dispatcher.connect(
 			0, engine::event::keyboard::OnRightKeyDown, fst::evt::function(this, &Player::OnRightKeyDown));
 	}

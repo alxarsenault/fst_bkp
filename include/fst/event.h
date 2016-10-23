@@ -2,8 +2,6 @@
 
 #include "def.h"
 #include "print.h"
-//#include "multi_vector.h"
-//#include "multi_key_vector.h"
 #include <map>
 //#include <multimap>
 #include <vector>
@@ -260,7 +258,6 @@ namespace evt {
 		//			}
 
 	private:
-		//			multi_vector<std::shared_ptr<binded_event>> _queue;
 		std::vector<binded_event> _queue;
 		std::map<Key, std::multimap<Id, std::shared_ptr<abstract_function>>> _evt_map;
 	};
