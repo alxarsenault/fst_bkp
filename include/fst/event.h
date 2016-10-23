@@ -209,6 +209,26 @@ namespace evt {
 					std::pair<Key, std::multimap<Id, std::shared_ptr<abstract_function>>>(obj_id, evt_map));
 			}
 		}
+		
+		// template<typename ...Args, typename T>
+		template <typename... MsgArgs, typename T> void connect(evt::Id evt_id, T func)
+		{
+			function_holder<T, MsgArgs...> fct(func);
+			auto it = _evt_map.find(0);
+			
+			// Add if object id is found.
+			if (it != _evt_map.end()) {
+				it->second.insert(std::pair<Id, std::shared_ptr<abstract_function>>(evt_id, fct.Copy()));
+			}
+			else {
+				// Create multimap for object id .
+				std::multimap<Id, std::shared_ptr<abstract_function>> evt_map;
+				evt_map.insert(std::pair<Id, std::shared_ptr<abstract_function>>(evt_id, fct.Copy()));
+
+				// Insert multimap to object id .
+				_evt_map.insert(std::pair<Key, std::multimap<Id, std::shared_ptr<abstract_function>>>(0, evt_map));
+			}
+		}
 
 		template <typename... Args> void push_event(Key obj_id, evt::Id evt_id, Args... args)
 		{
@@ -231,6 +251,36 @@ namespace evt {
 
 			std::shared_ptr<abstract_message> msg(new message<Args...>(args...));
 
+			// Add every connected functions to this event id to the event queue.
+			for (auto& i = range.first; i != range.second; ++i) {
+				// Add binded function to event queue.
+				//    _evt_queue.push_back(BindedEvent(i->second, msg));
+				_queue.emplace_back(binded_event(i->second, msg));
+				//    _evt_queue.push(BindedEvent(i->second, msg, priority));
+			}
+		}
+		
+		template <typename... Args> void push_event(evt::Id evt_id, Args... args)
+		{
+			// Search for object id in object map.
+			auto it = _evt_map.find(0);
+			
+			// If object id is not in map then do nothing.
+			if (it == _evt_map.end()) {
+				//					global_manager_mutex.unlock();
+				return;
+			}
+			
+			// Pair of the first and last element of this id.
+			auto range(it->second.equal_range(evt_id));
+			
+			if (range.first == it->second.end()) {
+				//					global_manager_mutex.unlock();
+				return;
+			}
+			
+			std::shared_ptr<abstract_message> msg(new message<Args...>(args...));
+			
 			// Add every connected functions to this event id to the event queue.
 			for (auto& i = range.first; i != range.second; ++i) {
 				// Add binded function to event queue.
