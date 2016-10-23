@@ -13,6 +13,7 @@ public:
 
 int main()
 {
+	fst::print("test", false);
 	fst::vector<ABC, 10> abc_vec;
 	
 	for(int i = 0; i < 10; i++) {

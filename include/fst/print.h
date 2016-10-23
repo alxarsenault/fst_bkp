@@ -385,6 +385,11 @@ namespace { // internal.
 	{
 		return str_len + sprintf(str_buffer + str_len, "%f ", value);
 	}
+	
+	template <> inline int p_format<bool>(char* str_buffer, int str_len, bool value)
+	{
+		return str_len + (value ? sprintf(str_buffer + str_len, "true ") : sprintf(str_buffer + str_len, "false "));
+	}
 
 	template <> inline int p_format<color>(char* str_buffer, int str_len, color value)
 	{
