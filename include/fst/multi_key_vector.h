@@ -5,13 +5,15 @@
 
 namespace fst {
 namespace internal {
-	template <std::size_t N, std::size_t S, typename Key, class... Ts> class multi_key_vector {
+	template <std::size_t N, std::size_t S, typename Key, class... Ts>
+	class multi_key_vector {
 	public:
 		multi_key_vector()
 		{
 		}
 
-		template <typename Op> inline void visit_all(Op op _FST_UNUSED)
+		template <typename Op>
+		inline void visit_all(Op op _FST_UNUSED)
 		{
 		}
 	};
@@ -29,24 +31,28 @@ namespace internal {
 		}
 
 		// add.
-		template <typename K> inline void add(Key key, const K& v)
+		template <typename K>
+		inline void add(Key key, const K& v)
 		{
 			internal_add<std::is_same<T, K>::value>(key, v);
 		}
 
 		// get.
-		template <typename K> inline fst::unordered_key_vector<Key, K, S>& get()
+		template <typename K>
+		inline fst::unordered_key_vector<Key, K, S>& get()
 		{
 			return internal_get<std::is_same<T, K>::value, K>();
 		}
 
 		// visit.
-		template <typename K, typename Op> inline void visit(Op op)
+		template <typename K, typename Op>
+		inline void visit(Op op)
 		{
 			return internal_visit<std::is_same<T, K>::value, K, Op>(op);
 		}
 
-		template <typename Op> inline void visit_all(Op op)
+		template <typename Op>
+		inline void visit_all(Op op)
 		{
 			for (auto& n : vec) {
 				op(n);
@@ -107,22 +113,26 @@ public:
 	{
 	}
 
-	template <typename K> inline void push_back(Key key, const K& k)
+	template <typename K>
+	inline void push_back(Key key, const K& k)
 	{
 		this->add(key, k);
 	}
 
-	template <typename K> inline fst::unordered_key_vector<Key, K, S>& Get()
+	template <typename K>
+	inline fst::unordered_key_vector<Key, K, S>& Get()
 	{
 		return this->template get<K>();
 	}
 
-	template <typename K, typename Op> inline void visit(Op op)
+	template <typename K, typename Op>
+	inline void visit(Op op)
 	{
 		this->template visit<K, Op>(op);
 	}
 
-	template <typename Op> inline void visit(Op op)
+	template <typename Op>
+	inline void visit(Op op)
 	{
 		this->template visit_all<Op>(op);
 	}

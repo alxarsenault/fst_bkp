@@ -5,13 +5,15 @@
 
 namespace fst {
 namespace internal {
-	template <std::size_t N, class... Ts> class multi_vector {
+	template <std::size_t N, class... Ts>
+	class multi_vector {
 	public:
 		multi_vector()
 		{
 		}
 
-		template <typename Op> inline void visit_all(Op op _FST_UNUSED)
+		template <typename Op>
+		inline void visit_all(Op op _FST_UNUSED)
 		{
 		}
 	};
@@ -29,34 +31,40 @@ namespace internal {
 		}
 
 		// add.
-		template <typename K> inline void add(const K& v)
+		template <typename K>
+		inline void add(const K& v)
 		{
 			internal_add<std::is_same<T, K>::value>(v);
 		}
 
 		// get.
-		template <typename K> inline std::vector<K>& get()
+		template <typename K>
+		inline std::vector<K>& get()
 		{
 			return internal_get<std::is_same<T, K>::value, K>();
 		}
 
-		template <typename K> inline const std::vector<K>& get() const
+		template <typename K>
+		inline const std::vector<K>& get() const
 		{
 			return internal_get<std::is_same<T, K>::value, K>();
 		}
 
 		// visit.
-		template <typename K, typename Op> inline void Visit(Op op)
+		template <typename K, typename Op>
+		inline void Visit(Op op)
 		{
 			return internal_visit<std::is_same<T, K>::value, K, Op>(op);
 		}
 
-		template <typename K, typename Op> inline void Visit(Op op) const
+		template <typename K, typename Op>
+		inline void Visit(Op op) const
 		{
 			return internal_visit<std::is_same<T, K>::value, K, Op>(op);
 		}
 
-		template <typename Op> inline void visit_all(Op op)
+		template <typename Op>
+		inline void visit_all(Op op)
 		{
 			for (auto& n : vec) {
 				op(n);
@@ -142,39 +150,46 @@ namespace internal {
 	};
 } // internal.
 
-template <class T, class... Ts> class multi_vector : public internal::multi_vector<0, T, Ts...> {
+template <class T, class... Ts>
+class multi_vector : public internal::multi_vector<0, T, Ts...> {
 public:
 	multi_vector()
 		: internal::multi_vector<0, T, Ts...>()
 	{
 	}
 
-	template <typename K> inline void push_back(const K& k)
+	template <typename K>
+	inline void push_back(const K& k)
 	{
 		this->add(k);
 	}
 
-	template <typename K> inline std::vector<K>& Get()
+	template <typename K>
+	inline std::vector<K>& Get()
 	{
 		return this->template get<K>();
 	}
 
-	template <typename K> inline const std::vector<K>& Get() const
+	template <typename K>
+	inline const std::vector<K>& Get() const
 	{
 		return this->template get<K>();
 	}
 
-	template <typename K, typename Op> inline void visit(Op op)
+	template <typename K, typename Op>
+	inline void visit(Op op)
 	{
 		this->template Visit<K, Op>(op);
 	}
 
-	template <typename K, typename Op> inline void visit(Op op) const
+	template <typename K, typename Op>
+	inline void visit(Op op) const
 	{
 		this->template Visit<K, Op>(op);
 	}
 
-	template <typename Op> inline void visit(Op op)
+	template <typename Op>
+	inline void visit(Op op)
 	{
 		this->template visit_all<Op>(op);
 	}

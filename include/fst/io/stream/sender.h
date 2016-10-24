@@ -8,14 +8,14 @@
 //#include <errno.h>
 //#include <cstring>
 //
-//namespace tk {
-//namespace asio {
-//class Dispatcher;
+// namespace tk {
+// namespace asio {
+// class Dispatcher;
 //
-//namespace stream {
+// namespace stream {
 //
-//template <typename T>
-//class Sender {
+// template <typename T>
+// class Sender {
 // public:
 //  typedef void (*SendCallback)(T*, void*, Status, Error, long);
 //
@@ -37,7 +37,8 @@
 //#ifdef __TK_CONSOLE__
 //        console::Error(TK_TRACER, "Resource is still unavailable (THIS SHOULD NEVER HAPPEND).");
 //        console::FError<console::FLogType::ASIO>(TK_TRACER,
-//                                                 "Resource is still unavailable (THIS SHOULD NEVER HAPPEND).");
+//                                                 "Resource is still unavailable (THIS SHOULD NEVER
+//                                                 HAPPEND).");
 //#endif  // __TK_CONSOLE__
 //        return;
 //      } else if (errno == EPIPE) {  // Broken pipe.
@@ -51,7 +52,8 @@
 //// Unhandled error (for now).
 //#ifdef __TK_CONSOLE__
 //      console::Error(TK_TRACER, "Could not send to socket :", std::strerror(errno));
-//      console::FError<console::FLogType::ASIO>(TK_TRACER, "Could not send to socket :", std::strerror(errno));
+//      console::FError<console::FLogType::ASIO>(TK_TRACER, "Could not send to socket :",
+//      std::strerror(errno));
 //#endif  // __TK_CONSOLE__
 //      sender->CallUserCallback(Status::kBad, Error::kUnknown);
 //      return;
@@ -60,8 +62,10 @@
 //    if (sender->_status == 0) {
 ///// @todo Don't know exactly what to do there.
 //#ifdef __TK_CONSOLE__
-//      console::Warning(TK_TRACER, "Could not send to socket again ( write size :", 0, ").", std::strerror(errno));
-//      console::FWarning<console::FLogType::ASIO>(TK_TRACER, "Could not send to socket again ( write size :", 0, ").",
+//      console::Warning(TK_TRACER, "Could not send to socket again ( write size :", 0, ").",
+//      std::strerror(errno));
+//      console::FWarning<console::FLogType::ASIO>(TK_TRACER, "Could not send to socket again ( write size :",
+//      0, ").",
 //                                                 std::strerror(errno));
 //
 //      /// @todo Add timeout ???
@@ -74,7 +78,8 @@
 //    sender->CallUserCallback(Status::kGood, Error::kNone);
 //  }
 //
-//  long AsyncWrite(T* owner, int fd, void* const data, std::size_t data_size, SendCallback callback, void* user_data) {
+//  long AsyncWrite(T* owner, int fd, void* const data, std::size_t data_size, SendCallback callback, void*
+//  user_data) {
 //    _fd = fd;
 //    _owner = owner;
 //    _data_size = data_size;
@@ -134,7 +139,8 @@
 //#ifdef __TK_CONSOLE__
 //      console::Error(TK_TRACER, "@@@@TODO MAYBE ADD TIMEOUT ??? Socket got disconnected ?????");
 //      console::FError<console::FLogType::ASIO>(TK_TRACER,
-//                                               "@@@@TODO MAYBE ADD TIMEOUT ??? Socket got disconnected ?????");
+//                                               "@@@@TODO MAYBE ADD TIMEOUT ??? Socket got disconnected
+//                                               ?????");
 //#endif  // __TK_CONSOLE__
 //      return CallUserCallback(Status::kBad, Error::kReaderWasClosed);
 //    }

@@ -49,7 +49,8 @@
 
 _START_GOOGLE_NAMESPACE_
 
-template <bool> struct SparsehashCompileAssert {
+template <bool>
+struct SparsehashCompileAssert {
 };
 #define SPARSEHASH_COMPILE_ASSERT(expr, msg)                                                                 \
 	__attribute__((unused)) typedef SparsehashCompileAssert<(bool(expr))> msg[bool(expr) ? 1 : -1]
@@ -84,7 +85,8 @@ namespace sparsehash_internal {
 
 // ----- low-level I/O for FILE* ----
 
-template <typename Ignored> inline bool read_data_internal(Ignored*, FILE* fp, void* data, size_t length)
+template <typename Ignored>
+inline bool read_data_internal(Ignored*, FILE* fp, void* data, size_t length)
 {
 	return fread(data, length, 1, fp) == 1;
 }
@@ -101,7 +103,8 @@ inline bool write_data_internal(Ignored*, FILE* fp, const void* data, size_t len
 // us, because iostream is a big header!  According to the standard,
 // it's only legal to delay the instantiation the way we want to if
 // the istream/ostream is a template type.  So we jump through hoops.
-template <typename ISTREAM> inline bool read_data_internal_for_istream(ISTREAM* fp, void* data, size_t length)
+template <typename ISTREAM>
+inline bool read_data_internal_for_istream(ISTREAM* fp, void* data, size_t length)
 {
 	return fp->read(reinterpret_cast<char*>(data), length).good();
 }
@@ -126,26 +129,30 @@ inline bool write_data_internal(Ignored*, std::ostream* fp, const void* data, si
 
 // The INPUT type needs to support a Read() method that takes a
 // buffer and a length and returns the number of bytes read.
-template <typename INPUT> inline bool read_data_internal(INPUT* fp, void*, void* data, size_t length)
+template <typename INPUT>
+inline bool read_data_internal(INPUT* fp, void*, void* data, size_t length)
 {
 	return static_cast<size_t>(fp->Read(data, length)) == length;
 }
 
 // The OUTPUT type needs to support a Write() operation that takes
 // a buffer and a length and returns the number of bytes written.
-template <typename OUTPUT> inline bool write_data_internal(OUTPUT* fp, void*, const void* data, size_t length)
+template <typename OUTPUT>
+inline bool write_data_internal(OUTPUT* fp, void*, const void* data, size_t length)
 {
 	return static_cast<size_t>(fp->Write(data, length)) == length;
 }
 
 // ----- low-level I/O: the public API ----
 
-template <typename INPUT> inline bool read_data(INPUT* fp, void* data, size_t length)
+template <typename INPUT>
+inline bool read_data(INPUT* fp, void* data, size_t length)
 {
 	return read_data_internal(fp, fp, data, length);
 }
 
-template <typename OUTPUT> inline bool write_data(OUTPUT* fp, const void* data, size_t length)
+template <typename OUTPUT>
+inline bool write_data(OUTPUT* fp, const void* data, size_t length)
 {
 	return write_data_internal(fp, fp, data, length);
 }
@@ -192,13 +199,16 @@ bool write_bigendian_number(OUTPUT* fp, IntType value, size_t length)
 // value_type is a POD type that contains no pointers.  Note,
 // however, we don't try to normalize endianness.
 // This is the type used for NopointerSerializer.
-template <typename value_type> struct pod_serializer {
-	template <typename INPUT> bool operator()(INPUT* fp, value_type* value) const
+template <typename value_type>
+struct pod_serializer {
+	template <typename INPUT>
+	bool operator()(INPUT* fp, value_type* value) const
 	{
 		return read_data(fp, value, sizeof(*value));
 	}
 
-	template <typename OUTPUT> bool operator()(OUTPUT* fp, const value_type& value) const
+	template <typename OUTPUT>
+	bool operator()(OUTPUT* fp, const value_type& value) const
 	{
 		return write_data(fp, &value, sizeof(value));
 	}
@@ -361,7 +371,8 @@ public:
 	}
 
 private:
-	template <class HashKey> class hash_munger {
+	template <class HashKey>
+	class hash_munger {
 	public:
 		static size_t MungedHash(size_t hash)
 		{
@@ -369,7 +380,8 @@ private:
 		}
 	};
 	// This matches when the hashtable key is a pointer.
-	template <class HashKey> class hash_munger<HashKey*> {
+	template <class HashKey>
+	class hash_munger<HashKey*> {
 	public:
 		static size_t MungedHash(size_t hash)
 		{

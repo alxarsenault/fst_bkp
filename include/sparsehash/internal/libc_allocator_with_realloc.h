@@ -39,7 +39,8 @@
 
 _START_GOOGLE_NAMESPACE_
 
-template <class T> class libc_allocator_with_realloc {
+template <class T>
+class libc_allocator_with_realloc {
 public:
 	typedef T value_type;
 	typedef size_t size_type;
@@ -96,17 +97,20 @@ public:
 		p->~value_type();
 	}
 
-	template <class U> libc_allocator_with_realloc(const libc_allocator_with_realloc<U>&)
+	template <class U>
+	libc_allocator_with_realloc(const libc_allocator_with_realloc<U>&)
 	{
 	}
 
-	template <class U> struct rebind {
+	template <class U>
+	struct rebind {
 		typedef libc_allocator_with_realloc<U> other;
 	};
 };
 
 // libc_allocator_with_realloc<void> specialization.
-template <> class libc_allocator_with_realloc<void> {
+template <>
+class libc_allocator_with_realloc<void> {
 public:
 	typedef void value_type;
 	typedef size_t size_type;
@@ -114,7 +118,8 @@ public:
 	typedef void* pointer;
 	typedef const void* const_pointer;
 
-	template <class U> struct rebind {
+	template <class U>
+	struct rebind {
 		typedef libc_allocator_with_realloc<U> other;
 	};
 };

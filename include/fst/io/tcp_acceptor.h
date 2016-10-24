@@ -6,12 +6,12 @@
 //#include <netdb.h>       // addrinfo.
 //#include <signal.h>      // sigaction.
 //
-//namespace tk {
-//namespace asio {
-//class Dispatcher;
-//namespace tcp {
+// namespace tk {
+// namespace asio {
+// class Dispatcher;
+// namespace tcp {
 //
-//class Acceptor {
+// class Acceptor {
 // public:
 //  Acceptor(Dispatcher* dispatcher, std::uint16_t port);
 //
@@ -21,7 +21,8 @@
 //
 //  inline bool IsValid() const { return _is_valid == 1; }
 //
-//  typedef void (*AcceptCallback)(tk::asio::Dispatcher* dispatcher, int socket, const ip::Address& ip_addr, void* data);
+//  typedef void (*AcceptCallback)(tk::asio::Dispatcher* dispatcher, int socket, const ip::Address& ip_addr,
+//  void* data);
 //
 //  void AsyncAccept(AcceptCallback callback, void* data);
 //

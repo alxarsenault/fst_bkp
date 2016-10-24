@@ -38,7 +38,8 @@ struct Data {
 
 } PACKED_STRUCT;
 
-template <typename T, typename... Ts> struct Core {
+template <typename T, typename... Ts>
+struct Core {
 	Core()
 		: event(&evt_dispatcher)
 	{

@@ -7,12 +7,12 @@
 //#include "tk/asio/stream/reader.hh"
 //#include "tk/asio/stream/sender.hh"
 //
-//namespace tk {
-//namespace asio {
-//class Dispatcher;
-//namespace tcp {
+// namespace tk {
+// namespace asio {
+// class Dispatcher;
+// namespace tcp {
 //
-//class Socket {
+// class Socket {
 // public:
 //  Socket(Dispatcher* dispatcher, const char* addr, int port);
 //

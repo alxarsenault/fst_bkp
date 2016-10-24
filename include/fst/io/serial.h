@@ -16,7 +16,8 @@
 //
 //  inline bool IsValid() const { return _is_valid == 1; }
 //
-//  long AsyncRead(void* data, std::size_t data_size, Reader<Serial>::ReadCallback callback, void* user_data = nullptr);
+//  long AsyncRead(void* data, std::size_t data_size, Reader<Serial>::ReadCallback callback, void* user_data =
+//  nullptr);
 //
 //  void Close();
 //

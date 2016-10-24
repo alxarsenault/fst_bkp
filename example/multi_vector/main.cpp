@@ -25,34 +25,45 @@
 // using has_toString = detect<T, toString_t>;
 
 // SFINAE test
-template <typename T> class has_helloworld {
+template <typename T>
+class has_helloworld {
 	typedef char _true;
 	typedef long _false;
 
-	template <typename C> static _true test(decltype(&C::Shot));
-	template <typename C> static _false test(...);
+	template <typename C>
+	static _true test(decltype(&C::Shot));
+	template <typename C>
+	static _false test(...);
 
 public:
 	enum { value = sizeof(test<T>()) == sizeof(char) };
 };
 
-template <typename T> struct has_shot_method {
-	template <class, class> class checker;
+template <typename T>
+struct has_shot_method {
+	template <class, class>
+	class checker;
 
-	template <typename C> static std::true_type test(checker<C, decltype(&C::Shot)>*);
+	template <typename C>
+	static std::true_type test(checker<C, decltype(&C::Shot)>*);
 
-	template <typename C> static std::false_type test(...);
+	template <typename C>
+	static std::false_type test(...);
 
 	typedef decltype(test<T>(nullptr)) type;
 	static const bool value = std::is_same<std::true_type, decltype(test<T>(nullptr))>::value;
 };
 
-template <typename K, typename T> struct has_method {
-	template <class, class> class checker;
+template <typename K, typename T>
+struct has_method {
+	template <class, class>
+	class checker;
 
-	template <typename C> static std::true_type test(checker<C, K>*);
+	template <typename C>
+	static std::true_type test(checker<C, K>*);
 
-	template <typename C> static std::false_type test(...);
+	template <typename C>
+	static std::false_type test(...);
 
 	typedef decltype(test<T>(nullptr)) type;
 	static const bool value = std::is_same<std::true_type, decltype(test<T>(nullptr))>::value;
@@ -133,7 +144,8 @@ public:
 	};
 
 	struct ShotFunctor {
-		template <typename T> void operator()(const T& t)
+		template <typename T>
+		void operator()(const T& t)
 		{
 			internal_Shot<has_shot_method<T>::value>(t);
 			//			internal_Shot<has_method<decltype(&T::Shot), T>::value>(t);

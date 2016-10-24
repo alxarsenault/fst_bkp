@@ -41,7 +41,8 @@ struct Button {
 struct Object {
 	Entity entity;
 
-	template <typename... Args> void push_event(fst::evt::Id id, Args... args)
+	template <typename... Args>
+	void push_event(fst::evt::Id id, Args... args)
 	{
 		push_event(entity, id);
 	}
@@ -91,7 +92,8 @@ int main()
 	dispatcher.call_events();
 
 	//	engine_core->component.push_back(
-	//									 entity_info.entity, game::component::ZRotator(&engine_core->data, entity_info.entity,
+	//									 entity_info.entity, game::component::ZRotator(&engine_core->data,
+	// entity_info.entity,
 	//-0.3));
 
 	//	engine_core->evt_dispatcher.connect(/

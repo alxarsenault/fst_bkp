@@ -4,7 +4,8 @@
 #include <sparsehash/dense_hash_map>
 
 namespace fst {
-template <typename Key, typename T, std::size_t N = 1024> class unordered_key_vector {
+template <typename Key, typename T, std::size_t N = 1024>
+class unordered_key_vector {
 public:
 	inline unordered_key_vector()
 		: _size(0)

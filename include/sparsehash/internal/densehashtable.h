@@ -1090,7 +1090,8 @@ private:
 	}
 
 	// (2) Arbitrary iterator, can't tell how much to resize
-	template <class InputIterator> void insert(InputIterator f, InputIterator l, std::input_iterator_tag)
+	template <class InputIterator>
+	void insert(InputIterator f, InputIterator l, std::input_iterator_tag)
 	{
 		for (; f != l; ++f)
 			insert(*f);
@@ -1105,7 +1106,8 @@ public:
 	}
 
 	// When inserting a lot at a time, we specialize on the type of iterator
-	template <class InputIterator> void insert(InputIterator f, InputIterator l)
+	template <class InputIterator>
+	void insert(InputIterator f, InputIterator l)
 	{
 		// specializes on iterator type
 		insert(f, l, typename std::iterator_traits<InputIterator>::iterator_category());
@@ -1113,7 +1115,8 @@ public:
 
 	// DefaultValue is a functor that takes a key and returns a value_type
 	// representing the default value to be inserted if none is found.
-	template <class DefaultValue> value_type& find_or_insert(const key_type& key)
+	template <class DefaultValue>
+	value_type& find_or_insert(const key_type& key)
 	{
 		// First, double-check we're not inserting emptykey or delkey
 		assert(
@@ -1309,7 +1312,8 @@ public:
 	}
 
 private:
-	template <class A> class alloc_impl : public A {
+	template <class A>
+	class alloc_impl : public A {
 	public:
 		typedef typename A::pointer pointer;
 		typedef typename A::size_type size_type;

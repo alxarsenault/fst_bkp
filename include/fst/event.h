@@ -11,13 +11,16 @@ namespace evt {
 	typedef unsigned long Id;
 	enum class priority { urgent, high, normal, low };
 
-	template <int...> struct ArgumentSizeList {
+	template <int...>
+	struct ArgumentSizeList {
 	};
 
-	template <int N, int... S> struct GenArgumentSizeList : GenArgumentSizeList<N - 1, N - 1, S...> {
+	template <int N, int... S>
+	struct GenArgumentSizeList : GenArgumentSizeList<N - 1, N - 1, S...> {
 	};
 
-	template <int... S> struct GenArgumentSizeList<0, S...> {
+	template <int... S>
+	struct GenArgumentSizeList<0, S...> {
 		typedef ArgumentSizeList<S...> type;
 	};
 
@@ -28,7 +31,8 @@ namespace evt {
 		}
 	};
 
-	template <typename... Args> class message : public abstract_message {
+	template <typename... Args>
+	class message : public abstract_message {
 	public:
 		message(const Args&... args)
 			: _params(args...)
@@ -45,7 +49,8 @@ namespace evt {
 		virtual void Call(std::shared_ptr<abstract_message> msg) = 0;
 	};
 
-	template <typename T, typename... Args> struct function_holder : public abstract_function {
+	template <typename T, typename... Args>
+	struct function_holder : public abstract_function {
 		T func_ptr;
 
 		function_holder(T func)
@@ -53,7 +58,8 @@ namespace evt {
 		{
 		}
 
-		template <int... S> void callFunc(std::shared_ptr<message<Args...>> msg, ArgumentSizeList<S...>)
+		template <int... S>
+		void callFunc(std::shared_ptr<message<Args...>> msg, ArgumentSizeList<S...>)
 		{
 			func_ptr(std::get<S>(msg->_params)...);
 		}
@@ -70,13 +76,15 @@ namespace evt {
 		}
 	};
 
-	template <typename... Args, typename T> function_holder<T, Args...> function(T fct)
+	template <typename... Args, typename T>
+	function_holder<T, Args...> function(T fct)
 	{
 		return function_holder<T, Args...>(fct);
 	}
 
 	// Member function.
-	template <typename Type, typename... Args> struct function_holder_with_type : public abstract_function {
+	template <typename Type, typename... Args>
+	struct function_holder_with_type : public abstract_function {
 		Type* type;
 		void (Type::*func_ptr)(Args...);
 
@@ -96,7 +104,8 @@ namespace evt {
 			return std::shared_ptr<abstract_function>(new function_holder_with_type(type, func_ptr));
 		}
 
-		template <int... S> void callFunc(std::shared_ptr<message<Args...>> msg, ArgumentSizeList<S...>)
+		template <int... S>
+		void callFunc(std::shared_ptr<message<Args...>> msg, ArgumentSizeList<S...>)
 		{
 			((type)->*(func_ptr))(std::get<S>(msg->_params)...);
 		}
@@ -143,7 +152,8 @@ namespace evt {
 		return binded_event(fct.Copy(), std::shared_ptr<abstract_message>(new message<MsgArgs...>(msg...)));
 	}
 
-	template <typename Key, typename... Priorities> class dispatcher {
+	template <typename Key, typename... Priorities>
+	class dispatcher {
 	public:
 		dispatcher()
 		{
@@ -190,7 +200,8 @@ namespace evt {
 		}
 
 		// template<typename ...Args, typename T>
-		template <typename... MsgArgs, typename T> void connect(Key obj_id, evt::Id evt_id, T func)
+		template <typename... MsgArgs, typename T>
+		void connect(Key obj_id, evt::Id evt_id, T func)
 		{
 			function_holder<T, MsgArgs...> fct(func);
 			auto it = _evt_map.find(obj_id);
@@ -209,13 +220,14 @@ namespace evt {
 					std::pair<Key, std::multimap<Id, std::shared_ptr<abstract_function>>>(obj_id, evt_map));
 			}
 		}
-		
+
 		// template<typename ...Args, typename T>
-		template <typename... MsgArgs, typename T> void connect(evt::Id evt_id, T func)
+		template <typename... MsgArgs, typename T>
+		void connect(evt::Id evt_id, T func)
 		{
 			function_holder<T, MsgArgs...> fct(func);
 			auto it = _evt_map.find(0);
-			
+
 			// Add if object id is found.
 			if (it != _evt_map.end()) {
 				it->second.insert(std::pair<Id, std::shared_ptr<abstract_function>>(evt_id, fct.Copy()));
@@ -226,11 +238,13 @@ namespace evt {
 				evt_map.insert(std::pair<Id, std::shared_ptr<abstract_function>>(evt_id, fct.Copy()));
 
 				// Insert multimap to object id .
-				_evt_map.insert(std::pair<Key, std::multimap<Id, std::shared_ptr<abstract_function>>>(0, evt_map));
+				_evt_map.insert(
+					std::pair<Key, std::multimap<Id, std::shared_ptr<abstract_function>>>(0, evt_map));
 			}
 		}
 
-		template <typename... Args> void push_event(Key obj_id, evt::Id evt_id, Args... args)
+		template <typename... Args>
+		void push_event(Key obj_id, evt::Id evt_id, Args... args)
 		{
 			// Search for object id in object map.
 			auto it = _evt_map.find(obj_id);
@@ -259,28 +273,29 @@ namespace evt {
 				//    _evt_queue.push(BindedEvent(i->second, msg, priority));
 			}
 		}
-		
-		template <typename... Args> void push_event(evt::Id evt_id, Args... args)
+
+		template <typename... Args>
+		void push_event(evt::Id evt_id, Args... args)
 		{
 			// Search for object id in object map.
 			auto it = _evt_map.find(0);
-			
+
 			// If object id is not in map then do nothing.
 			if (it == _evt_map.end()) {
 				//					global_manager_mutex.unlock();
 				return;
 			}
-			
+
 			// Pair of the first and last element of this id.
 			auto range(it->second.equal_range(evt_id));
-			
+
 			if (range.first == it->second.end()) {
 				//					global_manager_mutex.unlock();
 				return;
 			}
-			
+
 			std::shared_ptr<abstract_message> msg(new message<Args...>(args...));
-			
+
 			// Add every connected functions to this event id to the event queue.
 			for (auto& i = range.first; i != range.second; ++i) {
 				// Add binded function to event queue.

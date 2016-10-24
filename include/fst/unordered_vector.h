@@ -13,9 +13,9 @@ namespace fst {
 //<##> Stack with destructor.
 //------------------------------------------------------------------------------------------------------------
 template <typename T, std::size_t N = 8, bool Destruct = true, std::size_t ResizeMultiplicator = 2>
-class vector {
+class unordered_vector {
 public:
-	~vector()
+	~unordered_vector()
 	{
 		if (_data) {
 			delete[] _data;
@@ -351,25 +351,27 @@ public:
 
 		// Heap only.
 		if (_size > N) {
-			// Call obj destructor.
-			_data[index] = T();
-			move_all_emements(_data + index, _data + (index + 1), _size - (index + 1));
+			// Replace element at given index with last element of array and down size array size by 1.
+			_data[index] = std::move(_data[--_size]);
+			// move_all_emements(_data + index, _data + (index + 1), _size - (index + 1));
 			return;
 		}
 		// Going from heap to stack.
 		else if (_size == GetNPlus1()) {
-			// Call obj destructor.
-			_data[index] = T();
+			// Replace element at given index with last element of array and down size array size by 1.
+			_data[index] = std::move(_data[--_size]);
 
-			move_all_emements(_stack, _data, index);
-			move_all_emements(_stack + index, _data + (index + 1), _size - (index + 1));
+			move_all_emements(_stack, _data, _size);
+			// move_all_emements(_stack + index, _data + (index + 1), _size - (index + 1));
 			return;
 		}
-		// Stack only.
 
-		// Call obj destructor.
-		_stack[index] = T();
-		move_all_emements(_stack + index, _stack + (index + 1), _size - (index + 1));
+		//
+		// Stack only.
+		//
+
+		// Replace element at given index with last element of array and down size array size by 1.
+		_stack[index] = std::move(_stack[--_size]);
 	}
 
 	template <class Predicate>
@@ -471,9 +473,9 @@ private:
 //------------------------------------------------------------------------------------------------------------
 
 template <typename T, bool Destruct, std::size_t ResizeMultiplicator>
-class vector<T, 0, Destruct, ResizeMultiplicator> {
+class unordered_vector<T, 0, Destruct, ResizeMultiplicator> {
 public:
-	~vector()
+	~unordered_vector()
 	{
 		if (_data) {
 			delete[] _data;
@@ -664,13 +666,12 @@ public:
 
 		// Erase last element.
 		if (index == _size - 1) {
-			pop_back();
+			_data[--_size] = T();
 			return;
 		}
 
-		// Call obj destructor.
-		_data[index] = T();
-		move_all_emements(_data + index, _data + (index + 1), _size - (index + 1));
+		_data[index] = std::move(_data[--_size]);
+		// move_all_emements(_data + index, _data + (index + 1), _size - (index + 1));
 		return;
 	}
 
@@ -767,9 +768,9 @@ private:
 //------------------------------------------------------------------------------------------------------------
 
 template <typename T, std::size_t N, std::size_t ResizeMultiplicator>
-class vector<T, N, false, ResizeMultiplicator> {
+class unordered_vector<T, N, false, ResizeMultiplicator> {
 public:
-	~vector()
+	~unordered_vector()
 	{
 		if (_data) {
 			delete[] _data;
@@ -1081,18 +1082,22 @@ public:
 
 		// Heap only.
 		if (_size > N) {
-			move_all_emements(_data + index, _data + (index + 1), _size - (index + 1));
+			_data[index] = std::move(_data[--_size]);
+			// move_all_emements(_data + index, _data + (index + 1), _size - (index + 1));
 			return;
 		}
 		// Going from heap to stack.
 		else if (_size == GetNPlus1()) {
-			move_all_emements(_stack, _data, index);
-			move_all_emements(_stack + index, _data + (index + 1), _size - (index + 1));
+			_data[index] = std::move(_data[--_size]);
+			move_all_emements(_stack, _data, _size);
+			// move_all_emements(_stack, _data, index);
+			// move_all_emements(_stack + index, _data + (index + 1), _size - (index + 1));
 			return;
 		}
 
 		// Stack only.
-		move_all_emements(_stack + index, _stack + (index + 1), _size - (index + 1));
+		_stack[index] = std::move(_stack[--_size]);
+		// move_all_emements(_stack + index, _stack + (index + 1), _size - (index + 1));
 	}
 
 	template <class Predicate>
@@ -1193,9 +1198,9 @@ private:
 //<##> No stack without destructor.
 //------------------------------------------------------------------------------------------------------------
 template <typename T, std::size_t ResizeMultiplicator>
-class vector<T, 0, false, ResizeMultiplicator> {
+class unordered_vector<T, 0, false, ResizeMultiplicator> {
 public:
-	~vector()
+	~unordered_vector()
 	{
 		if (_data) {
 			delete[] _data;
@@ -1368,7 +1373,6 @@ public:
 		if (_size == 0) {
 			return std::move(_data[0]);
 		}
-
 		return std::move(_data[--_size]);
 	}
 
@@ -1380,11 +1384,12 @@ public:
 
 		// Erase last element.
 		if (index == _size - 1) {
-			pop_back();
+			--_size;
 			return;
 		}
 
-		move_all_emements(_data + index, _data + (index + 1), _size - (index + 1));
+		_data[index] = std::move(_data[--_size]);
+		// move_all_emements(_data + index, _data + (index + 1), _size - (index + 1));
 		return;
 	}
 

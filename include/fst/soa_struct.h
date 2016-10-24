@@ -4,7 +4,8 @@
 #include "multi_vector.h"
 
 namespace fst {
-template <typename T, typename... Ts> class soa_struct {
+template <typename T, typename... Ts>
+class soa_struct {
 public:
 	soa_struct()
 	{
@@ -16,12 +17,14 @@ public:
 		internal_push_back(ts...);
 	}
 
-	template <typename K> inline K* get()
+	template <typename K>
+	inline K* get()
 	{
 		return (K*)_data.template get<K>().data();
 	}
 
-	template <typename K> inline const K* get() const
+	template <typename K>
+	inline const K* get() const
 	{
 		return (K*)_data.template get<K>().data();
 	}
@@ -38,14 +41,16 @@ private:
 	{
 	}
 
-	template <typename K, typename... Ks> inline void internal_push_back(K k, Ks... ks)
+	template <typename K, typename... Ks>
+	inline void internal_push_back(K k, Ks... ks)
 	{
 		_data.template push_back<K>(k);
 		internal_push_back(ks...);
 	}
 };
 
-template <std::size_t K, class T> struct soa_type {
+template <std::size_t K, class T>
+struct soa_type {
 	soa_type(const T& v)
 		: value(v)
 	{

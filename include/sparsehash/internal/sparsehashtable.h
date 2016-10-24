@@ -1099,7 +1099,8 @@ private:
 	}
 
 	// (2) Arbitrary iterator, can't tell how much to resize
-	template <class InputIterator> void insert(InputIterator f, InputIterator l, std::input_iterator_tag)
+	template <class InputIterator>
+	void insert(InputIterator f, InputIterator l, std::input_iterator_tag)
 	{
 		for (; f != l; ++f)
 			insert(*f);
@@ -1114,7 +1115,8 @@ public:
 	}
 
 	// When inserting a lot at a time, we specialize on the type of iterator
-	template <class InputIterator> void insert(InputIterator f, InputIterator l)
+	template <class InputIterator>
+	void insert(InputIterator f, InputIterator l)
 	{
 		// specializes on iterator type
 		insert(f, l, typename std::iterator_traits<InputIterator>::iterator_category());
@@ -1122,7 +1124,8 @@ public:
 
 	// DefaultValue is a functor that takes a key and returns a value_type
 	// representing the default value to be inserted if none is found.
-	template <class DefaultValue> value_type& find_or_insert(const key_type& key)
+	template <class DefaultValue>
+	value_type& find_or_insert(const key_type& key)
 	{
 		// First, double-check we're not inserting delkey
 		assert((!settings.use_deleted() || !equals(key, key_info.delkey)) && "Inserting the deleted key");
@@ -1245,13 +1248,15 @@ public:
 	//
 	// The INPUT type needs to support a Read() operation. File and
 	// InputBuffer are appropriate types to pass in.
-	template <typename OUTPUT> bool write_metadata(OUTPUT* fp)
+	template <typename OUTPUT>
+	bool write_metadata(OUTPUT* fp)
 	{
 		squash_deleted(); // so we don't have to worry about delkey
 		return table.write_metadata(fp);
 	}
 
-	template <typename INPUT> bool read_metadata(INPUT* fp)
+	template <typename INPUT>
+	bool read_metadata(INPUT* fp)
 	{
 		num_deleted = 0; // since we got rid before writing
 		const bool result = table.read_metadata(fp);
@@ -1260,13 +1265,15 @@ public:
 	}
 
 	// Only meaningful if value_type is a POD.
-	template <typename OUTPUT> bool write_nopointer_data(OUTPUT* fp)
+	template <typename OUTPUT>
+	bool write_nopointer_data(OUTPUT* fp)
 	{
 		return table.write_nopointer_data(fp);
 	}
 
 	// Only meaningful if value_type is a POD.
-	template <typename INPUT> bool read_nopointer_data(INPUT* fp)
+	template <typename INPUT>
+	bool read_nopointer_data(INPUT* fp)
 	{
 		return table.read_nopointer_data(fp);
 	}

@@ -61,7 +61,8 @@ struct big_ {
 };
 
 // Identity metafunction.
-template <class T> struct identity_ {
+template <class T>
+struct identity_ {
 	typedef T type;
 };
 
@@ -70,13 +71,15 @@ template <class T> struct identity_ {
 // with hardcoding the integer type to bool. We use the fully
 // general integer_constant for compatibility with tr1.
 
-template <class T, T v> struct integral_constant {
+template <class T, T v>
+struct integral_constant {
 	static const T value = v;
 	typedef T value_type;
 	typedef integral_constant<T, v> type;
 };
 
-template <class T, T v> const T integral_constant<T, v>::value;
+template <class T, T v>
+const T integral_constant<T, v>::value;
 
 // Abbreviations: true_type and false_type are structs that represent boolean
 // true and false values. Also define the boost::mpl versions of those names,
@@ -89,11 +92,13 @@ typedef false_type false_;
 // if_ is a templatized conditional statement.
 // if_<cond, A, B> is a compile time evaluation of cond.
 // if_<>::type contains A if cond is true, B otherwise.
-template <bool cond, typename A, typename B> struct if_ {
+template <bool cond, typename A, typename B>
+struct if_ {
 	typedef A type;
 };
 
-template <typename A, typename B> struct if_<false, A, B> {
+template <typename A, typename B>
+struct if_<false, A, B> {
 	typedef B type;
 };
 
@@ -102,20 +107,24 @@ template <typename A, typename B> struct if_<false, A, B> {
 //
 // New code should prefer base::is_same, defined in base/type_traits.h.
 // It is functionally identical, but is_same is the standard spelling.
-template <typename A, typename B> struct type_equals_ : public false_ {
+template <typename A, typename B>
+struct type_equals_ : public false_ {
 };
 
-template <typename A> struct type_equals_<A, A> : public true_ {
+template <typename A>
+struct type_equals_<A, A> : public true_ {
 };
 
 // and_ is a template && operator.
 // and_<A, B>::value evaluates "A::value && B::value".
-template <typename A, typename B> struct and_ : public integral_constant<bool, (A::value && B::value)> {
+template <typename A, typename B>
+struct and_ : public integral_constant<bool, (A::value && B::value)> {
 };
 
 // or_ is a template || operator.
 // or_<A, B>::value evaluates "A::value || B::value".
-template <typename A, typename B> struct or_ : public integral_constant<bool, (A::value || B::value)> {
+template <typename A, typename B>
+struct or_ : public integral_constant<bool, (A::value || B::value)> {
 };
 
 _END_GOOGLE_NAMESPACE_

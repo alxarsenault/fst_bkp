@@ -43,44 +43,53 @@ enum class color {
 /// @brief Print an argument list.
 /// @details Each argument will be separated with a space character and will end with line break.
 /// @warning Fix buffer size of 1024, no bound check is made.
-template <typename T, typename... P> inline void print(T t, P... p);
+template <typename T, typename... P>
+inline void print(T t, P... p);
 
 /// @brief Print an argument list.
 /// @details Each argument will be separated with a space character and will end new line.
 /// @warning Fix buffer size of N, no bound check is made.
-template <std::size_t N, typename T, typename... P> inline void print(T t, P... p);
+template <std::size_t N, typename T, typename... P>
+inline void print(T t, P... p);
 
 /// @brief Print an argument list and reset any ANSI terminal attribute at before end of line.
 /// @details Each argument will be separated with a space character and will end with line break.
 /// @warning Fix buffer size of 1024, no bound check is made.
-template <typename T, typename... P> inline void cprint(T t, P... p);
+template <typename T, typename... P>
+inline void cprint(T t, P... p);
 
 /// @brief Print an argument list and reset any ANSI terminal attribute at before end of line.
 /// @details Each argument will be separated with a space character and will end with line break.
 /// @warning Fix buffer size of N, no bound check is made.
-template <std::size_t N, typename T, typename... P> inline void cprint(T t, P... p);
+template <std::size_t N, typename T, typename... P>
+inline void cprint(T t, P... p);
 
 /// @brief Print an argument list starting with time stamp '[HH:MM::SS]: '.
 /// @details Each argument will be separated with a space character and will end with line break.
 /// @warning Fix buffer size of 1024, no bound check is made.
-template <typename T, typename... P> inline void tprint(T t, P... p);
+template <typename T, typename... P>
+inline void tprint(T t, P... p);
 
 /// @brief Print an argument list starting with time stamp '[HH:MM::SS]: '.
 /// @details Each argument will be separated with a space character and will end with line break.
 /// @warning Fix buffer size of N, no bound check is made.
-template <std::size_t N, typename T, typename... P> inline void tprint(T t, P... p);
+template <std::size_t N, typename T, typename... P>
+inline void tprint(T t, P... p);
 
 /// @brief Print an argument list in bold red starting with '[ ERROR ] : '.
 /// @details Each argument will be separated with a space character and will end with line break.
 /// @warning Fix buffer size of 1024, no bound check is made.
-template <typename T, typename... P> inline void errprint(T t, P... p);
+template <typename T, typename... P>
+inline void errprint(T t, P... p);
 
 /// @brief Print an argument list in bold yellow starting with '[WARNING] : '.
 /// @details Each argument will be separated with a space character and will end with line break.
 /// @warning Fix buffer size of 1024, no bound check is made.
-template <typename T, typename... P> inline void warnprint(T t, P... p);
+template <typename T, typename... P>
+inline void warnprint(T t, P... p);
 
-template <typename T, typename... P> inline const char* stream(T t, P... p);
+template <typename T, typename... P>
+inline const char* stream(T t, P... p);
 
 /// Used to keep stream buffer data.
 struct streamer {
@@ -93,7 +102,8 @@ struct streamer {
 	char value[1024];
 };
 
-template <typename T> struct iterable_container {
+template <typename T>
+struct iterable_container {
 	inline iterable_container(T* begin_, T* end_)
 		: begin(begin_)
 		, end(end_)
@@ -114,12 +124,14 @@ template <typename T> struct iterable_container {
 
 // iterable_container<...>
 
-template <typename T> inline iterable_container<T> iterable(T* begin, T* end)
+template <typename T>
+inline iterable_container<T> iterable(T* begin, T* end)
 {
 	return iterable_container<T>(begin, end);
 }
 
-template <typename T> inline iterable_container<T> iterable(T* begin, std::size_t size)
+template <typename T>
+inline iterable_container<T> iterable(T* begin, std::size_t size)
 {
 	return iterable_container<T>(begin, begin + size);
 }
@@ -162,7 +174,8 @@ struct TimeInfo {
 
 namespace fst {
 namespace { // internal.
-	template <bool Mode> class StreamerCheck;
+	template <bool Mode>
+	class StreamerCheck;
 
 	static const char* color_string_array[] = {
 		"\033[0m", // Reset.
@@ -349,7 +362,8 @@ namespace { // internal.
 		return ++size;
 	}
 
-	template <typename T> inline int p_format(char* str_buffer, int str_len, T value)
+	template <typename T>
+	inline int p_format(char* str_buffer, int str_len, T value)
 	{
 		return StreamerCheck<std::is_convertible<T, streamer>::value>::format(str_buffer, str_len, value);
 	}
@@ -358,17 +372,20 @@ namespace { // internal.
 	// p_format<> specialization.
 	//
 
-	template <> inline int p_format<int>(char* str_buffer, int str_len, int value)
+	template <>
+	inline int p_format<int>(char* str_buffer, int str_len, int value)
 	{
 		return str_len + itostr(value, str_buffer + str_len);
 	}
 
-	template <> inline int p_format<unsigned int>(char* str_buffer, int str_len, unsigned int value)
+	template <>
+	inline int p_format<unsigned int>(char* str_buffer, int str_len, unsigned int value)
 	{
 		return str_len + itostr(value, str_buffer + str_len);
 	}
 
-	template <> inline int p_format<const char*>(char* str_buffer, int str_len, const char* value)
+	template <>
+	inline int p_format<const char*>(char* str_buffer, int str_len, const char* value)
 	{
 		strcpy(str_buffer + str_len, value);
 		int t_len = str_len + (int)strlen(value);
@@ -376,34 +393,55 @@ namespace { // internal.
 		return t_len + 1;
 	}
 
-	template <> inline int p_format<double>(char* str_buffer, int str_len, double value)
+	template <>
+	inline int p_format<double>(char* str_buffer, int str_len, double value)
 	{
 		return str_len + sprintf(str_buffer + str_len, "%f ", value);
 	}
 
-	template <> inline int p_format<float>(char* str_buffer, int str_len, float value)
+	template <>
+	inline int p_format<float>(char* str_buffer, int str_len, float value)
 	{
 		return str_len + sprintf(str_buffer + str_len, "%f ", value);
 	}
-	
-	template <> inline int p_format<bool>(char* str_buffer, int str_len, bool value)
+
+	template <>
+	inline int p_format<bool>(char* str_buffer, int str_len, bool value)
 	{
-		return str_len + (value ? sprintf(str_buffer + str_len, "true ") : sprintf(str_buffer + str_len, "false "));
+		//		return str_len
+		//			+ (value ? sprintf(str_buffer + str_len, "true ") : sprintf(str_buffer + str_len, "false
+		//"));
+
+		strcpy(str_buffer + str_len, (value ? "true" : "false"));
+		int t_len = str_len + (value ? 4 : 5);
+		*(str_buffer + t_len) = ' ';
+		return t_len + 1;
 	}
 
-	template <> inline int p_format<color>(char* str_buffer, int str_len, color value)
+	template <>
+	inline int p_format<char>(char* str_buffer, int str_len, char value)
+	{
+		*(str_buffer + str_len++) = value;
+		*(str_buffer + str_len++) = ' ';
+		return str_len;
+	}
+
+	template <>
+	inline int p_format<color>(char* str_buffer, int str_len, color value)
 	{
 		return str_len
 			+ sprintf(str_buffer + str_len, "%s", color_string_array[static_cast<std::size_t>(value)]);
 	}
 
-	template <> inline int p_format<CallerInfo>(char* str_buffer, int str_len, CallerInfo value)
+	template <>
+	inline int p_format<CallerInfo>(char* str_buffer, int str_len, CallerInfo value)
 	{
 		return str_len + sprintf(str_buffer + str_len, "[%s, %s, %d] ", strrchr(value.file, '/') + 1,
 							 value.name, value.line);
 	}
 
-	template <> inline int p_format<TimeInfo>(char* str_buffer, int str_len, TimeInfo value)
+	template <>
+	inline int p_format<TimeInfo>(char* str_buffer, int str_len, TimeInfo value)
 	{
 		return str_len + (int)strftime(str_buffer + str_len, 24, "[%T] ", value.tt);
 	}
@@ -437,7 +475,8 @@ namespace { // internal.
 	}
 
 #ifdef __FST_USE_STDLIB__
-	template <> inline int p_format<std::string>(char* str_buffer, int str_len, std::string value)
+	template <>
+	inline int p_format<std::string>(char* str_buffer, int str_len, std::string value)
 	{
 		strcpy(str_buffer + str_len, value.c_str());
 		int t_len = str_len + (int)value.size();
@@ -479,7 +518,8 @@ namespace { // internal.
 		write(2, str_buffer, str_len);
 	}
 
-	template <typename T, typename... P> inline void PrintChild(char* str_buffer, int str_len, T t, P... p)
+	template <typename T, typename... P>
+	inline void PrintChild(char* str_buffer, int str_len, T t, P... p)
 	{
 		PrintChild(str_buffer, p_format(str_buffer, str_len, t), p...);
 	}
@@ -515,7 +555,8 @@ namespace { // internal.
 		write(2, str_buffer, str_len + 1);
 	}
 
-	template <typename T, typename... P> inline void CPrintChild(char* str_buffer, int str_len, T t, P... p)
+	template <typename T, typename... P>
+	inline void CPrintChild(char* str_buffer, int str_len, T t, P... p)
 	{
 		CPrintChild(str_buffer, p_format(str_buffer, str_len, t), p...);
 	}
@@ -523,7 +564,8 @@ namespace { // internal.
 	/**
 	 *
 	 */
-	template <bool Mode> class StreamerCheck {
+	template <bool Mode>
+	class StreamerCheck {
 	public:
 		template <typename T, bool M = Mode, typename std::enable_if<M>::type* = nullptr>
 		static inline int format(char* str_buffer, int str_len, T value)
@@ -554,13 +596,15 @@ namespace { // internal.
 
 // print<...>
 
-template <typename T, typename... P> inline void print(T t, P... p)
+template <typename T, typename... P>
+inline void print(T t, P... p)
 {
 	char str_buffer[1024];
 	PrintChild(str_buffer, p_format(str_buffer, 0, t), p...);
 }
 
-template <std::size_t N, typename T, typename... P> inline void print(T t, P... p)
+template <std::size_t N, typename T, typename... P>
+inline void print(T t, P... p)
 {
 	char str_buffer[N];
 	PrintChild(str_buffer, p_format(str_buffer, 0, t), p...);
@@ -568,13 +612,15 @@ template <std::size_t N, typename T, typename... P> inline void print(T t, P... 
 
 // cprint<...>
 
-template <typename T, typename... P> inline void cprint(T t, P... p)
+template <typename T, typename... P>
+inline void cprint(T t, P... p)
 {
 	char str_buffer[1024];
 	CPrintChild(str_buffer, p_format(str_buffer, 0, t), p...);
 }
 
-template <std::size_t N, typename T, typename... P> inline void cprint(T t, P... p)
+template <std::size_t N, typename T, typename... P>
+inline void cprint(T t, P... p)
 {
 	char str_buffer[N];
 	CPrintChild(str_buffer, p_format(str_buffer, 0, t), p...);
@@ -582,7 +628,8 @@ template <std::size_t N, typename T, typename... P> inline void cprint(T t, P...
 
 // tprint<...>
 
-template <typename T, typename... P> inline void tprint(T t, P... p)
+template <typename T, typename... P>
+inline void tprint(T t, P... p)
 {
 	char str_buffer[1024];
 	std::time_t tt = std::time(nullptr);
@@ -590,7 +637,8 @@ template <typename T, typename... P> inline void tprint(T t, P... p)
 	PrintChild(str_buffer, p_format(str_buffer, str_len, t), p...);
 }
 
-template <std::size_t N, typename T, typename... P> inline void tprint(T t, P... p)
+template <std::size_t N, typename T, typename... P>
+inline void tprint(T t, P... p)
 {
 	char str_buffer[N];
 	std::time_t tt = std::time(nullptr);
@@ -600,7 +648,8 @@ template <std::size_t N, typename T, typename... P> inline void tprint(T t, P...
 
 // errprint<...>
 
-template <typename T, typename... P> inline void errprint(T t, P... p)
+template <typename T, typename... P>
+inline void errprint(T t, P... p)
 {
 	char str_buffer[1024];
 	int str_len = p_format(str_buffer, 0, color::bold_red);
@@ -610,7 +659,8 @@ template <typename T, typename... P> inline void errprint(T t, P... p)
 
 // warnprint<...>
 
-template <typename T, typename... P> inline void warnprint(T t, P... p)
+template <typename T, typename... P>
+inline void warnprint(T t, P... p)
 {
 	char str_buffer[1024];
 	int str_len = p_format(str_buffer, 0, color::bold_yellow);
@@ -620,7 +670,8 @@ template <typename T, typename... P> inline void warnprint(T t, P... p)
 
 // stream<...>
 
-template <typename T, typename... P> inline const char* stream(T t, P... p)
+template <typename T, typename... P>
+inline const char* stream(T t, P... p)
 {
 	char str_buffer[1024];
 	return StreamChild(str_buffer, p_format(str_buffer, 0, t), p...);
