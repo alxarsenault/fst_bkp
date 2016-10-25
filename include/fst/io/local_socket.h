@@ -3,12 +3,12 @@
 #include "../print.h"
 #include "dispatcher.h"
 
-#include <sys/socket.h> // sockaddr.
-#include <sys/un.h> // sockaddr.
-#include <string.h>
+#include <fcntl.h>
 #include <netdb.h> // addrinfo.
 #include <signal.h> // sigaction.
-#include <fcntl.h>
+#include <string.h>
+#include <sys/socket.h> // sockaddr.
+#include <sys/un.h> // sockaddr.
 
 #include "stream/reader.h"
 //#include "tk/asio/stream/sender.hh"
@@ -43,8 +43,9 @@ namespace io {
 				return _reader.AsyncRead(this, _sock_fd, data, data_size, callback, user_data);
 			}
 			//
-			//			long async_write(void* data, std::size_t data_size, stream::Sender<Socket>::SendCallback
-			//callback,
+			//			long async_write(void* data, std::size_t data_size,
+			// stream::Sender<Socket>::SendCallback
+			// callback,
 			//				void* user_data = nullptr)
 			//			{
 			//			}
@@ -68,14 +69,16 @@ namespace io {
 				strncpy(server_addr.sun_path, addr, sizeof(server_addr.sun_path));
 				server_addr.sun_path[sizeof(server_addr.sun_path) - 1] = '\0';
 
-				//				std::size_t size = (offsetof(struct sockaddr_un, sun_path) +
-				//strlen(server_addr.sun_path));
+				//				std::size_t size = (offsetof(struct sockaddr_un, sun_path)
+				//+
+				// strlen(server_addr.sun_path));
 
 				//				sockaddr_in server_addr;
 				//				server_addr.sin_family = AF_INET;
 				//				server_addr.sin_port = htons(_port);
 				//				server_addr.sin_addr.s_addr = inet_addr(addr);
-				//				memset(server_addr.sin_zero, '\0', sizeof(server_addr.sin_zero));
+				//				memset(server_addr.sin_zero, '\0',
+				// sizeof(server_addr.sin_zero));
 
 				socklen_t addr_size = sizeof(sockaddr_in);
 				int ret = connect(_sock_fd, (struct sockaddr*)&server_addr, addr_size);
@@ -86,15 +89,19 @@ namespace io {
 					return -1;
 				}
 
-				//				if(bind(_sock_fd, (struct sockaddr*)& server_addr, sizeof(server_addr)) == -1)
+				//				if(bind(_sock_fd, (struct sockaddr*)& server_addr,
+				// sizeof(server_addr)) == -1)
 				//{
-				//					errprint("Can't bind local::Socket", strerror(errno));
+				//					errprint("Can't bind local::Socket",
+				// strerror(errno));
 				//					return 9;
 				//				}
 
-				//				if(bind(_sock_fd, (struct sockaddr*)& server_addr, sizeof(server_addr)) == -1)
+				//				if(bind(_sock_fd, (struct sockaddr*)& server_addr,
+				// sizeof(server_addr)) == -1)
 				//{
-				//					errprint("Can't bind local::Socket", strerror(errno));
+				//					errprint("Can't bind local::Socket",
+				// strerror(errno));
 				//					return 9;
 				//				}
 
@@ -102,9 +109,11 @@ namespace io {
 				//
 				//				if (listen_error == -1) {
 				////#ifdef __TK_CONSOLE__
-				////					console::Error(TK_TRACER, "listen :", std::strerror(errno));
-				////					console::FError<console::FLogType::ASIO>(TK_TRACER, "listen :",
-				///std::strerror(errno));
+				////					console::Error(TK_TRACER, "listen :",
+				/// std::strerror(errno));
+				////					console::FError<console::FLogType::ASIO>(TK_TRACER, "listen
+				///:",
+				/// std::strerror(errno));
 				////#endif  // __TK_CONSOLE__
 				//					return 2;
 				//				}
@@ -112,13 +121,16 @@ namespace io {
 				//				server_addr.sin_family = AF_UNIX;
 				//				server_addr.sin_port = htons(_port);
 				//				server_addr.sin_addr.s_addr = inet_addr(addr);
-				//				memset(server_addr.sin_zero, '\0', sizeof(server_addr.sin_zero));
+				//				memset(server_addr.sin_zero, '\0',
+				// sizeof(server_addr.sin_zero));
 				//
 				//				socklen_t addr_size = sizeof(sockaddr_in);
-				//				int ret = connect(_sock_fd, (struct sockaddr*)&server_addr, addr_size);
+				//				int ret = connect(_sock_fd, (struct sockaddr*)&server_addr,
+				// addr_size);
 				//
 				//				if (ret == -1) {
-				//					errprint("Can't connect tcp::Socket :", std::strerror(errno));
+				//					errprint("Can't connect tcp::Socket :",
+				// std::strerror(errno));
 				//					return -1;
 				//				}
 

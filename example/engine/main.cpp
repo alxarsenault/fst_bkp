@@ -1,13 +1,13 @@
-#include <fst/print.h>
 #include <fst/multi_key_vector.h>
+#include <fst/print.h>
 
 #include <chrono>
 
 #include "engine/engine.hpp"
+#include "engine/event/keyboard.hpp"
 #include "engine/graphic/renderer.hpp"
 #include "engine/graphic/shader.hpp"
 #include "engine/graphic/vertex_buffer.hpp"
-#include "engine/event/keyboard.hpp"
 
 #include "game/game.hpp"
 
@@ -223,11 +223,13 @@ int main()
 			game::component::DontTouch(&engine_core.data, entity_info.entity, player.entity));
 	}
 
-	// Tell GL to only draw onto a pixel if the shape is closer to the viewer than anything already drawn at
+	// Tell GL to only draw onto a pixel if the shape is closer to the viewer than
+	// anything already drawn at
 	// that pixel.
 	glEnable(GL_DEPTH_TEST);
 
-	// With LESS depth-testing interprets a smaller depth value as meaning "closer".
+	// With LESS depth-testing interprets a smaller depth value as meaning
+	// "closer".
 	glDepthFunc(GL_LESS);
 
 	auto start_time = std::chrono::high_resolution_clock::now();

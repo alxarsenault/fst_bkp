@@ -1,5 +1,5 @@
-#include <fst/print.h>
 #include <fst/multi_vector.h>
+#include <fst/print.h>
 
 //// See http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2015/n4502.pdf.
 // template <typename...>
@@ -148,7 +148,8 @@ public:
 		void operator()(const T& t)
 		{
 			internal_Shot<has_shot_method<T>::value>(t);
-			//			internal_Shot<has_method<decltype(&T::Shot), T>::value>(t);
+			//			internal_Shot<has_method<decltype(&T::Shot),
+			// T>::value>(t);
 		}
 	};
 

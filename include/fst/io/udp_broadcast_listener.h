@@ -23,7 +23,8 @@
 //
 //  inline bool IsValid() const { return _is_valid == 1; }
 //
-//  long AsyncRead(void* data, std::size_t data_size, stream::Receiver<BroadcastListener>::ReadCallback
+//  long AsyncRead(void* data, std::size_t data_size,
+//  stream::Receiver<BroadcastListener>::ReadCallback
 //  callback,
 //                 void* user_data = nullptr);
 //

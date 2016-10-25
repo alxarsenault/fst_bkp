@@ -4,9 +4,9 @@
 #include "../status.h"
 //#include "tk/console/print.hh"
 //#include "tk/console/file_print.hh"
-#include <unistd.h>
-#include <errno.h>
 #include <cstring>
+#include <errno.h>
+#include <unistd.h>
 
 namespace fst {
 namespace io {
@@ -45,8 +45,7 @@ namespace io {
 							.");
 #endif // __TK_CONSOLE__
 							return;
-					}
-					else if (errno == EPIPE) { // Broken pipe.
+					} else if (errno == EPIPE) { // Broken pipe.
 #ifdef __TK_CONSOLE__
 						console::FError<console::FLogType::ASIO>(TK_TRACER, "Broken pipe.");
 #endif // __TK_CONSOLE__
@@ -70,15 +69,15 @@ namespace io {
 #ifdef __TK_CONSOLE__
 					console::Warning(TK_TRACER, "Could not read from socket again ( read size :", 0, ").",
 						std::strerror(errno));
-	  console::FWarning<console::FLogType::ASIO>(TK_TRACER, "Could not read from socket again ( read size
+		  console::FWarning<console::FLogType::ASIO>(TK_TRACER, "Could not read from socket again ( read size
       :", 0, ").",
                                                  std::strerror(errno));
 
-	  /// @todo Add timeout ???
-	  console::Error(TK_TRACER, "@@@@TODO MAYBE ADD TIMEOUT ??? Socket got disconnected ?????");
+		  /// @todo Add timeout ???
+		  console::Error(TK_TRACER, "@@@@TODO MAYBE ADD TIMEOUT ??? Socket got disconnected ?????");
 #endif // __TK_CONSOLE__
-	  reader->CallUserCallback(status::bad, error::kSenderWasClosed);
-	  return;
+		  reader->CallUserCallback(status::bad, error::kSenderWasClosed);
+		  return;
 				}
 
 				reader->CallUserCallback(status::good, error::kNone);
@@ -118,14 +117,14 @@ namespace io {
 				_status = read(_fd, _data, _data_size);
 
 				if (_status == -1) {
-					// Resource temporarily unavailable (which is normal since socket is on non-blocking
+					// Resource temporarily unavailable (which is normal since socket is on
+					// non-blocking
 					// mode).
 					if (errno == EAGAIN) {
 						_dispatcher->add_handler(
 							_fd, &Reader::ReaderHandler, this, dispatcher::handle_type::input);
 						return _status;
-					}
-					else if (errno == EPIPE) { // Broken pipe.
+					} else if (errno == EPIPE) { // Broken pipe.
 #ifdef __TK_CONSOLE__
 						console::FError<console::FLogType::ASIO>(TK_TRACER, "Broken pipe.");
 #endif // __TK_CONSOLE__
@@ -146,14 +145,14 @@ namespace io {
 #ifdef __TK_CONSOLE__
 					console::Warning(TK_TRACER, "Could not read from socket again ( read size :", 0, ").",
 						std::strerror(errno));
-	  console::FWarning<console::FLogType::ASIO>(TK_TRACER, "Could not read from socket again ( read size
+		  console::FWarning<console::FLogType::ASIO>(TK_TRACER, "Could not read from socket again ( read size
       :", 0, ").",
                                                  std::strerror(errno));
 
-	  /// @todo Add timeout ???
-	  console::Error(TK_TRACER, "@@@@TODO MAYBE ADD TIMEOUT ??? Socket got disconnected ?????");
+		  /// @todo Add timeout ???
+		  console::Error(TK_TRACER, "@@@@TODO MAYBE ADD TIMEOUT ??? Socket got disconnected ?????");
 #endif // __TK_CONSOLE__
-	  return CallUserCallback(status::bad, error::kSenderWasClosed);
+		  return CallUserCallback(status::bad, error::kSenderWasClosed);
 				}
 
 				fst::print("read right away");

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <OpenGL/gltypes.h>
 #include "engine/def.hpp"
+#include <OpenGL/gltypes.h>
 
 namespace engine {
 namespace graphic {

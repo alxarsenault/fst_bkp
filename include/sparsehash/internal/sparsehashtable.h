@@ -76,7 +76,8 @@
 // code uses quadratic probing, though you can change it to linear
 // via _JUMP below if you really want to.
 //
-// From http://www.augustana.ca/~mohrj/courses/1999.fall/csc210/lecture_notes/hashing.html
+// From
+// http://www.augustana.ca/~mohrj/courses/1999.fall/csc210/lecture_notes/hashing.html
 // NUMBER OF PROBES / LOOKUP       Successful            Unsuccessful
 // Quadratic collision resolution   1 - ln(1-L) - L/2    1/(1-L) - L - ln(1-L)
 // Linear collision resolution     [1+1/(1-L)]/2         [1+1/(1-L)2]/2
@@ -95,16 +96,16 @@
 #ifndef _SPARSEHASHTABLE_H_
 #define _SPARSEHASHTABLE_H_
 
-#include <sparsehash/internal/sparseconfig.h>
-#include <assert.h>
 #include <algorithm> // For swap(), eg
+#include <assert.h>
 #include <iterator> // for iterator tags
 #include <limits> // for numeric_limits
-#include <utility> // for pair
-#include <sparsehash/type_traits.h> // for remove_const
 #include <sparsehash/internal/hashtable-common.h>
+#include <sparsehash/internal/sparseconfig.h>
 #include <sparsehash/sparsetable> // IWYU pragma: export
+#include <sparsehash/type_traits.h> // for remove_const
 #include <stdexcept> // For length_error
+#include <utility> // for pair
 
 _START_GOOGLE_NAMESPACE_
 
@@ -973,12 +974,10 @@ private:
 					return std::pair<size_type, size_type>(ILLEGAL_BUCKET, bucknum);
 				else
 					return std::pair<size_type, size_type>(ILLEGAL_BUCKET, insert_pos);
-			}
-			else if (test_deleted(bucknum)) { // keep searching, but mark to insert
+			} else if (test_deleted(bucknum)) { // keep searching, but mark to insert
 				if (insert_pos == ILLEGAL_BUCKET)
 					insert_pos = bucknum;
-			}
-			else if (equals(key, get_key(table.unsafe_get(bucknum)))) {
+			} else if (equals(key, get_key(table.unsafe_get(bucknum)))) {
 				SPARSEHASH_STAT_UPDATE(total_probes += num_probes);
 				return std::pair<size_type, size_type>(bucknum, ILLEGAL_BUCKET);
 			}
@@ -1032,8 +1031,7 @@ public:
 		iterator pos = find(key); // either an iterator or end
 		if (pos == end()) {
 			return std::pair<iterator, iterator>(pos, pos);
-		}
-		else {
+		} else {
 			const iterator startpos = pos++;
 			return std::pair<iterator, iterator>(startpos, pos);
 		}
@@ -1043,8 +1041,7 @@ public:
 		const_iterator pos = find(key); // either an iterator or end
 		if (pos == end()) {
 			return std::pair<const_iterator, const_iterator>(pos, pos);
-		}
-		else {
+		} else {
 			const const_iterator startpos = pos++;
 			return std::pair<const_iterator, const_iterator>(startpos, pos);
 		}
@@ -1077,8 +1074,7 @@ private:
 		if (pos.first != ILLEGAL_BUCKET) { // object was already there
 			return std::pair<iterator, bool>(iterator(this, table.get_iter(pos.first), table.nonempty_end()),
 				false); // false: we didn't insert
-		}
-		else { // pos.second says where to put it
+		} else { // pos.second says where to put it
 			return std::pair<iterator, bool>(insert_at(obj, pos.second), true);
 		}
 	}
@@ -1133,12 +1129,10 @@ public:
 		DefaultValue default_value;
 		if (pos.first != ILLEGAL_BUCKET) { // object was already there
 			return *table.get_iter(pos.first);
-		}
-		else if (resize_delta(1)) { // needed to rehash to make room
+		} else if (resize_delta(1)) { // needed to rehash to make room
 			// Since we resized, we can't use pos, so recalculate where to insert.
 			return *insert_noresize(default_value(key)).first;
-		}
-		else { // no need to rehash, insert right here
+		} else { // no need to rehash, insert right here
 			return *insert_at(default_value(key), pos.second);
 		}
 	}
@@ -1157,8 +1151,7 @@ public:
 			// will think about shrink after next insert
 			settings.set_consider_shrink(true);
 			return 1; // because we deleted one thing
-		}
-		else {
+		} else {
 			return 0; // because we deleted nothing
 		}
 	}
@@ -1215,11 +1208,9 @@ public:
 	{
 		if (size() != ht.size()) {
 			return false;
-		}
-		else if (this == &ht) {
+		} else if (this == &ht) {
 			return true;
-		}
-		else {
+		} else {
 			// Iterate through the elements in "this" and see if the
 			// corresponding element is in ht
 			for (const_iterator it = begin(); it != end(); ++it) {

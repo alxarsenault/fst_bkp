@@ -32,7 +32,8 @@
 //  const char* GetData() const { return &_addr[0]; }
 //
 //#ifdef __TK_STDLIB__
-//  inline friend std::ostream& operator<<(std::ostream& stream, const Address& addr) { return stream <<
+//  inline friend std::ostream& operator<<(std::ostream& stream, const Address&
+//  addr) { return stream <<
 //  addr._addr; }
 //#endif  // __TK_STDLIB__
 //

@@ -38,30 +38,41 @@
 //      sockaddr_storage their_addr;
 //      socklen_t sin_size = sizeof(their_addr);
 //      sockaddr* addr = (sockaddr*)&their_addr;
-//      reader->_status = recvfrom(reader->_fd, reader->_data, reader->_data_size, 0, addr, &sin_size);
+//      reader->_status = recvfrom(reader->_fd, reader->_data,
+//      reader->_data_size, 0, addr, &sin_size);
 //
 //      char s[INET6_ADDRSTRLEN];
 //      inet_ntop(their_addr.ss_family, ip::GetInAddr(addr), s, sizeof(s));
-//      TK_CONSOLE(console::FLog<console::FLogType::ASIO>(TK_TRACER, "Receive from :", std::string(s));)
+//      TK_CONSOLE(console::FLog<console::FLogType::ASIO>(TK_TRACER, "Receive
+//      from :", std::string(s));)
 //
 //      if (reader->_status == -1) {
-//        // Resource temporarily unavailable (which is normal since socket is on non-blocking mode).
+//        // Resource temporarily unavailable (which is normal since socket is
+//        on non-blocking mode).
 //        if (errno == EAGAIN) {
-//          TK_CONSOLE(console::Error(TK_TRACER, "Resource is still unavailable (THIS SHOULD NEVER
+//          TK_CONSOLE(console::Error(TK_TRACER, "Resource is still unavailable
+//          (THIS SHOULD NEVER
 //          HAPPEND).");)
 //          TK_CONSOLE(console::FError<console::FLogType::ASIO>(
-//                         TK_TRACER, "Resource is still unavailable (THIS SHOULD NEVER HAPPEND).");)
+//                         TK_TRACER, "Resource is still unavailable (THIS
+//                         SHOULD NEVER HAPPEND).");)
 //          return;
-//        } else if (errno == EAFNOSUPPORT) {  // Address family not supported by protocol family.
+//        } else if (errno == EAFNOSUPPORT) {  // Address family not supported
+//        by protocol family.
 //          TK_CONSOLE(console::FWarning<console::FLogType::ASIO>(TK_TRACER,
-//                                                                "Address family not supported by protocol
+//                                                                "Address
+//                                                                family not
+//                                                                supported by
+//                                                                protocol
 //                                                                family.");)
 //          return;
 //        }
 //
-//        TK_CONSOLE(console::Error(TK_TRACER, "Could not read from socket :", std::strerror(errno));)
+//        TK_CONSOLE(console::Error(TK_TRACER, "Could not read from socket :",
+//        std::strerror(errno));)
 //        TK_CONSOLE(
-//            console::FError<console::FLogType::ASIO>(TK_TRACER, "Could not read from socket :",
+//            console::FError<console::FLogType::ASIO>(TK_TRACER, "Could not
+//            read from socket :",
 //            std::strerror(errno));)
 //
 //        return;
@@ -69,20 +80,25 @@
 //
 //      if (reader->_status == 0) {
 //        // Don't know what to do there.
-//        TK_CONSOLE(console::Warning(TK_TRACER, "Could not read from socket again ( read size :", 0, ").");)
+//        TK_CONSOLE(console::Warning(TK_TRACER, "Could not read from socket
+//        again ( read size :", 0, ").");)
 //        TK_CONSOLE(console::FWarning<console::FLogType::ASIO>(
-//                       TK_TRACER, "Could not read from socket again ( read size :", 0, ").");)
+//                       TK_TRACER, "Could not read from socket again ( read
+//                       size :", 0, ").");)
 //
 //        return;
 //      }
 //
 //      if (reader->_callback) {
-//        return reader->_callback(reader->_owner, reader->_user_data, ip::Address(s), reader->_status);
+//        return reader->_callback(reader->_owner, reader->_user_data,
+//        ip::Address(s), reader->_status);
 //      }
 //
-//      TK_CONSOLE(console::Warning(TK_TRACER, "Received data but no reader callback was set.");)
+//      TK_CONSOLE(console::Warning(TK_TRACER, "Received data but no reader
+//      callback was set.");)
 //      TK_CONSOLE(
-//          console::FWarning<console::FLogType::ASIO>(TK_TRACER, "Received data but no reader callback was
+//          console::FWarning<console::FLogType::ASIO>(TK_TRACER, "Received data
+//          but no reader callback was
 //          set.");)
 //    }
 //  }
@@ -95,13 +111,15 @@
 //  /**
 //   *
 //   */
-//  long AsyncRead(T* owner, int fd, void* data, std::size_t data_size, ReadCallback callback, void*
+//  long AsyncRead(T* owner, int fd, void* data, std::size_t data_size,
+//  ReadCallback callback, void*
 //  user_data) {
 //    _fd = fd;
 //
 //    if (_fd == -1) {
 //      TK_CONSOLE(console::Error(TK_TRACER, "Try to read on empty socket.");)
-//      TK_CONSOLE(console::FError<console::FLogType::ASIO>(TK_TRACER, "Try to read on empty socket.");)
+//      TK_CONSOLE(console::FError<console::FLogType::ASIO>(TK_TRACER, "Try to
+//      read on empty socket.");)
 //
 //      return -1;
 //    }
@@ -112,7 +130,8 @@
 //    _callback = callback;
 //    _user_data = user_data;
 //
-//    _dispatcher->AddHandler(_fd, &Receiver::ReceiverHandler, this, Dispatcher::HandleType::Input);
+//    _dispatcher->AddHandler(_fd, &Receiver::ReceiverHandler, this,
+//    Dispatcher::HandleType::Input);
 //
 //    sockaddr_storage their_addr;
 //    socklen_t sin_size = sizeof(their_addr);
@@ -123,23 +142,28 @@
 //    char s[INET6_ADDRSTRLEN];
 //    inet_ntop(their_addr.ss_family, ip::GetInAddr(addr), s, sizeof(s));
 //
-//    TK_CONSOLE(console::FLog<console::FLogType::ASIO>(TK_TRACER, "Receive from :", std::string(s));)
+//    TK_CONSOLE(console::FLog<console::FLogType::ASIO>(TK_TRACER, "Receive from
+//    :", std::string(s));)
 //
 //    if (_status == -1) {
-//      // Resource temporarily unavailable (which is normal since socket is on non-blocking mode).
+//      // Resource temporarily unavailable (which is normal since socket is on
+//      non-blocking mode).
 //      if (errno == EAGAIN) {
 //        return _status;
-//      } else if (errno == EAFNOSUPPORT) {  // Address family not supported by protocol family.
+//      } else if (errno == EAFNOSUPPORT) {  // Address family not supported by
+//      protocol family.
 //
 //        TK_CONSOLE(
-//            console::FWarning<console::FLogType::ASIO>(TK_TRACER, "Address family not supported by protocol
+//            console::FWarning<console::FLogType::ASIO>(TK_TRACER, "Address
+//            family not supported by protocol
 //            family.");)
 //
 //        return _status;
 //      }
 //
 //      TK_CONSOLE(console::Error(TK_TRACER, "Read :", std::strerror(errno));)
-//      TK_CONSOLE(console::FError<console::FLogType::ASIO>(TK_TRACER, "Read :", std::strerror(errno));)
+//      TK_CONSOLE(console::FError<console::FLogType::ASIO>(TK_TRACER, "Read :",
+//      std::strerror(errno));)
 //
 //      return _status;
 //    }
@@ -149,8 +173,10 @@
 //      return _status;
 //    }
 //
-//    TK_CONSOLE(console::Warning(TK_TRACER, "Received data but no reader callback was set.");)
-//    TK_CONSOLE(console::FWarning<console::FLogType::ASIO>(TK_TRACER, "Received data but no reader callback
+//    TK_CONSOLE(console::Warning(TK_TRACER, "Received data but no reader
+//    callback was set.");)
+//    TK_CONSOLE(console::FWarning<console::FLogType::ASIO>(TK_TRACER, "Received
+//    data but no reader callback
 //    was set.");)
 //
 //    return _status;

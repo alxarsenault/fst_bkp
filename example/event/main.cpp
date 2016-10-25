@@ -1,5 +1,5 @@
-#include <fst/print.h>
 #include <fst/event.h>
+#include <fst/print.h>
 #include <string>
 class Test1 {
 public:
@@ -69,14 +69,19 @@ int main()
 	//
 	//
 	//	fst::evt::dispatcher<Entity> dispatcher;
-	//	dispatcher.connect(a.entity, b.onclick, fst::evt::function(&t1, &Test1::Bang));
-	//	dispatcher.connect(a.entity, b.onclick, fst::evt::function(&t2, &Test2::Bang));
+	//	dispatcher.connect(a.entity, b.onclick, fst::evt::function(&t1,
+	//&Test1::Bang));
+	//	dispatcher.connect(a.entity, b.onclick, fst::evt::function(&t2,
+	//&Test2::Bang));
 	//
-	//	dispatcher.connect(b.entity, a.onclick, fst::evt::function(&t2, &Test2::Bang));
-	//	dispatcher.connect(b.entity, a.onclick, fst::evt::function(&t2, &Test2::Bang));
+	//	dispatcher.connect(b.entity, a.onclick, fst::evt::function(&t2,
+	//&Test2::Bang));
+	//	dispatcher.connect(b.entity, a.onclick, fst::evt::function(&t2,
+	//&Test2::Bang));
 
 	fst::evt::dispatcher<Entity> dispatcher;
-	//	dispatcher.connect(30, 3, fst::evt::function<int, int>([](int a, int b) {
+	//	dispatcher.connect(30, 3, fst::evt::function<int, int>([](int a, int b)
+	//{
 	//		fst::print(a, b);
 	//	}));
 
@@ -92,29 +97,38 @@ int main()
 	dispatcher.call_events();
 
 	//	engine_core->component.push_back(
-	//									 entity_info.entity, game::component::ZRotator(&engine_core->data,
+	//									 entity_info.entity,
+	// game::component::ZRotator(&engine_core->data,
 	// entity_info.entity,
 	//-0.3));
 
 	//	engine_core->evt_dispatcher.connect(/
-	//										0, engine::event::keyboard::OnUpKeyDown, fst::evt::function(this,
+	//										0,
+	// engine::event::keyboard::OnUpKeyDown, fst::evt::function(this,
 	//&Player::OnUpKeyDown));
 
 	//	evt_manager->_evt_dispatcher->push_event(0, keyboard::OnDownKeyDown);
 
 	//	fst::evt::dispatcher<Entity> dispatcher;
-	//	dispatcher.add_connection(my_entity, my_entity_soccer_evt, fst::evt::function(&t1, &Test1::Soccer));
-	//	dispatcher.add_connection(my_entity, my_entity_soccer_evt, fst::evt::function(&t2, &Test2::Soccer));
 	//	dispatcher.add_connection(my_entity, my_entity_soccer_evt,
-	//		fst::evt::function<int, int>([](int a, int b) { fst::print("Cunt :", a, b); }));
+	// fst::evt::function(&t1, &Test1::Soccer));
+	//	dispatcher.add_connection(my_entity, my_entity_soccer_evt,
+	// fst::evt::function(&t2, &Test2::Soccer));
+	//	dispatcher.add_connection(my_entity, my_entity_soccer_evt,
+	//		fst::evt::function<int, int>([](int a, int b) { fst::print("Cunt :",
+	// a, b); }));
 	//
 	//	dispatcher.add_connection<int, int>(
-	//		my_entity, my_entity_soccer_evt, [](int a, int b) { fst::print("Boom :", a, b); });
+	//		my_entity, my_entity_soccer_evt, [](int a, int b) { fst::print("Boom
+	//:", a, b); });
 	//
-	//	dispatcher.add_connection(my_entity, my_entity_bang_evt, fst::evt::function(&t1, &Test1::Bang));
-	//	dispatcher.add_connection(my_entity, my_entity_bang_evt, fst::evt::function(&t2, &Test2::Bang));
+	//	dispatcher.add_connection(my_entity, my_entity_bang_evt,
+	// fst::evt::function(&t1, &Test1::Bang));
+	//	dispatcher.add_connection(my_entity, my_entity_bang_evt,
+	// fst::evt::function(&t2, &Test2::Bang));
 	//	dispatcher.add_connection(
-	//		my_entity, my_entity_bang_evt, fst::evt::function([]() { fst::print("Cunt"); }));
+	//		my_entity, my_entity_bang_evt, fst::evt::function([]() {
+	// fst::print("Cunt"); }));
 	//
 	//	dispatcher.push_event(my_entity, my_entity_soccer_evt, 40, 45);
 	//	dispatcher.push_event(my_entity, my_entity_bang_evt);

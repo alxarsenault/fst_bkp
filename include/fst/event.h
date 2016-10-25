@@ -167,8 +167,7 @@ namespace evt {
 			// Add if object id is found.
 			if (it != _evt_map.end()) {
 				it->second.insert(std::pair<Id, std::shared_ptr<abstract_function>>(evt_id, fct.Copy()));
-			}
-			else {
+			} else {
 				// Create multimap for object id .
 				std::multimap<Id, std::shared_ptr<abstract_function>> evt_map;
 				evt_map.insert(std::pair<Id, std::shared_ptr<abstract_function>>(evt_id, fct.Copy()));
@@ -187,8 +186,7 @@ namespace evt {
 			// Add if object id is found.
 			if (it != _evt_map.end()) {
 				it->second.insert(std::pair<Id, std::shared_ptr<abstract_function>>(evt_id, fct.Copy()));
-			}
-			else {
+			} else {
 				// Create multimap for object id .
 				std::multimap<Id, std::shared_ptr<abstract_function>> evt_map;
 				evt_map.insert(std::pair<Id, std::shared_ptr<abstract_function>>(evt_id, fct.Copy()));
@@ -209,8 +207,7 @@ namespace evt {
 			// Add if object id is found.
 			if (it != _evt_map.end()) {
 				it->second.insert(std::pair<Id, std::shared_ptr<abstract_function>>(evt_id, fct.Copy()));
-			}
-			else {
+			} else {
 				// Create multimap for object id .
 				std::multimap<Id, std::shared_ptr<abstract_function>> evt_map;
 				evt_map.insert(std::pair<Id, std::shared_ptr<abstract_function>>(evt_id, fct.Copy()));
@@ -231,8 +228,7 @@ namespace evt {
 			// Add if object id is found.
 			if (it != _evt_map.end()) {
 				it->second.insert(std::pair<Id, std::shared_ptr<abstract_function>>(evt_id, fct.Copy()));
-			}
-			else {
+			} else {
 				// Create multimap for object id .
 				std::multimap<Id, std::shared_ptr<abstract_function>> evt_map;
 				evt_map.insert(std::pair<Id, std::shared_ptr<abstract_function>>(evt_id, fct.Copy()));
@@ -318,7 +314,8 @@ namespace evt {
 		//
 		//			}
 		//
-		//			void remove_event_connection(Key obj_id, evt::Id evt_id) {
+		//			void remove_event_connection(Key obj_id, evt::Id evt_id)
+		//{
 		//
 		//			}
 

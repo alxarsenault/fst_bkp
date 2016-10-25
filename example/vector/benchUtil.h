@@ -1,14 +1,14 @@
 #pragma once
 
+#include <chrono>
 #include <iomanip>
 #include <iostream>
 #include <string>
-#include <chrono>
 
 /*
-	escape(void*) and clobber() are from Chandler Carruth. More info:
-	https://www.youtube.com/watch?v=nXaxk27zwlk
-	Ty Chandler!
+		escape(void*) and clobber() are from Chandler Carruth. More info:
+		https://www.youtube.com/watch?v=nXaxk27zwlk
+		Ty Chandler!
 */
 
 namespace Bench {

@@ -14,10 +14,12 @@
 //  Session(Dispatcher* dispatcher, int sock_fd);
 //  virtual ~Session();
 //
-//  long AsyncRead(void* data, std::size_t data_size, stream::Reader<Session>::ReadCallback callback,
+//  long AsyncRead(void* data, std::size_t data_size,
+//  stream::Reader<Session>::ReadCallback callback,
 //                 void* user_data = nullptr);
 //
-//  long AsyncWrite(void* data, std::size_t data_size, stream::Sender<Session>::SendCallback callback,
+//  long AsyncWrite(void* data, std::size_t data_size,
+//  stream::Sender<Session>::SendCallback callback,
 //                  void* user_data = nullptr);
 //
 //  int GetSockFd() const { return _sock_fd; }

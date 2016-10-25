@@ -1,8 +1,8 @@
 #include "engine/graphic/renderer.hpp"
 
-#include <fst/print.h>
-#include <GLFW/glfw3.h>
 #include "engine/event/manager.hpp"
+#include <GLFW/glfw3.h>
+#include <fst/print.h>
 
 namespace engine {
 namespace graphic {

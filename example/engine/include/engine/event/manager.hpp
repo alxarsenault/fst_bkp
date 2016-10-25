@@ -65,7 +65,8 @@ namespace event {
 
 		void PollEvents();
 
-		// fst::multi_vector<DownKeyDown, UpKeyDown, RightKeyDown, LeftKeyDown> events;
+		// fst::multi_vector<DownKeyDown, UpKeyDown, RightKeyDown, LeftKeyDown>
+		// events;
 		fst::evt::dispatcher<engine::Entity>* _evt_dispatcher;
 
 	private:

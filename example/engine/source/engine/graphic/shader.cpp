@@ -1,6 +1,6 @@
 #include "engine/graphic/shader.hpp"
-#include <fst/print.h>
 #include <OpenGL/gl.h>
+#include <fst/print.h>
 
 namespace engine {
 namespace graphic {

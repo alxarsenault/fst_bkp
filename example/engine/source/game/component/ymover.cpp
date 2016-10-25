@@ -24,8 +24,7 @@ namespace component {
 		if (value > 0.95) {
 			value = 0.95;
 			_positive_y = !_positive_y;
-		}
-		else if (value < -0.95) {
+		} else if (value < -0.95) {
 			value = -0.95;
 			_positive_y = !_positive_y;
 		}

@@ -21,7 +21,8 @@
 //
 //  inline bool IsValid() const { return _is_valid == 1; }
 //
-//  typedef void (*AcceptCallback)(tk::asio::Dispatcher* dispatcher, int socket, const ip::Address& ip_addr,
+//  typedef void (*AcceptCallback)(tk::asio::Dispatcher* dispatcher, int socket,
+//  const ip::Address& ip_addr,
 //  void* data);
 //
 //  void AsyncAccept(AcceptCallback callback, void* data);

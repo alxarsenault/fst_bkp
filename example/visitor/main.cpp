@@ -1,8 +1,8 @@
-#include <fst/print.h>
 #include <fst/multi_vector.h>
+#include <fst/print.h>
 #include <string>
-#include <vector>
 #include <tuple>
+#include <vector>
 //
 //#include <cstdint>
 #include <iostream>

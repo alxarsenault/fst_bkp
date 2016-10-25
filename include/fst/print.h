@@ -2,10 +2,10 @@
 
 #include "def.h"
 #include "math.h"
-#include <unistd.h> // write.
-#include <cstring> // strcpy.
 #include <cstdio> // sprintf.
+#include <cstring> // strcpy.
 #include <ctime> // time_t and localtime.
+#include <unistd.h> // write.
 
 #ifdef __FST_USE_STDLIB__
 #include <string>
@@ -41,49 +41,59 @@ enum class color {
 };
 
 /// @brief Print an argument list.
-/// @details Each argument will be separated with a space character and will end with line break.
+/// @details Each argument will be separated with a space character and will end
+/// with line break.
 /// @warning Fix buffer size of 1024, no bound check is made.
 template <typename T, typename... P>
 inline void print(T t, P... p);
 
 /// @brief Print an argument list.
-/// @details Each argument will be separated with a space character and will end new line.
+/// @details Each argument will be separated with a space character and will end
+/// new line.
 /// @warning Fix buffer size of N, no bound check is made.
 template <std::size_t N, typename T, typename... P>
 inline void print(T t, P... p);
 
-/// @brief Print an argument list and reset any ANSI terminal attribute at before end of line.
-/// @details Each argument will be separated with a space character and will end with line break.
+/// @brief Print an argument list and reset any ANSI terminal attribute at
+/// before end of line.
+/// @details Each argument will be separated with a space character and will end
+/// with line break.
 /// @warning Fix buffer size of 1024, no bound check is made.
 template <typename T, typename... P>
 inline void cprint(T t, P... p);
 
-/// @brief Print an argument list and reset any ANSI terminal attribute at before end of line.
-/// @details Each argument will be separated with a space character and will end with line break.
+/// @brief Print an argument list and reset any ANSI terminal attribute at
+/// before end of line.
+/// @details Each argument will be separated with a space character and will end
+/// with line break.
 /// @warning Fix buffer size of N, no bound check is made.
 template <std::size_t N, typename T, typename... P>
 inline void cprint(T t, P... p);
 
 /// @brief Print an argument list starting with time stamp '[HH:MM::SS]: '.
-/// @details Each argument will be separated with a space character and will end with line break.
+/// @details Each argument will be separated with a space character and will end
+/// with line break.
 /// @warning Fix buffer size of 1024, no bound check is made.
 template <typename T, typename... P>
 inline void tprint(T t, P... p);
 
 /// @brief Print an argument list starting with time stamp '[HH:MM::SS]: '.
-/// @details Each argument will be separated with a space character and will end with line break.
+/// @details Each argument will be separated with a space character and will end
+/// with line break.
 /// @warning Fix buffer size of N, no bound check is made.
 template <std::size_t N, typename T, typename... P>
 inline void tprint(T t, P... p);
 
 /// @brief Print an argument list in bold red starting with '[ ERROR ] : '.
-/// @details Each argument will be separated with a space character and will end with line break.
+/// @details Each argument will be separated with a space character and will end
+/// with line break.
 /// @warning Fix buffer size of 1024, no bound check is made.
 template <typename T, typename... P>
 inline void errprint(T t, P... p);
 
 /// @brief Print an argument list in bold yellow starting with '[WARNING] : '.
-/// @details Each argument will be separated with a space character and will end with line break.
+/// @details Each argument will be separated with a space character and will end
+/// with line break.
 /// @warning Fix buffer size of 1024, no bound check is made.
 template <typename T, typename... P>
 inline void warnprint(T t, P... p);
@@ -227,40 +237,31 @@ namespace { // internal.
 			if (val >= 10000000) {
 				if (val >= 1000000000) {
 					size = 10;
-				}
-				else if (val >= 100000000) {
+				} else if (val >= 100000000) {
 					size = 9;
-				}
-				else {
+				} else {
 					size = 8;
 				}
-			}
-			else {
+			} else {
 				if (val >= 1000000) {
 					size = 7;
-				}
-				else if (val >= 100000) {
+				} else if (val >= 100000) {
 					size = 6;
-				}
-				else {
+				} else {
 					size = 5;
 				}
 			}
-		}
-		else {
+		} else {
 			if (val >= 100) {
 				if (val >= 1000) {
 					size = 4;
-				}
-				else {
+				} else {
 					size = 3;
 				}
-			}
-			else {
+			} else {
 				if (val >= 10) {
 					size = 2;
-				}
-				else {
+				} else {
 					size = 1;
 				}
 			}
@@ -305,40 +306,31 @@ namespace { // internal.
 			if (val >= 10000000) {
 				if (val >= 1000000000) {
 					size = 10;
-				}
-				else if (val >= 100000000) {
+				} else if (val >= 100000000) {
 					size = 9;
-				}
-				else {
+				} else {
 					size = 8;
 				}
-			}
-			else {
+			} else {
 				if (val >= 1000000) {
 					size = 7;
-				}
-				else if (val >= 100000) {
+				} else if (val >= 100000) {
 					size = 6;
-				}
-				else {
+				} else {
 					size = 5;
 				}
 			}
-		}
-		else {
+		} else {
 			if (val >= 100) {
 				if (val >= 1000) {
 					size = 4;
-				}
-				else {
+				} else {
 					size = 3;
 				}
-			}
-			else {
+			} else {
 				if (val >= 10) {
 					size = 2;
-				}
-				else {
+				} else {
 					size = 1;
 				}
 			}
@@ -409,7 +401,8 @@ namespace { // internal.
 	inline int p_format<bool>(char* str_buffer, int str_len, bool value)
 	{
 		//		return str_len
-		//			+ (value ? sprintf(str_buffer + str_len, "true ") : sprintf(str_buffer + str_len, "false
+		//			+ (value ? sprintf(str_buffer + str_len, "true ") :
+		// sprintf(str_buffer + str_len, "false
 		//"));
 
 		strcpy(str_buffer + str_len, (value ? "true" : "false"));
@@ -502,7 +495,8 @@ namespace { // internal.
 		write(2, str_buffer, str_len);
 	}
 
-	/// Since there's no space after colors no need to backup one space when ending with color.
+	/// Since there's no space after colors no need to backup one space when ending
+	/// with color.
 	inline void PrintChild(char* str_buffer, int str_len, color col)
 	{
 		str_len = p_format(str_buffer, str_len, col);

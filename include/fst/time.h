@@ -6,41 +6,18 @@ namespace fst {
 
 class time {
 public:
-	// time();
-
-	//		long ms() const;
-	//
-	const struct timeval& get_timeval() const
-	{
-		return _tv;
-	}
-	//
-	//		time& operator=(const time& time);
-	//
-	//		bool operator==(const time& time) const;
-	//
-	//		bool operator!=(const time& time) const;
-	//
-	//		bool operator<(const time& time) const;
-	//
-	//		bool operator>(const time& time) const;
-	//
-	//		bool operator<=(const time& time) const;
-	//
-	//		bool operator>=(const time& time) const;
-	//
-	//		time operator-(const time& time) const;
-	//		time operator+(const time& time) const;
-	//
-	//		time& operator-=(const time& time);
-	//		time& operator+=(const time& time);
-
 	inline time()
 	{
 		gettimeofday(&_tv, nullptr);
 	}
 
-	// inline long GetMs() const { return _tv.tv_sec * 1000 + (long)ceil(_tv.tv_usec / 1000.0); }
+	const struct timeval& get_timeval() const
+	{
+		return _tv;
+	}
+
+	// inline long GetMs() const { return _tv.tv_sec * 1000 +
+	// (long)ceil(_tv.tv_usec / 1000.0); }
 	inline long ms() const
 	{
 		return _tv.tv_sec * 1000 + (long)(_tv.tv_usec / 1000.0);

@@ -1,22 +1,22 @@
-#include <fst/print.h>
 #include <fst/multi_key_vector.h>
+#include <fst/print.h>
 #include <fst/soa_struct.h>
 #include <fst/unordered_key_vector.h>
 #include <sparsehash/dense_hash_map>
 
-#include <OpenGL/glu.h>
-#include <OpenGL/gl3.h>
 #include <GLFW/glfw3.h> /* GLFW helper library */
+#include <OpenGL/gl3.h>
+#include <OpenGL/glu.h>
 
+#include <glm/gtc/matrix_transform.hpp> // glm::translate, glm::rotate, glm::scale, glm::perspective
+#include <glm/gtc/type_ptr.hpp> // glm::value_ptr
+#include <glm/gtx/transform.hpp>
+#include <glm/mat4x4.hpp> // glm::mat4
 #include <glm/vec3.hpp> // glm::vec3
 #include <glm/vec4.hpp> // glm::vec4, glm::ivec4
-#include <glm/mat4x4.hpp> // glm::mat4
-#include <glm/gtc/matrix_transform.hpp> // glm::translate, glm::rotate, glm::scale, glm::perspective
-#include <glm/gtx/transform.hpp>
-#include <glm/gtc/type_ptr.hpp> // glm::value_ptr
 
-#include <stdio.h>
 #include <chrono>
+#include <stdio.h>
 
 namespace engine {
 typedef long Entity;
@@ -237,7 +237,8 @@ public:
 
 		glBindVertexArray(_vao);
 
-		/* draw points 0-3 from the currently bound VAO with current in-use shader */
+		/* draw points 0-3 from the currently bound VAO with current in-use shader
+		 */
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 	}
 
@@ -317,8 +318,7 @@ public:
 				value -= 0.008;
 				_positive_x = false;
 			}
-		}
-		else {
+		} else {
 			if (value < -0.95) {
 				value += 0.008;
 				_positive_x = true;
@@ -376,7 +376,8 @@ int main()
 	GLuint vao;
 	GLuint vbo;
 
-	/* geometry to use. these are 3 xyz points (9 floats total) to make a triangle */
+	/* geometry to use. these are 3 xyz points (9 floats total) to make a triangle
+	 */
 	GLfloat points[] = { 0.0f, 0.5f, 0.0f, 0.5f, -0.5f, 0.0f, -0.5f, -0.5f, 0.0f };
 	/* these are the strings of code for the shaders
 	 the vertex shader positions each vertex point */
@@ -434,7 +435,8 @@ int main()
 	 than anything already drawn at that pixel */
 	glEnable(GL_DEPTH_TEST); /* enable depth-testing */
 
-	/* with LESS depth-testing interprets a smaller depth value as meaning "closer" */
+	/* with LESS depth-testing interprets a smaller depth value as meaning
+	 * "closer" */
 	glDepthFunc(GL_LESS);
 
 	/* a vertex buffer object (VBO) is created here. this stores an array of
@@ -451,11 +453,13 @@ int main()
 	glBindVertexArray(vao);
 	glEnableVertexAttribArray(0); // "attribute #0 should be enabled when this vao is bound"
 
-	// this VBO is already bound, but it's a good habit to explicitly specify which VBO's data the following
+	// this VBO is already bound, but it's a good habit to explicitly specify
+	// which VBO's data the following
 	// vertex attribute pointer refers to
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-	// "attribute #0 is created from every 3 variables in the above buffer, of type float (i.e. make me
+	// "attribute #0 is created from every 3 variables in the above buffer, of
+	// type float (i.e. make me
 	// vec3s)"
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 
@@ -483,8 +487,7 @@ int main()
 			// ax::console::Error("Vertex Shader :", error_msg);
 			delete[] error_msg;
 		}
-	}
-	else {
+	} else {
 		fst::print("All good");
 	}
 

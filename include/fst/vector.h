@@ -4,10 +4,10 @@
 
 namespace fst {
 
-// Stack with destructor.
-// No stack with destructor.
-// Stack without destructor.
-// No stack without destructor.
+// Stack with destructor       : vector<T, N, true>
+// No stack with destructor    : vector<T, 0, true>
+// Stack without destructor    : vector<T, N, false>
+// No stack without destructor : vector<T, 0, false>
 
 //------------------------------------------------------------------------------------------------------------
 //<##> Stack with destructor.

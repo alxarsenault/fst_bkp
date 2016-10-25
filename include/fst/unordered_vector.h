@@ -351,18 +351,22 @@ public:
 
 		// Heap only.
 		if (_size > N) {
-			// Replace element at given index with last element of array and down size array size by 1.
+			// Replace element at given index with last element of array and down size
+			// array size by 1.
 			_data[index] = std::move(_data[--_size]);
-			// move_all_emements(_data + index, _data + (index + 1), _size - (index + 1));
+			// move_all_emements(_data + index, _data + (index + 1), _size - (index +
+			// 1));
 			return;
 		}
 		// Going from heap to stack.
 		else if (_size == GetNPlus1()) {
-			// Replace element at given index with last element of array and down size array size by 1.
+			// Replace element at given index with last element of array and down size
+			// array size by 1.
 			_data[index] = std::move(_data[--_size]);
 
 			move_all_emements(_stack, _data, _size);
-			// move_all_emements(_stack + index, _data + (index + 1), _size - (index + 1));
+			// move_all_emements(_stack + index, _data + (index + 1), _size - (index +
+			// 1));
 			return;
 		}
 
@@ -370,7 +374,8 @@ public:
 		// Stack only.
 		//
 
-		// Replace element at given index with last element of array and down size array size by 1.
+		// Replace element at given index with last element of array and down size
+		// array size by 1.
 		_stack[index] = std::move(_stack[--_size]);
 	}
 
@@ -671,7 +676,8 @@ public:
 		}
 
 		_data[index] = std::move(_data[--_size]);
-		// move_all_emements(_data + index, _data + (index + 1), _size - (index + 1));
+		// move_all_emements(_data + index, _data + (index + 1), _size - (index +
+		// 1));
 		return;
 	}
 
@@ -1083,7 +1089,8 @@ public:
 		// Heap only.
 		if (_size > N) {
 			_data[index] = std::move(_data[--_size]);
-			// move_all_emements(_data + index, _data + (index + 1), _size - (index + 1));
+			// move_all_emements(_data + index, _data + (index + 1), _size - (index +
+			// 1));
 			return;
 		}
 		// Going from heap to stack.
@@ -1091,13 +1098,15 @@ public:
 			_data[index] = std::move(_data[--_size]);
 			move_all_emements(_stack, _data, _size);
 			// move_all_emements(_stack, _data, index);
-			// move_all_emements(_stack + index, _data + (index + 1), _size - (index + 1));
+			// move_all_emements(_stack + index, _data + (index + 1), _size - (index +
+			// 1));
 			return;
 		}
 
 		// Stack only.
 		_stack[index] = std::move(_stack[--_size]);
-		// move_all_emements(_stack + index, _stack + (index + 1), _size - (index + 1));
+		// move_all_emements(_stack + index, _stack + (index + 1), _size - (index +
+		// 1));
 	}
 
 	template <class Predicate>
@@ -1389,7 +1398,8 @@ public:
 		}
 
 		_data[index] = std::move(_data[--_size]);
-		// move_all_emements(_data + index, _data + (index + 1), _size - (index + 1));
+		// move_all_emements(_data + index, _data + (index + 1), _size - (index +
+		// 1));
 		return;
 	}
 

@@ -73,7 +73,8 @@
 // code uses quadratic probing, though you can change it to linear
 // via JUMP_ below if you really want to.
 //
-// From http://www.augustana.ca/~mohrj/courses/1999.fall/csc210/lecture_notes/hashing.html
+// From
+// http://www.augustana.ca/~mohrj/courses/1999.fall/csc210/lecture_notes/hashing.html
 // NUMBER OF PROBES / LOOKUP       Successful            Unsuccessful
 // Quadratic collision resolution   1 - ln(1-L) - L/2    1/(1-L) - L - ln(1-L)
 // Linear collision resolution     [1+1/(1-L)]/2         [1+1/(1-L)2]/2
@@ -89,18 +90,18 @@
 #ifndef _DENSEHASHTABLE_H_
 #define _DENSEHASHTABLE_H_
 
-#include <sparsehash/internal/sparseconfig.h>
-#include <assert.h>
-#include <stdio.h> // for FILE, fwrite, fread
 #include <algorithm> // For swap(), eg
+#include <assert.h>
 #include <iterator> // For iterator tags
 #include <limits> // for numeric_limits
 #include <memory> // For uninitialized_fill
-#include <utility> // for pair
 #include <sparsehash/internal/hashtable-common.h>
 #include <sparsehash/internal/libc_allocator_with_realloc.h>
+#include <sparsehash/internal/sparseconfig.h>
 #include <sparsehash/type_traits.h>
 #include <stdexcept> // For length_error
+#include <stdio.h> // for FILE, fwrite, fread
+#include <utility> // for pair
 
 _START_GOOGLE_NAMESPACE_
 
@@ -892,8 +893,7 @@ private:
 	{
 		if (!table) {
 			table = val_info.allocate(new_num_buckets);
-		}
-		else {
+		} else {
 			destroy_buckets(0, num_buckets);
 			if (new_num_buckets != num_buckets) { // resize, if necessary
 				typedef base::integral_constant<bool,
@@ -958,12 +958,10 @@ private:
 					return std::pair<size_type, size_type>(ILLEGAL_BUCKET, bucknum);
 				else
 					return std::pair<size_type, size_type>(ILLEGAL_BUCKET, insert_pos);
-			}
-			else if (test_deleted(bucknum)) { // keep searching, but mark to insert
+			} else if (test_deleted(bucknum)) { // keep searching, but mark to insert
 				if (insert_pos == ILLEGAL_BUCKET)
 					insert_pos = bucknum;
-			}
-			else if (equals(key, get_key(table[bucknum]))) {
+			} else if (equals(key, get_key(table[bucknum]))) {
 				return std::pair<size_type, size_type>(bucknum, ILLEGAL_BUCKET);
 			}
 			++num_probes; // we're doing another probe
@@ -1016,8 +1014,7 @@ public:
 		iterator pos = find(key); // either an iterator or end
 		if (pos == end()) {
 			return std::pair<iterator, iterator>(pos, pos);
-		}
-		else {
+		} else {
 			const iterator startpos = pos++;
 			return std::pair<iterator, iterator>(startpos, pos);
 		}
@@ -1027,8 +1024,7 @@ public:
 		const_iterator pos = find(key); // either an iterator or end
 		if (pos == end()) {
 			return std::pair<const_iterator, const_iterator>(pos, pos);
-		}
-		else {
+		} else {
 			const const_iterator startpos = pos++;
 			return std::pair<const_iterator, const_iterator>(startpos, pos);
 		}
@@ -1048,8 +1044,7 @@ private:
 			clear_deleted(delpos);
 			assert(num_deleted > 0);
 			--num_deleted; // used to be, now it isn't
-		}
-		else {
+		} else {
 			++num_elements; // replacing an empty bucket
 		}
 		set_value(&table[pos], obj);
@@ -1068,8 +1063,7 @@ private:
 		if (pos.first != ILLEGAL_BUCKET) { // object was already there
 			return std::pair<iterator, bool>(iterator(this, table + pos.first, table + num_buckets, false),
 				false); // false: we didn't insert
-		}
-		else { // pos.second says where to put it
+		} else { // pos.second says where to put it
 			return std::pair<iterator, bool>(insert_at(obj, pos.second), true);
 		}
 	}
@@ -1126,12 +1120,10 @@ public:
 		DefaultValue default_value;
 		if (pos.first != ILLEGAL_BUCKET) { // object was already there
 			return table[pos.first];
-		}
-		else if (resize_delta(1)) { // needed to rehash to make room
+		} else if (resize_delta(1)) { // needed to rehash to make room
 			// Since we resized, we can't use pos, so recalculate where to insert.
 			return *insert_noresize(default_value(key)).first;
-		}
-		else { // no need to rehash, insert right here
+		} else { // no need to rehash, insert right here
 			return *insert_at(default_value(key), pos.second);
 		}
 	}
@@ -1150,8 +1142,7 @@ public:
 			++num_deleted;
 			settings.set_consider_shrink(true); // will think about shrink after next insert
 			return 1; // because we deleted one thing
-		}
-		else {
+		} else {
 			return 0; // because we deleted nothing
 		}
 	}
@@ -1204,11 +1195,9 @@ public:
 	{
 		if (size() != ht.size()) {
 			return false;
-		}
-		else if (this == &ht) {
+		} else if (this == &ht) {
 			return true;
-		}
-		else {
+		} else {
 			// Iterate through the elements in "this" and see if the
 			// corresponding element is in ht
 			for (const_iterator it = begin(); it != end(); ++it) {

@@ -1,17 +1,17 @@
 #pragma once
 
-#include <poll.h> // pollfd.
 #include <errno.h>
 #include <fcntl.h>
+#include <poll.h> // pollfd.
 
 #include "../print.h"
-#include "../unordered_vector.h"
 #include "../time.h"
+#include "../unordered_vector.h"
 
 namespace fst {
 namespace io {
 
-//	template <std::size_t N = 16>
+	//	template <std::size_t N = 16>
 	class dispatcher {
 	private:
 		struct handler_data {
@@ -24,8 +24,10 @@ namespace io {
 
 		static void dummy_pipe_handler(void* data)
 		{
-			// TK_CONSOLE(console::Error("Receive dummy pipe data (THIS SHOULD NEVER HAPPEND");)
-			// TK_CONSOLE(console::Error("This could be use to send command to io dispatcher in the futur.");)
+			// TK_CONSOLE(console::Error("Receive dummy pipe data (THIS SHOULD NEVER
+			// HAPPEND");)
+			// TK_CONSOLE(console::Error("This could be use to send command to io
+			// dispatcher in the futur.");)
 		}
 
 	public:
@@ -43,9 +45,11 @@ namespace io {
 				return;
 			}
 
-			//						 if (!SetSocketBlockingEnabled(_dummy_pipe_fd[0], true)) {
-			//							 TK_CONSOLE(console::Error("Could not set dummy pipe to
-			//non-blocking."));
+			//						 if (!SetSocketBlockingEnabled(_dummy_pipe_fd[0], true))
+			//{
+			//							 TK_CONSOLE(console::Error("Could not set dummy pipe
+			// to
+			// non-blocking."));
 			//							 return;
 			//						 }
 
@@ -104,8 +108,7 @@ namespace io {
 					// Interrupted system call.
 					if (errno == EINTR) {
 						continue;
-					}
-					else { // Stop on any other error.
+					} else { // Stop on any other error.
 						fst::errprint("Can't poll :", std::strerror(errno));
 						return retval;
 					}
@@ -129,38 +132,54 @@ namespace io {
 				for (int i = 0; i < l_size; i++) {
 
 					if (_poll_list[i].revents == 0) {
-						// TK_CONSOLE(console::FLog<console::FLogType::ASIO>(TK_TRACER, "revents == 0");)
+						// TK_CONSOLE(console::FLog<console::FLogType::ASIO>(TK_TRACER,
+						// "revents == 0");)
 						continue;
 					}
 
-					//#define	POLLIN		0x0001		/* any readable data available */
-					//#define	POLLPRI		0x0002		/* OOB/Urgent readable data */
-					//#define	POLLOUT		0x0004		/* filedescriptor is writeable */
-					//#define	POLLRDNORM	0x0040		/* non-OOB/URG data available */
-					//#define	POLLWRNORM	POLLOUT		/* no write type differentiation */
-					//#define	POLLRDBAND	0x0080		/* OOB/Urgent readable data */
-					//#define	POLLWRBAND	0x0100		/* OOB/Urgent data can be written */
+					//#define	POLLIN		0x0001		/* any readable data
+					// available */
+					//#define	POLLPRI		0x0002		/* OOB/Urgent
+					// readable data */
+					//#define	POLLOUT		0x0004		/* filedescriptor is
+					// writeable */
+					//#define	POLLRDNORM	0x0040		/* non-OOB/URG data
+					// available */
+					//#define	POLLWRNORM	POLLOUT		/* no write type
+					// differentiation */
+					//#define	POLLRDBAND	0x0080		/* OOB/Urgent readable
+					// data */
+					//#define	POLLWRBAND	0x0100		/* OOB/Urgent data can
+					// be written */
 
 					/*
 					 * FreeBSD extensions: polling on a regular file might return one
 					 * of these events (currently only supported on local filesystems).
 					 */
-					//#define	POLLEXTEND	0x0200		/* file may have been extended */
-					//#define	POLLATTRIB	0x0400		/* file attributes may have changed */
-					//#define	POLLNLINK	0x0800		/* (un)link/rename may have happened */
-					//#define	POLLWRITE	0x1000		/* file's contents may have changed */
+					//#define	POLLEXTEND	0x0200		/* file may have been
+					// extended */
+					//#define	POLLATTRIB	0x0400		/* file attributes may
+					// have changed */
+					//#define	POLLNLINK	0x0800		/* (un)link/rename may
+					// have happened */
+					//#define	POLLWRITE	0x1000		/* file's contents may
+					// have changed */
 
 					/*
 					 * These events are set if they occur regardless of whether they were
 					 * requested.
 					 */
-					//#define	POLLERR		0x0008		/* some poll error occurred */
-					//#define	POLLHUP		0x0010		/* file descriptor was "hung up" */
-					//#define	POLLNVAL	0x0020		/* requested events "invalid" */
+					//#define	POLLERR		0x0008		/* some poll error
+					// occurred */
+					//#define	POLLHUP		0x0010		/* file descriptor
+					// was "hung up" */
+					//#define	POLLNVAL	0x0020		/* requested events
+					//"invalid" */
 
 					if (_poll_list[i].revents == POLLHUP) {
 						//						TK_CONSOLE(console::FLog<console::FLogType::ASIO>(
-						//							TK_TRACER, "POLLHUP : file descriptor was hung up.");)
+						//							TK_TRACER, "POLLHUP : file descriptor
+						// was hung up.");)
 
 						// Need to close this fd.
 						continue;
@@ -169,7 +188,8 @@ namespace io {
 					// Handle output.
 					if ((_poll_list[i].revents & HandleTypeToPollFlag[handle_type::output])) {
 						//						TK_CONSOLE(console::FLog<console::FLogType::ASIO>(
-						//							TK_TRACER, "POLLOUT : file descriptor is writeable.");)
+						//							TK_TRACER, "POLLOUT : file descriptor is
+						// writeable.");)
 
 						for (const auto& handler : _handler_list[handle_type::output]) {
 							if (handler.fd == _poll_list[i].fd) {
@@ -183,7 +203,8 @@ namespace io {
 					// Handle input.
 					if ((_poll_list[i].revents & HandleTypeToPollFlag[handle_type::input])) {
 						//						TK_CONSOLE(console::FLog<console::FLogType::ASIO>(
-						//							TK_TRACER, "POLLIN : any readable data available.");)
+						//							TK_TRACER, "POLLIN : any readable data
+						// available.");)
 
 						// Find handler.
 						for (const auto& handler : _handler_list[handle_type::input]) {
@@ -198,16 +219,19 @@ namespace io {
 
 					// Could not handle revents, it's an unexpected result (for now).
 					fst::errprint(ptrace, "revents :", _poll_list[i].revents);
-					//					TK_CONSOLE(console::Error(TK_TRACER, "revents :",
+					//					TK_CONSOLE(console::Error(TK_TRACER,
+					//"revents :",
 					//_poll_list[i].revents);)
 					//					TK_CONSOLE(console::FError<console::FLogType::ASIO>(
-					//						TK_TRACER, "revents :", _poll_list[i].revents);)
+					//						TK_TRACER, "revents :",
+					//_poll_list[i].revents);)
 					_is_running = 0;
 					break;
 				}
 
 				//				TK_CONSOLE(console::FLog<console::FLogType::ASIO>(
-				//					TK_TRACER, "Delete before size :", _poll_list.GetSize());)
+				//					TK_TRACER, "Delete before size
+				//:", _poll_list.GetSize());)
 
 				_poll_list.erase_if([](const pollfd& pfd) { return pfd.fd == -1; });
 				_handler_list[handle_type::input].erase_if(
@@ -216,20 +240,22 @@ namespace io {
 					[](const handler_data& hd) { return hd.fd == -1; });
 
 				//				TK_CONSOLE(console::FLog<console::FLogType::ASIO>(
-				//					TK_TRACER, "Delete after size :", _poll_list.GetSize());)
+				//					TK_TRACER, "Delete after size
+				//:", _poll_list.GetSize());)
 
 				if (time_out_ms != -1) {
-					//					const long diff_ms = (tk::time::Clock() - begin_time).GetMs();
+					//					const long diff_ms = (tk::time::Clock()
+					//- begin_time).GetMs();
 					const long diff_ms = (fst::time() - begin_time).ms();
 
 					if (diff_ms < time_out_ms) {
 						current_time_out_ms = time_out_ms - diff_ms;
-					}
-					else {
+					} else {
 						// Call timeout callback.
 						_time_out_callback(_time_out_data);
 						current_time_out_ms = time_out_ms;
-						//						begin_time = tk::time::Clock();
+						//						begin_time =
+						// tk::time::Clock();
 						begin_time = fst::time();
 					}
 				}
@@ -261,12 +287,13 @@ namespace io {
 				_poll_list.emplace_back(pollfd{ fd, HandleTypeToPollFlag[type], 0 });
 			}
 
-			// TK_CONSOLE(console::FLog<console::FLogType::ASIO>(TK_TRACER, "Add handler to socket :", fd);)
+			// TK_CONSOLE(console::FLog<console::FLogType::ASIO>(TK_TRACER, "Add handler
+			// to socket :", fd);)
 			return 0;
 		}
 
-		void remove_handler(int fd) {
-			
+		void remove_handler(int fd)
+		{
 		}
 
 		void remove_handler(int fd, handle_type type);

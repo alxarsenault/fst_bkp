@@ -1,12 +1,12 @@
+#include <fst/assert.h>
 #include <fst/def.h>
 #include <fst/print.h>
-#include <fst/assert.h>
-#include <fst/vector.h>
-#include <fst/unordered_vector.h>
 #include <fst/unordered_array.h>
+#include <fst/unordered_vector.h>
+#include <fst/vector.h>
 #include <iostream>
-#include <vector>
 #include <utility>
+#include <vector>
 
 #include "benchUtil.h"
 

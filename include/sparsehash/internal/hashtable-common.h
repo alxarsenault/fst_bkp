@@ -40,12 +40,12 @@
 #ifndef UTIL_GTL_HASHTABLE_COMMON_H_
 #define UTIL_GTL_HASHTABLE_COMMON_H_
 
-#include <sparsehash/internal/sparseconfig.h>
 #include <assert.h>
-#include <stdio.h>
-#include <stddef.h> // for size_t
 #include <iosfwd>
+#include <sparsehash/internal/sparseconfig.h>
+#include <stddef.h> // for size_t
 #include <stdexcept> // For length_error
+#include <stdio.h>
 
 _START_GOOGLE_NAMESPACE_
 

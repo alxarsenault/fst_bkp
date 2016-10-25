@@ -1,8 +1,8 @@
 #pragma once
 
-#include <cstddef>
-#include <OpenGL/gltypes.h>
 #include "engine/def.hpp"
+#include <OpenGL/gltypes.h>
+#include <cstddef>
 
 namespace engine {
 namespace graphic {
