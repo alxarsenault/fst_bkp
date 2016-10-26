@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../print.h"
-#include "dispatcher.h"
+#include "../../print.h"
+#include "../dispatcher.h"
 
 #include <fcntl.h>
 #include <netdb.h> // addrinfo.
@@ -10,7 +10,7 @@
 #include <sys/socket.h> // sockaddr.
 #include <sys/un.h> // sockaddr.
 
-#include "stream/reader.h"
+#include "../stream/reader.h"
 //#include "tk/asio/stream/sender.hh"
 
 namespace fst {

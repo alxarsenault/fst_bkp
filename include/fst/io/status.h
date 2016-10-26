@@ -2,7 +2,6 @@
 
 namespace fst {
 namespace io {
-
 	enum class error {
 		kNone,
 		kResourceTemporarilyUnavailable,
@@ -18,7 +17,12 @@ namespace io {
 		kUnknown
 	};
 
-	enum class status { good, warning, bad };
+	enum class state { good, warning, bad };
+
+	struct status {
+		state state;
+		error error;
+	};
 
 } // io.
 } // fst.

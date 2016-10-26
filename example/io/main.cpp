@@ -1,63 +1,36 @@
 #include <fst/io/dispatcher.h>
-#include <fst/io/file.h>
-#include <fst/io/local_socket.h>
+#include <fst/io/tcp/acceptor.h>
+
 #include <fst/print.h>
+#include <fst/vector.h>
 
 char buffer[1024];
-char buffer2[1024];
-char buffer3[1024];
+
 int main()
 {
+	fst::vector<fst::io::tcp::socket, 16> sessions_vec;
 	fst::io::dispatcher io_dispatcher;
-	//	fst::io::local::socket local_socket(&io_dispatcher);
-	//	local_socket.init("./dsa");
+	fst::io::tcp::acceptor tcp_acceptor(&io_dispatcher, 8012);
 
-	fst::io::file f(&io_dispatcher);
-	fst::io::file f2(&io_dispatcher);
-	fst::io::file f3(&io_dispatcher);
-	f.init("/Users/alexarse/Desktop/server.py");
-	f2.init("/Users/alexarse/Desktop/server.py");
-	f3.init("/Users/alexarse/Desktop/server.py");
-	f.async_read(buffer, 1024, [](fst::io::file*, void*, fst::io::status status, fst::io::error error, long) {
-		if (status == fst::io::status::bad) {
-			fst::print("bad chunky", (int)error);
-			return;
-		}
-		// fst::print((const char*)buffer);
-	});
+	tcp_acceptor.async_accept(
+		[](fst::io::tcp::socket&& sock, const fst::io::ip::address& ip_addr, void* data) {
+			fst::print("got connection from :", ip_addr.data());
+			auto* sessions_vec = static_cast<fst::vector<fst::io::tcp::socket, 16>*>(data);
 
-	f2.async_read(
-		buffer2, 1024, [](fst::io::file*, void*, fst::io::status status, fst::io::error error, long) {
-			if (status == fst::io::status::bad) {
-				fst::print("bad chunky", (int)error);
-				return;
-			}
-			// fst::print((const char*)buffer2);
-		});
+			sock.async_read((void*)buffer, 1024, [](fst::io::tcp::socket*, void* data _FST_UNUSED,
+													 fst::io::status status, long n_bytes _FST_UNUSED) {
+				if (status.state == fst::io::state::bad) {
+					return;
+				}
 
-	f3.async_read(
-		buffer3, 1024, [](fst::io::file*, void*, fst::io::status status, fst::io::error error, long) {
-			if (status == fst::io::status::bad) {
-				fst::print("bad chunky", (int)error);
-				return;
-			}
-			// fst::print((const char*)buffer2);
-		});
+				fst::print(buffer);
+			});
 
-	//	local_socket.async_read(
-	//		buffer, 1024, [](fst::io::local::socket*, void*, fst::io::status
-	// status, fst::io::error error,
-	// long)
-	//{
-	//			if (status == fst::io::status::bad) {
-	//				fst::print("bad chunky", (int)error);
-	//				return;
-	//			}
-	//			fst::print("chunky");
-	//		});
+			sessions_vec->emplace_back(std::move(sock));
+		},
+		&sessions_vec);
 
-	io_dispatcher.add_timeout_handler([](void* data) { fst::tprint("timeout"); }, nullptr);
-
+	io_dispatcher.add_timeout_handler([](void* data _FST_UNUSED) { fst::tprint("timeout"); }, nullptr);
 	io_dispatcher.run(2000);
 	return 0;
 }
