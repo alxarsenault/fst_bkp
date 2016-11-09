@@ -34,7 +34,9 @@ namespace io {
 					if (errno == EAGAIN) {
 						errprint(ptrace, "Resource is still unavailable (THIS SHOULD NEVER HAPPEND).");
 						return;
-					} else if (errno == EPIPE) { // Broken pipe.
+					}
+					// Broken pipe.
+					else if (errno == EPIPE) {
 						errprint(ptrace, "Broken pipe.");
 						rder->CallUserCallback(status{ state::bad, error::kBrokenPipe });
 						return;

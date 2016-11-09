@@ -12,18 +12,20 @@ int main()
 	fst::io::dispatcher io_dispatcher;
 	fst::io::tcp::acceptor tcp_acceptor(&io_dispatcher, 8012);
 
+	// Start accepting connections.
 	tcp_acceptor.async_accept(
 		[](fst::io::tcp::socket&& sock, const fst::io::ip::address& ip_addr, void* data) {
 			fst::print("got connection from :", ip_addr.data());
 			auto* sessions_vec = static_cast<fst::vector<fst::io::tcp::socket, 16>*>(data);
 
+			// Start reading from accepted socket.
 			sock.async_read((void*)buffer, 1024, [](fst::io::tcp::socket*, void* data _FST_UNUSED,
 													 fst::io::status status, long n_bytes _FST_UNUSED) {
 				if (status.state == fst::io::state::bad) {
 					return;
 				}
 
-				fst::print(buffer);
+				fst::print("Receive message :", buffer);
 			});
 
 			sessions_vec->emplace_back(std::move(sock));

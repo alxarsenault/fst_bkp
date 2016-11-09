@@ -20,10 +20,6 @@ namespace io {
 			sender()
 			{
 			}
-			//			sender(dispatcher* io_dispatcher)
-			//				: _dispatcher(io_dispatcher)
-			//			{
-			//			}
 
 			static void SenderHandler(void* data)
 			{
@@ -41,7 +37,9 @@ namespace io {
 					if (errno == EAGAIN) {
 						errprint(ptrace, "Resource is still unavailable (THIS SHOULD NEVER HAPPEND).");
 						return;
-					} else if (errno == EPIPE) { // Broken pipe.
+					}
+					// Broken pipe.
+					else if (errno == EPIPE) {
 						errprint(ptrace, "Broken pipe.");
 						snder->CallUserCallback(status{ state::bad, error::kBrokenPipe });
 						return;
@@ -94,17 +92,15 @@ namespace io {
 
 				// If could not send data.
 				if (_n_bytes == -1) {
-					// Resource temporarily unavailable (which is normal since socket is on
-					// non-blocking mode).
+					// Resource temporarily unavailable.
 					if (errno == EAGAIN) {
 						// Add output handler to io dispatcher.
-						// get_dispatcher
 						owner->get_dispatcher()->add_handler(
 							_fd, &sender::SenderHandler, this, dispatcher::handle_type::output);
-						//_dispatcher->AddHandler(_fd, &sender::SenderHandler, this,
-						// dispatcher::handle_type::output);
 						return _n_bytes;
-					} else if (errno == EPIPE) { // Broken pipe.
+					}
+					// Broken pipe.
+					else if (errno == EPIPE) {
 						errprint(ptrace, "Broken pipe.");
 						return CallUserCallback(status{ state::bad, error::kBrokenPipe });
 					}
