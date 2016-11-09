@@ -1,18 +1,19 @@
 #include <fst/print.h>
 #include <fst/small_string.h>
+#include <fst/ascii.h>
 
 #include <stdio.h>
 
 template <std::size_t N>
-void StripNonAlphaNumFromBeginning(fst::small_string<N>& str)
+void strip_non_alphanum_at_begin_and_end(fst::small_string<N>& str)
 {
-	long index = str.index_of_first([](char c) { return fst::is_alphanumeric(c); });
+	long index = str.index_of_first([](char c) { return fst::ascii::is_alphanumeric(c); });
 
 	if (index != -1) {
 		str.erase(0, index);
 	}
 
-	index = str.r_index_of_first([](char c) { return fst::is_alphanumeric(c); });
+	index = str.r_index_of_first([](char c) { return fst::ascii::is_alphanumeric(c); });
 
 	if (index != -1) {
 		str.erase(index + 1, str.size() - index - 1);
@@ -20,13 +21,46 @@ void StripNonAlphaNumFromBeginning(fst::small_string<N>& str)
 }
 
 template <std::size_t N>
-void strip_non_alphanum_at_begin_and_end(fst::small_string<N>& str)
+void replace_tab_and_multispace_with_mono_space(fst::small_string<N>& str)
 {
-	long index = str.index_of_first([](char c) { return fst::is_alphanumeric(c); });
+	// Replace all tabs by space.
+	str.operation_if([](char c) { return fst::ascii::is_tab(c); }, [](char& c) { c = ' '; });
 
-	if (index != -1) {
-		str.erase(0, index);
+	long first_space_index = str.index_of_first([](char c) { return fst::ascii::is_space(c); });
+
+	while (first_space_index != -1) {
+
+		int count_spaces = 0;
+		for (std::size_t i = first_space_index + 1; i < str.size(); i++) {
+			if (!fst::ascii::is_space(str[i])) {
+				break;
+			}
+			count_spaces++;
+		}
+
+		if (count_spaces) {
+			str.erase(first_space_index + 1, count_spaces);
+		}
+
+		fst::print("N count :", (int)count_spaces);
+
+		first_space_index
+			= str.index_of_first([](char c) { return fst::ascii::is_space(c); }, first_space_index + 1);
 	}
+}
+
+template <std::size_t N>
+void to_upper_case(fst::small_string<N>& str)
+{
+	str.operation_if([](char c) { return fst::ascii::is_lower_case_letter(c); },
+		[](char& c) { c -= fst::ascii::distance_between_lower_and_upper_case(); });
+}
+
+template <std::size_t N>
+void to_lower_case(fst::small_string<N>& str)
+{
+	str.operation_if([](char c) { return fst::ascii::is_upper_case_letter(c); },
+		[](char& c) { c += fst::ascii::distance_between_lower_and_upper_case(); });
 }
 
 int main()
@@ -64,49 +98,78 @@ int main()
 	fst::small_string<64> str07("    John   a   ");
 	printf("%s\n", str07.data());
 
-	StripNonAlphaNumFromBeginning(str07);
+	strip_non_alphanum_at_begin_and_end(str07);
 	printf("%s\n", str07.data());
 
-	//	StripNonAlphaNumFromBeginning(str07);
-	//	printf("%s\n", str07.data());
-	//	long index = str07.index_of_first([](char c) {
-	//		return fst::is_alphanumeric(c);
-	//	});
+	replace_tab_and_multispace_with_mono_space(str07);
+	printf("%s\n", str07.data());
+
 	//
-	//	fst::print((int)index);
-	//
-	//	if(index != -1) {
-	//		str07.erase(0, index);
-	//	}
-	//	printf("%s\n", str07.data());
-	//
-	//		index = str07.r_index_of_first([](char c) {
-	//			return fst::is_alphanumeric(c);
-	//		});
-	//
-	//
-	//	fst::print((int)index);
-	//	if(index != -1) {
-	//		str07.erase(index + 1, str07.size() - index - 1);
-	//	}
-	//
-	//	printf("%s\n", str07.data());
-	//
-	////	index = str07.index_of_first([](char c) {
-	////		return !fst::is_alphanumeric(c);
-	////	});
-	//
-	////	fst::print((int)index);
-	////
-	////	if(index != -1) {
-	////		long second_word_index = str07.index_of_first([](char c) {
-	////			return fst::is_alphanumeric(c);
-	////		}, index);
-	////
-	////		fst::print((int)second_word_index);
-	////		str07.erase(index, second_word_index - index);
-	////		printf("%s\n", str07.data());
-	////	}
-	//
+	fst::small_string<64> str08("   Alex\tandre Jo  Peter    abc  ");
+	printf("%s\n", str08.data());
+	strip_non_alphanum_at_begin_and_end(str08);
+	replace_tab_and_multispace_with_mono_space(str08);
+	printf("%s\n", str08.data());
+
+	to_lower_case(str08);
+	printf("%s\n", str08.data());
+
+	to_upper_case(str08);
+	printf("%s\n", str08.data());
+
+	fst::print("COUNT SPACES :", (int)str08.count(' '));
+	str08.replace('A', 'K');
+	printf("%s\n", str08.data());
+
+	fst::small_string<64> str09 = "alexandre arsenault";
+	str09.replace({ 'a', 'e' }, 'k');
+	printf("%s\n", str09.data());
+
+	fst::small_string<64> str10 = "alexandre arsenault";
+	str10.replace({ 'a', 'e' }, { 'e', 'a' });
+	printf("%s\n", str10.data());
+
+	// Copy constructor.
+	fst::small_string<124> str11 = "Alex";
+	fst::small_string<64> str12(str11);
+	printf("%s\n", str12.data());
+
+	fst::small_string<64> str13 = "   Alex       ";
+	str13.strip_leading_spaces();
+	str13.strip_trailing_spaces();
+	printf("%s\n", str13.data());
+
+	fst::small_string<64> str14 = "   -123 ";
+	fst::print("Is int :", str14.is_int());
+	fst::print("Is uint :", str14.is_uint());
+
+	fst::small_string<64> str15 = "   12389 ";
+	unsigned int k = str15.to_uint();
+	fst::print("k =", k);
+
+	fst::small_string<64> str16 = "   -12389 ";
+	int kk = str16.to_int();
+	fst::print("k =", kk);
+
+	fst::small_string<64> str17 = "-12389.5";
+	fst::print("Is float :", str17.is_float());
+	float f = str17.to_float();
+	fst::print("f =", f);
+
+	// Sub string.
+	fst::small_string<64> str18 = "Alexandre";
+	fst::small_string<64> str19 = str18.substr(4);
+	printf("%s\n", str19.data());
+
+	fst::small_string<64> str20 = "Alexandre";
+	fst::small_string<64> str21 = str20.substr(0, 4);
+	printf("%s\n", str21.data());
+
+	// Compare.
+	fst::small_string<64> str22 = "Alexandre";
+	fst::small_string<64> str23 = "Alexandre";
+	fst::print("compare :", str22 == str23);
+	fst::print("compare :", str22 == "Alexandre");
+	printf("%s\n", (const char*)str23);
 	return 0;
 }
