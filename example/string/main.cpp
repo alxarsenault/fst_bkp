@@ -26,7 +26,7 @@ public:
 	/**
 	 * Find the first bit set (first non 0 bit). Also string.h ffs().
 	 */
-	inline std::size_t cross_platform_bsf(unsigned int mask)
+	inline static std::size_t cross_platform_bsf(unsigned int mask)
 	{
 	#if defined(_MSC_VER)
 		unsigned long pos;
@@ -41,7 +41,7 @@ public:
 	 * Mix of https://www.strchr.com/sse2_optimised_strlen
 	 * and http://blog.maragnus.com/post/11447793404/faster-strlen
 	 */
-	std::size_t strlen(const char* str)
+	std::size_t static strlen(const char* str)
 	{
 		/* Speed up edge case. */
 		if (str == nullptr || *str == '\0')
