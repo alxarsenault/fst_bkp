@@ -39,7 +39,7 @@
 x64/
 x86/
 x86_64/
-build/
+build*/
 bld/
 [Bb]in/
 [Oo]bj/

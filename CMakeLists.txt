@@ -1,11 +1,15 @@
-cmake_minimum_required(VERSION 3.2.1)
+cmake_minimum_required(VERSION 3.5.0)
 
 # Check if we run cmake at root of workspace.
 if (CMAKE_BINARY_DIR STREQUAL CMAKE_SOURCE_DIR)
     message(FATAL_ERROR "Source and build directories cannot be the same.")
 endif ()
 
-project(fst)
+project(fstLib)
+set(FST_VERSION 0.0.1)
+
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
 
 # Use folder.
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -43,9 +47,49 @@ file(GLOB FOLDER_FILE_FST_HEADER_FILES ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRE
 
 source_group("include" FILES ${FOLDER_FILE_FST_HEADER_FILES})
 
-add_custom_target(${PROJECT_NAME} SOURCES ${FST_HEADER_FILES})
+# Install Package Configuration
 
-install(FILES ${FST_HEADER_FILES} DESTINATION /usr/local/include/fst/)
+set(FST_INSTALL_CONFIGDIR "${CMAKE_INSTALL_LIBDIR}/cmake/fst")
+install(FILES ${FST_HEADER_FILES} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/fst")
+
+write_basic_package_version_file(
+	"${CMAKE_CURRENT_BINARY_DIR}/fstConfigVersion.cmake"
+	VERSION ${FST_VERSION}
+	COMPATIBILITY AnyNewerVersion
+)
+
+configure_package_config_file(
+	cmake/fstConfig.cmake.in
+	${FST_INSTALL_CONFIGDIR}/fstConfig.cmake
+	INSTALL_DESTINATION ${FST_INSTALL_CONFIGDIR}
+	PATH_VARS CMAKE_INSTALL_INCLUDEDIR
+	NO_CHECK_REQUIRED_COMPONENTS_MACRO
+)
+
+install(
+	FILES
+		"${CMAKE_CURRENT_BINARY_DIR}/${FST_INSTALL_CONFIGDIR}/fstConfig.cmake"
+		"${CMAKE_CURRENT_BINARY_DIR}/fstConfigVersion.cmake"
+	DESTINATION ${FST_INSTALL_CONFIGDIR}
+)
+
+add_library(fst INTERFACE)
+target_include_directories(fst INTERFACE
+	$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+)
+install(TARGETS fst EXPORT fstTargets)
+
+export(EXPORT fstTargets
+	FILE "${CMAKE_CURRENT_BINARY_DIR}/fstTargets.cmake"
+)
+
+install(
+	EXPORT fstTargets FILE fstTargets.cmake
+	DESTINATION ${FST_INSTALL_CONFIGDIR}
+)
+
+export(PACKAGE fst)
 
 # Examples.
 add_subdirectory(example/print)
@@ -53,7 +97,7 @@ add_subdirectory(example/visitor)
 add_subdirectory(example/multi_vector)
 add_subdirectory(example/vector)
 add_subdirectory(example/array)
-add_subdirectory(example/one_file_engine)
+# BROKEN add_subdirectory(example/one_file_engine)
 add_subdirectory(example/engine)
 add_subdirectory(example/event)
 add_subdirectory(example/fstring)

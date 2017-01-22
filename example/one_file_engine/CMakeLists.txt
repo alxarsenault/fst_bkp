@@ -12,9 +12,9 @@ source_group("include" FILES ${INCLUDE_FILES})
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${INCLUDE_FILES})
 
-target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include) 
-target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/cocoa) 
-target_include_directories(${PROJECT_NAME} PUBLIC ${FST_INCLUDE_DIRECTORY}) 
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/cocoa)
+target_include_directories(${PROJECT_NAME} PUBLIC ${FST_INCLUDE_DIRECTORY})
 target_include_directories(${PROJECT_NAME} PUBLIC /usr/local/include)
 
 link_directories(/usr/local/lib/)
