@@ -67,6 +67,11 @@ namespace ascii {
 		return (c >= 0 && c <= 31) || c == 127;
 	}
 
+	inline bool is_end_of_line(char c)
+	{
+		return c == '\n' || c == '\r';
+	}
+
 	inline bool is_special(char c)
 	{
 		// ! " # $ % & ' ( ) * + - . / : ; < = > ? @ [ \ ] ^ _ ` { | } ~

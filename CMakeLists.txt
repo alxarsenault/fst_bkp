@@ -11,6 +11,8 @@ set(FST_VERSION 0.0.1)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
+option(BUILD_EXAMPLES "Build with examples" OFF)
+
 # Use folder.
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -92,12 +94,14 @@ install(
 export(PACKAGE fst)
 
 # Examples.
-add_subdirectory(example/print)
-add_subdirectory(example/visitor)
-add_subdirectory(example/multi_vector)
-add_subdirectory(example/vector)
-add_subdirectory(example/array)
-# BROKEN add_subdirectory(example/one_file_engine)
-add_subdirectory(example/engine)
-add_subdirectory(example/event)
-add_subdirectory(example/fstring)
+if(BUILD_EXAMPLES)
+	add_subdirectory(example/print)
+	add_subdirectory(example/visitor)
+	add_subdirectory(example/multi_vector)
+	add_subdirectory(example/vector)
+	add_subdirectory(example/array)
+	# BROKEN add_subdirectory(example/one_file_engine)
+	add_subdirectory(example/engine)
+	add_subdirectory(example/event)
+	add_subdirectory(example/fstring)
+endif(BUILD_EXAMPLES)

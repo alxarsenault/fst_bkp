@@ -55,15 +55,14 @@ public:
 
 	inline small_string(const char* str);
 
+	template <typename... P>
+	inline small_string(const char* format_str, P... p);
+
 	inline std::size_t size() const;
 
-	inline const char* data() const;
-
-	inline char* data();
+	inline const char* c_str() const;
 
 	inline operator const char*() const;
-
-	inline operator char*();
 
 	inline char& operator[](std::size_t index);
 
@@ -150,13 +149,13 @@ public:
 	small_string substr(std::size_t pos, std::size_t len) const;
 
 	template <class Predicate>
-	inline long index_of_first(Predicate predicate);
+	inline long index_of_first(Predicate predicate) const;
 
 	template <class Predicate>
-	inline long index_of_first(Predicate predicate, std::size_t start);
+	inline long index_of_first(Predicate predicate, std::size_t start) const;
 
 	template <class Predicate>
-	inline long r_index_of_first(Predicate predicate);
+	inline long r_index_of_first(Predicate predicate) const;
 
 	template <class Predicate>
 	inline void erase_if(Predicate predicate);
@@ -179,6 +178,12 @@ public:
 	inline const char* end() const;
 
 	inline std::size_t count(char c) const;
+
+	template <typename... P>
+	int format(const char* format, P... p);
+
+	template <typename... P>
+	int append_format(const char* format, P... p);
 
 	inline void replace(char c, char w);
 
@@ -257,31 +262,28 @@ inline small_string<N>::small_string(const char* str)
 }
 
 template <std::size_t N>
+template <typename... P>
+inline small_string<N>::small_string(const char* format_str, P... p)
+	: _size(0)
+{
+	_data[0] = 0;
+	format(format_str, p...);
+}
+
+template <std::size_t N>
 inline std::size_t small_string<N>::size() const
 {
 	return _size;
 }
 
 template <std::size_t N>
-inline const char* small_string<N>::data() const
-{
-	return _data;
-}
-
-template <std::size_t N>
-inline char* small_string<N>::data()
+inline const char* small_string<N>::c_str() const
 {
 	return _data;
 }
 
 template <std::size_t N>
 inline small_string<N>::operator const char*() const
-{
-	return _data;
-}
-
-template <std::size_t N>
-inline small_string<N>::operator char*()
 {
 	return _data;
 }
@@ -645,7 +647,7 @@ small_string<N> small_string<N>::substr(std::size_t pos, std::size_t len) const
 
 template <std::size_t N>
 template <class Predicate>
-inline long small_string<N>::index_of_first(Predicate predicate)
+inline long small_string<N>::index_of_first(Predicate predicate) const
 {
 	for (std::size_t i = 0; i < _size; i++) {
 		if (predicate(_data[i])) {
@@ -658,7 +660,7 @@ inline long small_string<N>::index_of_first(Predicate predicate)
 
 template <std::size_t N>
 template <class Predicate>
-inline long small_string<N>::index_of_first(Predicate predicate, std::size_t start)
+inline long small_string<N>::index_of_first(Predicate predicate, std::size_t start) const
 {
 	for (std::size_t i = start; i < _size; i++) {
 		if (predicate(_data[i])) {
@@ -671,7 +673,7 @@ inline long small_string<N>::index_of_first(Predicate predicate, std::size_t sta
 
 template <std::size_t N>
 template <class Predicate>
-inline long small_string<N>::r_index_of_first(Predicate predicate)
+inline long small_string<N>::r_index_of_first(Predicate predicate) const
 {
 	for (std::size_t i = _size; i > 0; i--) {
 		if (predicate(_data[i])) {
@@ -763,6 +765,45 @@ inline std::size_t small_string<N>::count(char c) const
 	}
 
 	return count;
+}
+
+template <std::size_t N>
+template <typename... P>
+int small_string<N>::format(const char* format, P... p)
+{
+	// int snprintf ( char * s, size_t n, const char * format, ... );
+	// Notice that only when this returned value is non-negative and less than n,
+	// the string has been completely written.
+	int s = snprintf(_data, BufferSize(), format, p...);
+
+	if (s < 0 || s >= (int)BufferSize()) {
+		_data[N] = 0;
+		_size = N;
+		return -1;
+	}
+
+	_size = s;
+	return s;
+}
+
+template <std::size_t N>
+template <typename... P>
+int small_string<N>::append_format(const char* format, P... p)
+{
+	// int snprintf ( char * s, size_t n, const char * format, ... );
+	// Notice that only when this returned value is non-negative and less than n,
+	// the string has been completely written.
+	const std::size_t max_buffer_size = BufferSize() - _size;
+	int s = snprintf(_data + _size, max_buffer_size, format, p...);
+
+	if (s < 0 || s >= (int)max_buffer_size) {
+		_data[N] = 0;
+		_size = N;
+		return -1;
+	}
+
+	_size += s;
+	return s;
 }
 
 template <std::size_t N>
