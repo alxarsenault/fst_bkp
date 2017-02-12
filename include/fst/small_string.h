@@ -3,14 +3,74 @@
 #include "assert.h"
 #include "ascii.h"
 
+/* SIMD */
+#include <emmintrin.h>
+#if defined(_MSC_VER)
+	#include <intrin.h> // Valid for >= 1300. Older VS not supported in fst.
+#endif
+
 /// @todo Add ifdef.
-#include <string.h>
 #include <math.h>
 
 namespace fst {
-inline std::size_t fast_strlen(const char* str)
+
+/**
+ * Find the first bit set (first non 0 bit). Also string.h ffs().
+ */
+inline std::size_t __cross_platform_bsf(unsigned int mask)
 {
-	return strlen(str);
+#if defined(_MSC_VER)
+	unsigned long pos;
+	_BitScanForward(&pos, mask);
+	return pos;
+#else
+	return __builtin_ctz(mask);
+#endif
+}
+
+/**
+ * SIMD strlen.
+ */
+std::size_t inline strlen(const char* str)
+{
+	/* Speed up edge case. */
+	if (str == nullptr || *str == '\0')
+		return 0;
+
+	std::size_t len = 0;
+	const char* ptr_bak = str;
+
+	__m128i xmm0 = _mm_setzero_si128(); // Testing against 0.
+	__m128i xmm1;
+	unsigned int mask = 0;
+
+	/* Prepass to align data on 16 bytes. Deal with beginning data. */
+	if (((intptr_t)str & 0xF) != 0) {
+		/* Use load unaligned to set everything up. */
+		xmm1 = _mm_loadu_si128((const __m128i*)str);
+		xmm1 = _mm_cmpeq_epi8(xmm1, xmm0);
+
+		if ((mask = _mm_movemask_epi8(xmm1)) != 0) {
+			/* Found the end in the first bits. */
+			return __cross_platform_bsf(mask);
+		}
+		str = (const char *)(0x10 + (intptr_t)str & ~0xF);
+	}
+
+	/* Search for 0. */
+	for (;;) {
+		xmm1 = _mm_load_si128((const __m128i*)str);
+		xmm1 = _mm_cmpeq_epi8(xmm1, xmm0);
+		if ((mask = _mm_movemask_epi8(xmm1)) != 0) {
+			/* Got 0 somewhere within 16 bytes in xmm1, or within 16 bits in
+			 * mask. Find index of first set bit. */
+			len = str - ptr_bak;
+			len += __cross_platform_bsf(mask);
+			break;
+		}
+		str += sizeof(__m128i);
+	}
+	return len;
 }
 
 template <std::size_t N>
@@ -251,7 +311,7 @@ inline small_string<N>::small_string(const small_string<S>& str)
 template <std::size_t N>
 inline small_string<N>::small_string(const char* str)
 {
-	const std::size_t length = fast_strlen(str);
+	const std::size_t length = strlen(str);
 	_size = length;
 
 	FST_ASSERT_MSG(!(length > N), "String is too long.");
@@ -358,7 +418,7 @@ int small_string<N>::compare(const small_string<S>& str) const
 template <std::size_t N>
 int small_string<N>::compare(const char* str) const
 {
-	const std::size_t str_length = fast_strlen(str);
+	const std::size_t str_length = strlen(str);
 	const std::size_t shortest_size = str_length < _size ? str_length : _size;
 
 	for (std::size_t i = 0; i < shortest_size; i++) {
@@ -470,7 +530,7 @@ inline void small_string<N>::append(char value)
 template <std::size_t N>
 inline void small_string<N>::append(const char* str)
 {
-	const std::size_t length = fast_strlen(str);
+	const std::size_t length = strlen(str);
 	FST_ASSERT_MSG(!(_size + length > N), "String is too long.");
 
 	for (std::size_t i = _size, n = 0; i < _size + length + 1; i++, n++) {
@@ -498,7 +558,7 @@ inline void small_string<N>::append(const small_string<S>& str)
 template <std::size_t N>
 inline bool small_string<N>::is_appendable(const char* str) const
 {
-	return _size + fast_strlen(str) <= N;
+	return _size + strlen(str) <= N;
 }
 
 template <std::size_t N>
