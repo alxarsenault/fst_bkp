@@ -84,6 +84,7 @@ auto make_adapter(N1* n1, N2* n2, N3* n3) {
 
 
 
+
 void lambda_storing_test() {
 	auto m_mul = [](const auto& lhs, const auto& rhs) {
 		return lhs * rhs;
@@ -117,7 +118,8 @@ int main(/*int argc, char* argv[]*/) {
 	int runtime_num;
 	fst::print("please enter a number...");
 	std::cin >> runtime_num;
-	fst::print("answer (num * num) :", n2(runtime_num, runtime_num));
+	fst::print("answer (", runtime_num, "*", runtime_num, ") =",
+			n2(runtime_num, runtime_num));
 
 	/* Build graph. */
 	auto node_mul = make_node2(mul);
@@ -129,6 +131,9 @@ int main(/*int argc, char* argv[]*/) {
 	/* Can mix and match outputs and inputs with tuples. */
 	auto node_two_v = make_node2(return_two_values);
 	fst::print(node_mul(node_two_v(10, 6)));
+
+	int result = node_mul(node_add(1, node_mul(2, 4)), node_mul(node_add(1, 1), node_add(2, 3)));
+	fst::print("chaining, (1 + 2 * 4) * ((1 + 1) * (2 + 3)) =", result);
 
 	/**
 	 * CONCLUSION : This is insane, but cool.
