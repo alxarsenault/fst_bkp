@@ -117,7 +117,7 @@ int main(/*int argc, char* argv[]*/) {
 	int runtime_num;
 	fst::print("please enter a number...");
 	std::cin >> runtime_num;
-	fst::print("answer :", std::get<0>(n2(runtime_num, runtime_num)));
+	fst::print("answer (num * num) :", n2(runtime_num, runtime_num));
 
 	/* Build graph. */
 	auto node_mul = make_node2(mul);
@@ -135,8 +135,9 @@ int main(/*int argc, char* argv[]*/) {
 	 *
 	 * I forsee issues in representing this model. How do you get the number
 	 * of arguments? And returns? You could use tuples for input and output,
-	 * use their size to draw the node inputs/outputs... But then perf might
-	 * die.
+	 * use their size to draw the node inputs/outputs... The problem is getting
+	 * the size for the lambda arguments. But there is a way to do that in
+	 * template declarations. But then again perf might die.
 	 *
 	 * Worth investigating a little more, probably unmanageable in the long run.
 	 */
