@@ -15,9 +15,22 @@
 namespace fst {
 
 /**
+ * Intel doesn't have multiply instructions for 8bit SIMD vector.
+ */
+static inline __m128i _mm_mullo_epi8(__m128i a, __m128i b)
+{
+    // unpack and multiply
+    __m128i dst_even = _mm_mullo_epi16(a, b);
+    __m128i dst_odd = _mm_mullo_epi16(_mm_srli_epi16(a, 8),_mm_srli_epi16(b, 8));
+    // repack
+    return _mm_or_si128(_mm_slli_epi16(dst_odd, 8),
+			_mm_srli_epi16(_mm_slli_epi16(dst_even,8), 8));
+}
+
+/**
  * Find the first bit set (first non 0 bit). Also string.h ffs().
  */
-inline std::size_t __cross_platform_bsf(unsigned int mask)
+static inline std::size_t __cross_platform_bsf(unsigned int mask)
 {
 #if defined(_MSC_VER)
 	unsigned long pos;
@@ -31,7 +44,7 @@ inline std::size_t __cross_platform_bsf(unsigned int mask)
 /**
  * SIMD strlen.
  */
-std::size_t inline strlen(const char* str)
+static inline std::size_t strlen(const char* str)
 {
 	/* Speed up edge case. */
 	if (str == nullptr || *str == '\0')
@@ -869,10 +882,45 @@ int small_string<N>::append_format(const char* format, P... p)
 template <std::size_t N>
 inline void small_string<N>::replace(char c, char w)
 {
-	for (unsigned int i = 0; i < _size; i++) {
-		if (_data[i] == c) {
-			_data[i] = w;
-		}
+	// Load the searched for character.
+	const __m128i xmm_search_char = _mm_set1_epi8(c);
+	// ASCII difference of characters.
+	const __m128i xmm_diff = _mm_set1_epi8(w - c);
+	// Mask upper 7bits.
+	const __m128i xmm_mask_7 = _mm_set1_epi8(0x01);
+
+	size_t i;
+	for (i = 0; i < _size / 16 * 16; i += 16) {
+		// Load unaligned.
+		const __m128i xmm_str = _mm_loadu_si128((const __m128i*)(_data + i));
+		// Find char.
+		__m128i xmm_result = _mm_cmpeq_epi8(xmm_str, xmm_search_char);
+		// Mask all upper 7bits to get 0x01.
+		xmm_result = _mm_and_si128(xmm_result, xmm_mask_7);
+		// Multiply 1 by character difference.
+		xmm_result = _mm_mullo_epi8(xmm_result, xmm_diff);
+		// Add the character difference.
+		xmm_result = _mm_add_epi8(xmm_result, xmm_str);
+		// Store the results in string.
+		_mm_storeu_si128((__m128i*)(_data + i), xmm_result);
+	}
+
+	/* Final pass with remainder data that doesn't fill 128bits. */
+	const __m128i xmm_str = _mm_loadu_si128((const __m128i*)(_data + i));
+	__m128i xmm_result = _mm_cmpeq_epi8(xmm_str, xmm_search_char);
+	xmm_result = _mm_and_si128(xmm_result, xmm_mask_7);
+	xmm_result = _mm_mullo_epi8(xmm_result, xmm_diff);
+	xmm_result = _mm_add_epi8(xmm_result, xmm_str);
+
+	/**
+	 * Don't store the full data as we will write in unrelated memory.
+	 * Store modified data in appropriately sized array, then only
+	 * extract the string elements.
+	 **/
+	char temp_storage[sizeof(__m128i)];
+	_mm_storeu_si128((__m128i*)(&temp_storage), xmm_result);
+	for (size_t j = 0; j < _size - i; ++j) {
+		*(_data + i + j) = temp_storage[j];
 	}
 }
 
