@@ -8,7 +8,7 @@ namespace internal {
 	template <std::size_t N, class... Ts>
 	class multi_vector {
 	public:
-		multi_vector()
+		inline multi_vector()
 		{
 		}
 
@@ -25,7 +25,7 @@ namespace internal {
 		std::vector<type> vec;
 
 	public:
-		multi_vector()
+		inline multi_vector()
 			: multi_vector<N + 1, Ts...>()
 		{
 		}
@@ -153,7 +153,7 @@ namespace internal {
 template <class T, class... Ts>
 class multi_vector : public internal::multi_vector<0, T, Ts...> {
 public:
-	multi_vector()
+	inline multi_vector()
 		: internal::multi_vector<0, T, Ts...>()
 	{
 	}

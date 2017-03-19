@@ -6,7 +6,7 @@
 /* SIMD */
 #include <emmintrin.h>
 #if defined(_MSC_VER)
-	#include <intrin.h> // Valid for >= 1300. Older VS not supported in fst.
+#include <intrin.h> // Valid for >= 1300. Older VS not supported in fst.
 #endif
 
 /// @todo Add ifdef.
@@ -54,7 +54,7 @@ std::size_t inline strlen(const char* str)
 			/* Found the end in the first bits. */
 			return __cross_platform_bsf(mask);
 		}
-		str = (const char *)(0x10 + (intptr_t)str & ~0xF);
+		str = (const char*)(0x10 + (intptr_t)str & ~0xF);
 	}
 
 	/* Search for 0. */
