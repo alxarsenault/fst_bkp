@@ -1,194 +1,117 @@
 #include <fst/multi_vector.h>
 #include <fst/print.h>
 
-//// See http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2015/n4502.pdf.
-// template <typename...>
-// using void_t = void;
-//
-//// Primary template handles all types not supporting the operation.
-// template <typename, template <typename> class, typename = void_t<>>
-// struct detect {
-////	using value = std::false_type;
-//	typedef std::false_type value;
-//};
-//
-//// Specialization recognizes/validates only types supporting the archetype.
-// template <typename T, template <typename> class Op>
-// struct detect<T, Op, void_t<Op<T>>> {
-//	typedef std::true_type value;
-//};
-//
-// template <typename T>
-// using toString_t = decltype(std::declval<T>().Shot());
-//
-// template <typename T>
-// using has_toString = detect<T, toString_t>;
-
-// SFINAE test
-template <typename T>
-class has_helloworld {
-	typedef char _true;
-	typedef long _false;
-
-	template <typename C>
-	static _true test(decltype(&C::Shot));
-
-	template <typename C>
-	static _false test(...);
-
+class Banana {
 public:
-	enum { value = sizeof(test<T>()) == sizeof(char) };
+	void eat()
+	{
+		fst::print("Eat banana.");
+	}
 };
 
-template <typename T>
-struct has_shot_method {
-	//	template <class, class>
-	//	class checker;
+class Apple {
+public:
+	void eat()
+	{
+		fst::print("Eat apple.");
+	}
+};
 
-	template <typename C>
-	static std::true_type test(decltype(&C::Shot))
+class Orange {
+public:
+	void eat()
+	{
+		fst::print("Eat orange.");
+	}
+};
+
+class RottenTomato {
+public:
+	void cook()
+	{
+		fst::print("Cook tomato.");
+	}
+};
+
+template <typename K>
+struct Functor {
+	template <typename T>
+	static const bool value = std::is_same<std::true_type, decltype(K::template exist<T>(nullptr))>::value;
+
+	template <bool M, typename T, FST_TRUE(M)>
+	inline void internal_call(T& t)
+	{
+		K::call(t);
+	}
+
+	template <bool M, typename T, FST_FALSE(M)>
+	inline void internal_call(T&)
 	{
 	}
 
-	template <typename C>
-	static std::false_type test(...)
+	template <typename T>
+	inline void operator()(T& t)
 	{
+		internal_call<value<T>>(t);
 	}
-
-	typedef decltype(test<T>(nullptr)) type;
-	static const bool value = std::is_same<std::true_type, decltype(test<T>(nullptr))>::value;
 };
 
-// template <typename K, typename T>
-// struct has_method {
-//	template <class, class>
-//	class checker;
-//
-//	template <typename C>
-//	static std::true_type test(checker<C, K>*);
-//
-//	template <typename C>
-//	static std::false_type test(...);
-//
-//	typedef decltype(test<T>(nullptr)) type;
-//	static const bool value = std::is_same<std::true_type, decltype(test<T>(nullptr))>::value;
+#define FST_FUNCTION_NAME(fct_name)                                                                          \
+	template <typename C>                                                                                    \
+	static std::true_type exist(decltype(&C::fct_name))                                                      \
+	{                                                                                                        \
+	}                                                                                                        \
+	template <typename C>                                                                                    \
+	static std::false_type exist(...)                                                                        \
+	{                                                                                                        \
+	}
+
+// struct EatFunctor : public Functor<EatFunctor>{
+//    FUNCTION_NAME(eat);
+//    template<typename T> inline static void call(T& t){ t.eat(); };
 //};
 
-// Visit.
-template <bool M, typename T, typename std::enable_if<M>::type* = nullptr>
-inline void internal_Shot(const T& t)
-{
-	t.Shot();
-}
-
-template <bool M, typename T, typename std::enable_if<!M>::type* = nullptr>
-inline void internal_Shot(const T& t _FST_UNUSED)
-{
-	fst::print("Empty shot");
-	return;
-}
-
-// template<class Type> struct S;
-
-// int main() {
-//	auto x = ...;
-//	S<decltype(x)>();
-//}
-
-class Pistol {
-public:
-	Pistol()
-	{
-	}
-
-	void Shot() const
-	{
-		fst::print("Pistol::Shot");
-	}
-
-	void Reload() const
-	{
-		fst::print("Pistol::Reload");
-	}
-
-	void AddAmmo(int ammo)
-	{
-		fst::print("Pistol::AddAmmo", ammo);
-	}
-};
-
-class Rifle {
-public:
-	Rifle()
-	{
-	}
-
-	//	void Shot() const {
-	//		fst::print("Rifle::Shot");
-	//	}
-
-	void Reload() const
-	{
-		fst::print("Rifle::Reload");
-	}
-
-	void AddAmmo(int ammo)
-	{
-		fst::print("Rifle::AddAmmo", ammo);
-	}
-};
-
-class GunInterface {
-public:
-	GunInterface()
-	{
-	}
-
-	struct Data {
-		int ammo_left;
+#define FST_DECLARE_FUNCTOR(name, fct_name)                                                                  \
+	struct name : public Functor<name> {                                                                     \
+		FST_FUNCTION_NAME(fct_name);                                                                         \
+		template <typename T>                                                                                \
+		inline static void call(T& t)                                                                        \
+		{                                                                                                    \
+			t.fct_name();                                                                                    \
+		};                                                                                                   \
 	};
 
-	struct ShotFunctor {
-		template <typename T>
-		void operator()(const T& t)
-		{
-			internal_Shot<has_shot_method<T>::value>(t);
-		}
-	};
-
-	auto Shot() const
-	{
-		return ShotFunctor();
-	}
-
-	auto Reload() const
-	{
-		return [](const auto& gun) { return gun.Reload(); };
-	}
-
-	auto AddAmmo(int ammo)
-	{
-		return [ammo](auto& gun) { return gun.AddAmmo(ammo); };
-	}
-};
+FST_DECLARE_FUNCTOR(EatFunctor, eat);
+FST_DECLARE_FUNCTOR(CookFunctor, cook);
 
 int main()
 {
-	//	fst::print(typeid(Pistol).name());
-	fst::multi_vector<Pistol, Rifle> guns;
-	guns.push_back(Pistol());
-	guns.push_back(Rifle());
-	guns.push_back(Pistol());
-	guns.push_back(Pistol());
+	fst::multi_vector<RottenTomato, Banana, Apple, Orange> fruits;
+	fruits.reserve_all(3);
+	fruits.reserve<Banana>(90);
 
-	//	fst::print("Add ammo in rifles.");
-	GunInterface gun_interface;
-	guns.visit(gun_interface.Shot());
-	//	guns.visit(gun_interface.Reload());
-	//	guns.visit(gun_interface.AddAmmo(10));
+	fruits.push_back(RottenTomato());
+	fruits.push_back(Apple());
+	fruits.push_back(Banana());
+	fruits.push_back(Orange());
 
-	fst::print("Add ammo in rifles.");
-	//	guns.visit<Rifle>([](auto& gun) { retu`rn gun.AddAmmo(20); });
-	fst::print("Add ammo in rifles.");
+	fst::print("Eat :");
+	fruits.visit_all(EatFunctor());
+	fst::print("Cook :");
+	fruits.visit_all(CookFunctor());
+
+	// Eat only bananas.
+	fst::print("Eat bananas :");
+	fruits.visit<Banana>(EatFunctor());
+
+	fst::print("Eat bananas :");
+	fruits.clear<Banana>();
+	fruits.visit<Banana>(EatFunctor());
+
+	fst::print("Eat all :");
+
+	fruits.clear_all();
+	fruits.visit_all(EatFunctor());
+
 	return 0;
 }
