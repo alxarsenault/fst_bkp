@@ -2,6 +2,7 @@
 
 #include "def.h"
 #include <vector>
+#include "print.h"
 
 namespace fst {
 
@@ -12,8 +13,40 @@ public:
 	{
 	}
 
+	/// @todo Is this worth it.
+	template <typename K>
+	multi_vector(std::initializer_list<K>)
+	{
+	}
+
+	/// @todo Is this worth it.
+	template <class K0, typename K1>
+	multi_vector(std::initializer_list<K0>, std::initializer_list<K1>)
+	{
+	}
+
 	template <typename Op>
 	inline void visit_all(Op)
+	{
+	}
+
+	template <typename Op>
+	inline void visit_all(Op) const
+	{
+	}
+
+	template <typename Op, typename... Ops>
+	inline void visit_all_types(Op, Ops... ops) const
+	{
+	}
+
+	template <typename Op>
+	inline void visit_all_backward(Op)
+	{
+	}
+
+	template <typename Op>
+	inline void visit_all_backward(Op) const
 	{
 	}
 
@@ -23,6 +56,16 @@ public:
 
 	inline void clear_all()
 	{
+	}
+
+	inline std::size_t size_all() const
+	{
+		return 0;
+	}
+
+	inline bool is_empty_all() const
+	{
+		return true;
 	}
 };
 
@@ -38,10 +81,34 @@ public:
 	{
 	}
 
+	/// @todo Is this worth it.
+	template <class K>
+	multi_vector(std::initializer_list<K> list)
+		: multi_vector<Ts...>(list)
+	{
+		internal_init_list<std::is_same<T, K>::value>(list);
+	}
+
+	/// @todo Is this worth it.
+	/// If yes, keep going with n types  [10].
+	template <class K0, typename K1>
+	multi_vector(std::initializer_list<K0> list_0, std::initializer_list<K1> list_1)
+		: multi_vector<Ts...>(list_0, list_1)
+	{
+		internal_init_list<std::is_same<T, K0>::value>(list_0);
+		internal_init_list<std::is_same<T, K1>::value>(list_1);
+	}
+
 	template <typename K>
 	inline void push_back(const K& v)
 	{
 		internal_push_back<std::is_same<T, K>::value>(v);
+	}
+
+	template <typename K>
+	inline void emplace_back(K&& v)
+	{
+		internal_emplace_back<std::is_same<T, K>::value>(std::move(v));
 	}
 
 	template <typename K>
@@ -56,14 +123,68 @@ public:
 		return internal_get<std::is_same<T, K>::value, K>();
 	}
 
-	template <typename Op>
-	inline void visit_all(Op op)
+	template <typename Op, typename... Ops>
+	inline void visit_all(Op op, Ops... ops)
 	{
 		for (auto& n : vec) {
 			op(n);
 		}
 
-		multi_vector<Ts...>::template visit_all<Op>(op);
+		multi_vector<Ts...>::template visit_all(op);
+
+		visit_all(ops...);
+	}
+
+	inline void visit_all()
+	{
+	}
+
+	template <typename Op, typename... Ops>
+	inline void visit_all(Op op, Ops... ops) const
+	{
+		for (auto& n : vec) {
+			op(n);
+		}
+
+		multi_vector<Ts...>::template visit_all(op);
+
+		visit_all(ops...);
+	}
+
+	inline void visit_all() const
+	{
+	}
+
+	template <typename Op, typename... Ops>
+	inline void visit_all_types(Op op, Ops... ops)
+	{
+		internal_visit_all_types(op, ops...);
+
+		multi_vector<Ts...>::template visit_all_types(op, ops...);
+	}
+
+	inline void visit_all_types()
+	{
+	}
+
+	template <typename Op>
+	inline void visit_all_backward(Op op)
+	{
+		multi_vector<Ts...>::template visit_all_backward<Op>(op);
+
+		for (auto& n : vec) {
+			op(n);
+		}
+	}
+
+	template <typename Op>
+	inline void visit_all_backward(Op op) const
+	{
+		multi_vector<Ts...>::template visit_all_backward<Op>(op);
+
+		for (const auto& n : vec) {
+			op(n);
+		}
 	}
 
 	template <typename K, typename Op>
@@ -76,6 +197,30 @@ public:
 	inline void visit(Op op) const
 	{
 		internal_visit<std::is_same<T, K>::value, K>(op);
+	}
+
+	template <typename K, class... Ks, typename Op>
+	inline void visit_some(Op op)
+	{
+		visit<K>(op);
+		visit_some<Ks...>(op);
+	}
+
+	template <typename Op>
+	inline void visit_some(Op)
+	{
+	}
+
+	template <typename K, class... Ks, typename Op>
+	inline void visit_some(Op op) const
+	{
+		visit<K>(op);
+		visit_some<Ks...>(op);
+	}
+
+	template <typename Op>
+	inline void visit_some(Op) const
+	{
 	}
 
 	template <typename K>
@@ -102,7 +247,51 @@ public:
 		multi_vector<Ts...>::template clear_all();
 	}
 
+	template <typename K>
+	inline std::size_t size() const
+	{
+		return internal_size<std::is_same<T, K>::value, K>();
+	}
+
+	inline std::size_t size_all() const
+	{
+		return vec.size() + multi_vector<Ts...>::template size_all();
+	}
+
+	template <typename K>
+	inline bool is_empty() const
+	{
+		return internal_is_empty<std::is_same<T, K>::value, K>();
+	}
+
+	inline bool is_empty_all() const
+	{
+		return vec.empty() && multi_vector<Ts...>::template is_empty_all();
+	}
+
+	template <typename K>
+	inline void pop_back()
+	{
+		internal_pop_back<std::is_same<T, K>::value, K>();
+	}
+
 private:
+	// Init list..
+	template <bool M, typename K, FST_TRUE(M)>
+	inline void internal_init_list(std::initializer_list<K> list)
+	{
+		vec.reserve(list.size());
+		for (auto&& n : list) {
+			vec.emplace_back(n);
+		}
+	}
+
+	template <bool M, typename K, FST_FALSE(M)>
+	inline void internal_init_list(std::initializer_list<K>)
+	{
+	}
+
+	// Push back.
 	template <bool M, typename K, FST_TRUE(M)>
 	inline void internal_push_back(const K& v)
 	{
@@ -113,6 +302,19 @@ private:
 	inline void internal_push_back(const K& v)
 	{
 		multi_vector<Ts...>::push_back(v);
+	}
+
+	// Emplace back.
+	template <bool M, typename K, FST_TRUE(M)>
+	inline void internal_emplace_back(K&& v)
+	{
+		vec.emplace_back(std::move(v));
+	}
+
+	template <bool M, typename K, FST_FALSE(M)>
+	inline void internal_emplace_back(K&& v)
+	{
+		multi_vector<Ts...>::emplace_back(std::move(v));
 	}
 
 	template <bool M, typename K, FST_TRUE(M)>
@@ -171,6 +373,21 @@ private:
 		multi_vector<Ts...>::template visit<K>(op);
 	}
 
+	// Visit all types.
+	template <typename Op, typename... Ops>
+	inline void internal_visit_all_types(Op op, Ops... ops)
+	{
+		for (auto& n : vec) {
+			op(n);
+		}
+
+		internal_visit_all_types(ops...);
+	}
+
+	inline void internal_visit_all_types()
+	{
+	}
+
 	// Reserve this.
 	template <bool M, typename K, FST_TRUE(M)>
 	inline void internal_reserve(std::size_t new_size)
@@ -197,196 +414,44 @@ private:
 	{
 		multi_vector<Ts...>::template clear<K>();
 	}
-};
 
-// namespace internal {
-//	template <std::size_t N, class... Ts>
-//	class multi_vector {
-//	public:
-//		inline multi_vector()
-//		{
-//		}
-//
-//		template <typename Op>
-//		inline void visit_all(Op op _FST_UNUSED)
-//		{
-//		}
-//	};
-//
-//	template <std::size_t N, class T, class... Ts>
-//	class multi_vector<N, T, Ts...> : public multi_vector<N + 1, Ts...> {
-//	private:
-//		using type = T;
-//		std::vector<type> vec;
-//
-//	public:
-//		inline multi_vector()
-//			: multi_vector<N + 1, Ts...>()
-//		{
-//		}
-//
-//		// add.
-//		template <typename K>
-//		inline void add(const K& v)
-//		{
-//			internal_add<std::is_same<T, K>::value>(v);
-//		}
-//
-//		// get.
-//		template <typename K>
-//		inline std::vector<K>& get()
-//		{
-//			return internal_get<std::is_same<T, K>::value, K>();
-//		}
-//
-//		template <typename K>
-//		inline const std::vector<K>& get() const
-//		{
-//			return internal_get<std::is_same<T, K>::value, K>();
-//		}
-//
-//		// visit.
-//		template <typename K, typename Op>
-//		inline void Visit(Op op)
-//		{
-//			return internal_visit<std::is_same<T, K>::value, K, Op>(op);
-//		}
-//
-//		template <typename K, typename Op>
-//		inline void Visit(Op op) const
-//		{
-//			return internal_visit<std::is_same<T, K>::value, K, Op>(op);
-//		}
-//
-//		template <typename Op>
-//		inline void visit_all(Op op)
-//		{
-//			for (auto& n : vec) {
-//				op(n);
-//			}
-//
-//			multi_vector<N + 1, Ts...>::template visit_all<Op>(op);
-//		}
-//
-//	private:
-//		// Add.
-//		template <bool M, typename K, typename std::enable_if<M>::type* = nullptr>
-//		inline void internal_add(const K& v)
-//		{
-//			vec.push_back(v);
-//		}
-//
-//		template <bool M, typename K, typename std::enable_if<!M>::type* = nullptr>
-//		inline void internal_add(const K& v)
-//		{
-//			this->multi_vector<N + 1, Ts...>::add(v);
-//		}
-//
-//		//
-//		// Get.
-//		//
-//
-//		// Return vec.
-//		template <bool M, typename K, typename std::enable_if<M>::type* = nullptr>
-//		inline std::vector<K>& internal_get()
-//		{
-//			return vec;
-//		}
-//
-//		// Keep looping.
-//		template <bool M, typename K, typename std::enable_if<!M>::type* = nullptr>
-//		inline std::vector<K>& internal_get()
-//		{
-//			return this->multi_vector<N + 1, Ts...>::template get<K>();
-//		}
-//
-//		// Return vector.
-//		template <bool M, typename K, typename std::enable_if<M>::type* = nullptr>
-//		inline const std::vector<K>& internal_get() const
-//		{
-//			return vec;
-//		}
-//
-//		// Keep looping.
-//		template <bool M, typename K, typename std::enable_if<!M>::type* = nullptr>
-//		inline const std::vector<K>& internal_get() const
-//		{
-//			return this->multi_vector<N + 1, Ts...>::template get<K>();
-//		}
-//
-//		// Visit.
-//		template <bool M, typename K, typename Op, typename std::enable_if<M>::type* = nullptr>
-//		inline void internal_visit(Op op)
-//		{
-//			for (auto& n : vec) {
-//				op(n);
-//			}
-//		}
-//
-//		template <bool M, typename K, typename Op, typename std::enable_if<!M>::type* = nullptr>
-//		inline void internal_visit(Op op)
-//		{
-//			return this->multi_vector<N + 1, Ts...>::template Visit<K, Op>(op);
-//		}
-//
-//		template <bool M, typename K, typename Op, typename std::enable_if<M>::type* = nullptr>
-//		inline void internal_visit(Op op) const
-//		{
-//			for (const auto& n : vec) {
-//				op(n);
-//			}
-//		}
-//
-//		template <bool M, typename K, typename Op, typename std::enable_if<!M>::type* = nullptr>
-//		inline void internal_visit(Op op) const
-//		{
-//			return this->multi_vector<N + 1, Ts...>::template visit<K, Op>(op);
-//		}
-//	};
-//} // internal.
-//
-// template <class T, class... Ts>
-// class multi_vector : public internal::multi_vector<0, T, Ts...> {
-// public:
-//	inline multi_vector()
-//		: internal::multi_vector<0, T, Ts...>()
-//	{
-//	}
-//
-//	template <typename K>
-//	inline void push_back(const K& k)
-//	{
-//		this->add(k);
-//	}
-//
-//	template <typename K>
-//	inline std::vector<K>& Get()
-//	{
-//		return this->template get<K>();
-//	}
-//
-//	template <typename K>
-//	inline const std::vector<K>& Get() const
-//	{
-//		return this->template get<K>();
-//	}
-//
-//	template <typename K, typename Op>
-//	inline void visit(Op op)
-//	{
-//		this->template Visit<K, Op>(op);
-//	}
-//
-//	template <typename K, typename Op>
-//	inline void visit(Op op) const
-//	{
-//		this->template Visit<K, Op>(op);
-//	}
-//
-//	template <typename Op>
-//	inline void visit(Op op)
-//	{
-//		this->template visit_all<Op>(op);
-//	}
-//};
+	// Size
+	template <bool M, typename K, FST_TRUE(M)>
+	inline std::size_t internal_size() const
+	{
+		return vec.size();
+	}
+
+	template <bool M, typename K, FST_FALSE(M)>
+	inline std::size_t internal_size() const
+	{
+		return multi_vector<Ts...>::template size<K>();
+	}
+
+	// Is empty.
+	template <bool M, typename K, FST_TRUE(M)>
+	inline bool internal_is_empty() const
+	{
+		return vec.empty();
+	}
+
+	template <bool M, typename K, FST_FALSE(M)>
+	inline bool internal_is_empty() const
+	{
+		return multi_vector<Ts...>::template is_empty<K>();
+	}
+
+	// Pop back
+	template <bool M, typename K, FST_TRUE(M)>
+	inline void internal_pop_back()
+	{
+		vec.pop_back();
+	}
+
+	template <bool M, typename K, FST_FALSE(M)>
+	inline void internal_pop_back()
+	{
+		multi_vector<Ts...>::template pop_back<K>();
+	}
+};
 } // fst.
