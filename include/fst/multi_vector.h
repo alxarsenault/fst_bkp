@@ -25,8 +25,8 @@ public:
 	{
 	}
 
-	template <typename Op>
-	inline void visit_all(Op)
+	template <typename Op, typename... Args>
+	inline void visit_all(Op, Args...)
 	{
 	}
 
@@ -123,16 +123,26 @@ public:
 		return internal_get<std::is_same<T, K>::value, K>();
 	}
 
-	template <typename Op, typename... Ops>
-	inline void visit_all(Op op, Ops... ops)
+	//	template <typename Op, typename... Ops>
+	//	inline void visit_all(Op op, Ops... ops)
+	//	{
+	//		for (auto& n : vec) {
+	//			op(n);
+	//		}
+	//
+	//		multi_vector<Ts...>::template visit_all(op);
+	//
+	//		visit_all(ops...);
+	//	}
+
+	template <typename Op, typename... Args>
+	inline void visit_all(Op op, Args... args)
 	{
 		for (auto& n : vec) {
-			op(n);
+			op(n, args...);
 		}
 
-		multi_vector<Ts...>::template visit_all(op);
-
-		visit_all(ops...);
+		multi_vector<Ts...>::template visit_all(op, args...);
 	}
 
 	inline void visit_all()

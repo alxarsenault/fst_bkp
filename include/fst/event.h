@@ -197,7 +197,6 @@ namespace evt {
 			}
 		}
 
-		// template<typename ...Args, typename T>
 		template <typename... MsgArgs, typename T>
 		void connect(Key obj_id, evt::Id evt_id, T func)
 		{
@@ -218,7 +217,6 @@ namespace evt {
 			}
 		}
 
-		// template<typename ...Args, typename T>
 		template <typename... MsgArgs, typename T>
 		void connect(evt::Id evt_id, T func)
 		{

@@ -663,7 +663,6 @@ inline void warnprint(T t, P... p)
 }
 
 // stream<...>
-
 template <typename T, typename... P>
 inline const char* stream(T t, P... p)
 {
