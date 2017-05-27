@@ -36,7 +36,7 @@ public:
 	}
 
 	template <typename Op, typename... Ops>
-	inline void visit_all_types(Op, Ops... ops) const
+	inline void visit_all_types(Op, Ops...) const
 	{
 	}
 

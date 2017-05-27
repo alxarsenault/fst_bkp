@@ -66,7 +66,7 @@ public:
 };
 
 template <typename... Ts, typename... Ks>
-type_container<Ts..., Ks...> concat_type_container(type_container<Ts...> t0, type_container<Ks...> t1)
+type_container<Ts..., Ks...> concat_type_container(type_container<Ts...>, type_container<Ks...>)
 {
 	return type_container<Ts..., Ks...>();
 }

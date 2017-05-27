@@ -50,8 +50,8 @@ file(GLOB FOLDER_FILE_FST_HEADER_FILES ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRE
 source_group("include" FILES ${FOLDER_FILE_FST_HEADER_FILES})
 
 # Dummy project.
-add_library(fst_header STATIC ${FST_HEADER_FILES})
-set_target_properties(fst_header PROPERTIES LINKER_LANGUAGE CXX)
+# add_library(fst_header STATIC ${FST_HEADER_FILES})
+# set_target_properties(fst_header PROPERTIES LINKER_LANGUAGE CXX)
 
 # Install Package Configuration
 
