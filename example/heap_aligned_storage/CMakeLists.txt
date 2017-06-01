@@ -1,11 +1,10 @@
 cmake_minimum_required(VERSION 3.2.1)
-project(nodemodel)
+project(heap_aligned_storage)
 
 # Use folder.
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-file(GLOB_RECURSE SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
-source_group("source" FILES ${SOURCE_FILES})
+file(GLOB_RECURSE SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
