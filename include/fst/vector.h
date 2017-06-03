@@ -1,6 +1,9 @@
 #pragma once
 
 #include "def.h"
+#include <cstddef>
+#include <memory>
+#include <utility>
 
 namespace fst {
 
