@@ -13,35 +13,37 @@ constexpr bool is_power_of_two(T x) noexcept
 template <class T, size_t Align>
 struct heap_aligned_storage {
 	inline heap_aligned_storage(size_t count, bool zero = true) noexcept
-		: _raw_data(malloc(count * sizeof(T) + Align - 1))
+		: _raw_data(new char[count * sizeof(T) + Align - 1])
+		, data(align_ptr(count, zero, _raw_data.get()))
+	{}
+
+private:
+	std::unique_ptr<char> _raw_data;
+
+	static inline T*const align_ptr(size_t count, bool zero
+			, char* raw_data) noexcept
 	{
 		static_assert(is_power_of_two(Align)
 				, "Alignement needs to be power of two.");
 
-		void* temp_p = _raw_data;
+		void* temp_p = raw_data;
 		size_t raw_size = count * sizeof(T) + Align - 1;
 		if (zero) {
-			memset(_raw_data, 0, raw_size);
+			memset(raw_data, 0, raw_size);
 		}
 
-		void* ret = std::align(Align, count * sizeof(T), temp_p, raw_size);
-		assert(ret != nullptr && "Could not align memory.");
+		void* err = std::align(Align, count * sizeof(T), temp_p, raw_size);
+		assert(err != nullptr && "Could not align memory.");
 
-		data = static_cast<T*>(temp_p);
-		assert(data != nullptr && "Couldn't allocate or align memory.");
+		T*const ret = static_cast<T*>(temp_p);
+		assert(ret != nullptr && "Couldn't allocate or align memory.");
 
-		assert((reinterpret_cast<uintptr_t>(data) & (Align - 1)) == 0
+		assert((reinterpret_cast<uintptr_t>(ret) & (Align - 1)) == 0
 				&& "Pointer not aligned.");
+		return ret;
 	}
-
-	inline ~heap_aligned_storage() noexcept {
-		free(_raw_data);
-	}
-
-private:
-	void* _raw_data;
 
 public:
-	T* data;
+	T*const data;
 };
 
