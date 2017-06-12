@@ -25,6 +25,11 @@ public:
 		}
 	}
 
+	inline T& back()
+	{
+		return _data[_size - 1];
+	}
+
 	inline void reserve(std::size_t size)
 	{
 		/// @todo Finish this.
