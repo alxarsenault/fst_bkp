@@ -27,7 +27,7 @@ public:
 
 	inline T& back()
 	{
-		return _data[_size - 1];
+		return _size <= N ? _stack[_size - 1] : _data[_size - 1];
 	}
 
 	inline void reserve(std::size_t size)
@@ -488,6 +488,11 @@ public:
 		}
 	}
 
+	inline T& back()
+	{
+		return _data[_size - 1];
+	}
+
 	inline void reserve(std::size_t size)
 	{
 		/// @todo Finish this.
@@ -782,6 +787,11 @@ public:
 		if (_data) {
 			delete[] _data;
 		}
+	}
+
+	inline T& back()
+	{
+		return _size <= N ? _stack[_size - 1] : _data[_size - 1];
 	}
 
 	inline void reserve(std::size_t size)
@@ -1208,6 +1218,11 @@ public:
 		if (_data) {
 			delete[] _data;
 		}
+	}
+
+	inline T& back()
+	{
+		return _data[_size - 1];
 	}
 
 	inline void reserve(std::size_t size)
