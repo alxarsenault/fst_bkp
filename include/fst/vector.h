@@ -30,6 +30,16 @@ public:
 		return _size <= N ? _stack[_size - 1] : _data[_size - 1];
 	}
 
+	inline const T& back() const
+	{
+		return _size <= N ? _stack[_size - 1] : _data[_size - 1];
+	}
+
+	inline std::size_t empty() const
+	{
+		return _size == 0;
+	}
+
 	inline void reserve(std::size_t size)
 	{
 		/// @todo Finish this.
@@ -488,7 +498,17 @@ public:
 		}
 	}
 
+	inline std::size_t empty() const
+	{
+		return _size == 0;
+	}
+
 	inline T& back()
+	{
+		return _data[_size - 1];
+	}
+
+	inline const T& back() const
 	{
 		return _data[_size - 1];
 	}
@@ -789,7 +809,17 @@ public:
 		}
 	}
 
+	inline std::size_t empty() const
+	{
+		return _size == 0;
+	}
+
 	inline T& back()
+	{
+		return _size <= N ? _stack[_size - 1] : _data[_size - 1];
+	}
+
+	inline const T& back() const
 	{
 		return _size <= N ? _stack[_size - 1] : _data[_size - 1];
 	}
@@ -1220,7 +1250,17 @@ public:
 		}
 	}
 
+	inline std::size_t empty() const
+	{
+		return _size == 0;
+	}
+
 	inline T& back()
+	{
+		return _data[_size - 1];
+	}
+
+	inline const T& back() const
 	{
 		return _data[_size - 1];
 	}
