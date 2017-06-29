@@ -3,6 +3,8 @@
 #include <memory>
 #include <type_traits>
 
+template <typename... Args> inline void unused(Args&&...) {}
+
 template <class T>
 constexpr bool is_power_of_two(T x) noexcept
 {
@@ -17,9 +19,14 @@ struct heap_aligned_storage {
 		, data(align_ptr(count, zero, _raw_data.get()))
 	{}
 
-private:
-	std::unique_ptr<char[]> _raw_data;
+	inline T& operator[](size_t pos) noexcept {
+		return data[pos];
+	}
+	inline const T& operator[](size_t pos) const noexcept {
+		return data[pos];
+	}
 
+private:
 	static inline T*const align_ptr(size_t count, bool zero
 			, char* raw_data) noexcept
 	{
@@ -34,6 +41,7 @@ private:
 
 		void* err = std::align(Align, count * sizeof(T), temp_p, raw_size);
 		assert(err != nullptr && "Could not align memory.");
+		unused(err);
 
 		T*const ret = static_cast<T*>(temp_p);
 		assert(ret != nullptr && "Couldn't allocate or align memory.");
@@ -42,6 +50,8 @@ private:
 				&& "Pointer not aligned.");
 		return ret;
 	}
+
+	std::unique_ptr<char[]> _raw_data;
 
 public:
 	T*const data;
