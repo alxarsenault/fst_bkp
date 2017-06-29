@@ -18,7 +18,7 @@ struct heap_aligned_storage {
 	{}
 
 private:
-	std::unique_ptr<char> _raw_data;
+	std::unique_ptr<char[]> _raw_data;
 
 	static inline T*const align_ptr(size_t count, bool zero
 			, char* raw_data) noexcept
