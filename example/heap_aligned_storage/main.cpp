@@ -29,6 +29,10 @@ int main(int, char**) {
 	print_ptr(a_mem6);
 	print_ptr(a_mem7);
 
+	for (size_t i = 0; i < bench_num; ++i) {
+		printf("%d ", a_mem1.data[i]);
+	}
+
 	int t_int = 42;
 	for (size_t i = 0; i < bench_num; ++i) {
 		a_mem1.data[i] = t_int;
@@ -37,5 +41,7 @@ int main(int, char**) {
 	for (size_t i = 0; i < bench_num; ++i) {
 		printf("%d ", a_mem1.data[i]);
 	}
+
+	printf("\nsize : %zu\n", a_mem1.size());
 	return 0;
 }

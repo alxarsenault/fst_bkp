@@ -16,18 +16,23 @@ template <class T, size_t Align>
 struct heap_aligned_storage {
 	inline heap_aligned_storage(size_t count, bool zero = true) noexcept
 		: _raw_data(new char[count * sizeof(T) + Align - 1])
+		, _size(count)
 		, data(align_ptr(count, zero, _raw_data.get()))
 	{}
 
-	inline T& operator[](size_t pos) noexcept {
+	inline T& operator[](const size_t pos) noexcept {
 		return data[pos];
 	}
-	inline const T& operator[](size_t pos) const noexcept {
+	inline const T& operator[](const size_t pos) const noexcept {
 		return data[pos];
 	}
 
+	inline size_t size() const noexcept {
+		return _size;
+	}
+
 private:
-	static inline T*const align_ptr(size_t count, bool zero
+	static inline T*const align_ptr(const size_t count, const bool zero
 			, char* raw_data) noexcept
 	{
 		static_assert(is_power_of_two(Align)
@@ -51,7 +56,8 @@ private:
 		return ret;
 	}
 
-	std::unique_ptr<char[]> _raw_data;
+	const std::unique_ptr<char[]> _raw_data;
+	const size_t _size;
 
 public:
 	T*const data;
