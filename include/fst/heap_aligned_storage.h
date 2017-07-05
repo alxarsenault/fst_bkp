@@ -20,10 +20,10 @@ struct heap_aligned_storage {
 		, data(align_ptr(count, zero, _raw_data.get()))
 	{}
 
-	inline T& operator[](const size_t pos) noexcept {
+	inline T& operator[](size_t pos) noexcept {
 		return data[pos];
 	}
-	inline const T& operator[](const size_t pos) const noexcept {
+	inline const T& operator[](size_t pos) const noexcept {
 		return data[pos];
 	}
 
@@ -32,7 +32,7 @@ struct heap_aligned_storage {
 	}
 
 private:
-	static inline T*const align_ptr(const size_t count, const bool zero
+	static inline T*const align_ptr(size_t count, bool zero
 			, char* raw_data) noexcept
 	{
 		static_assert(is_power_of_two(Align)
