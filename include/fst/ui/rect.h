@@ -1,7 +1,7 @@
 #pragma once
 
-#include "fst/point.h"
-#include "fst/size.h"
+#include "fst/ui/point.h"
+#include "fst/ui/size.h"
 
 namespace fst::ui {
 namespace detail {
