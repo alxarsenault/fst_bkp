@@ -1,7 +1,7 @@
 ---
 Language:        Cpp
 # BasedOnStyle:  WebKit
-AccessModifierOffset: -4
+AccessModifierOffset: -2
 AlignAfterOpenBracket: false
 AlignEscapedNewlinesLeft: false
 AlignOperands:   false
@@ -9,7 +9,7 @@ AlignTrailingComments: false
 AllowAllParametersOfDeclarationOnNextLine: true
 AllowShortBlocksOnASingleLine: false
 AllowShortCaseLabelsOnASingleLine: false
-AllowShortFunctionsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: true
 AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
 AlwaysBreakBeforeMultilineStrings: false
@@ -17,10 +17,20 @@ AlwaysBreakTemplateDeclarations: true
 BinPackArguments: true
 BinPackParameters: true
 BreakBeforeBinaryOperators: All
-BreakBeforeBraces: WebKit
+# BreakBeforeBraces: WebKit
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterClass: false
+  AfterEnum: false
+  AfterStruct: false
+  AfterFunction: false
+  AfterNamespace: false
+  AfterUnion : false
+  BeforeElse : true
+  AfterControlStatement: false
 BreakBeforeTernaryOperators: true
 BreakConstructorInitializersBeforeComma: true
-ColumnLimit:     110
+ColumnLimit:     120
 CommentPragmas:  '^ IWYU pragma:'
 ConstructorInitializerAllOnOneLineOrOnePerLine: false
 ConstructorInitializerIndentWidth: 4
@@ -31,7 +41,7 @@ DisableFormat:   false
 ExperimentalAutoDetectBinPacking: false
 ForEachMacros:   [ foreach, Q_FOREACH, BOOST_FOREACH ]
 IndentCaseLabels: false
-IndentWidth:     4
+IndentWidth:     2
 IndentWrappedFunctionNames: false
 KeepEmptyLinesAtTheStartOfBlocks: true
 MaxEmptyLinesToKeep: 1
@@ -57,7 +67,6 @@ SpacesInCStyleCastParentheses: false
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
 Standard:        Cpp11
-TabWidth:        4
-UseTab:          Always
+TabWidth:        2
+UseTab:          Never
 SortIncludes:	 false
-...
