@@ -11,7 +11,16 @@
 #define fst_assert(Expr, Msg) fst::assert_detail::custom_assert(#Expr, Expr, __FILE__, __LINE__, Msg)
 #endif
 
-namespace fst::assert_detail {
+namespace fst {
+namespace config {
+#ifdef NDEBUG
+  inline constexpr bool has_asser = false;
+#else
+  inline constexpr bool has_assert = true;
+#endif
+} // namespace config.
+
+namespace assert_detail {
 #ifndef NDEBUG
   inline void custom_assert(const char* expr_str, bool expr, const char* file, int line, const std::string& msg) {
     if (expr) {
@@ -24,4 +33,5 @@ namespace fst::assert_detail {
     std::abort();
   }
 #endif // NDEBUG
-} // namespace fst::assert_detail.
+} // namespace assert_detail.
+} // namespace fst.
