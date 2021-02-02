@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-namespace alx::math {
+namespace fst::math {
 template <typename T>
 constexpr T pi = T(3.141592653589793);
 
@@ -49,4 +49,4 @@ template <typename T>
 inline constexpr T cube(T x) {
   return x * x * x;
 }
-} // namespace alx::math.
+} // namespace fst::math.
