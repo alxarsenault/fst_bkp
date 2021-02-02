@@ -1,0 +1,19 @@
+cmake_minimum_required(VERSION 3.8.0)
+
+set(CMAKE_XCODE_GENERATE_SCHEME ON)
+
+project(fst)
+
+# Use folder.
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
+set(FST_INCLUDE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+# All sources.
+file(GLOB_RECURSE FST_SOURCE_FILES "${FST_INCLUDE_DIRECTORY}/*.h")
+
+add_library(${PROJECT_NAME} INTERFACE ${FST_SOURCE_FILES})
+
+target_include_directories(${PROJECT_NAME} INTERFACE
+    ${FST_INCLUDE_DIRECTORY}
+)
