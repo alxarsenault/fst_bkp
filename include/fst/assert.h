@@ -11,6 +11,8 @@
 #define fst_assert(Expr, Msg) fst::assert_detail::custom_assert(#Expr, Expr, __FILE__, __LINE__, Msg)
 #endif
 
+#define fst_error(Msg) fst_assert(false, Msg)
+
 namespace fst {
 namespace config {
 #ifdef NDEBUG
