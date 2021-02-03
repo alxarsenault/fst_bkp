@@ -5,6 +5,10 @@
 namespace {
 class MySingleton {
 public:
+  MySingleton() = default;
+  MySingleton(const std::string& str)
+      : string_value(str) {}
+
   std::string string_value;
 };
 
@@ -19,12 +23,22 @@ struct MySingletonInitializer {
 using MySingletonRetainer = fst::scoped_singleton_retainer<MySingleton, MySingletonInitializer>;
 
 TEST(scoped_singleton, simple_retain) {
+  EXPECT_EQ(MyScopedSingleton::is_retained(), false);
+  EXPECT_EQ(MyScopedSingleton::get_count(), 0);
+
+  // Create an instance of the singleton.
   {
     MySingletonInstance instance = MyScopedSingleton::retain();
     instance->string_value = "Banana";
-
     EXPECT_EQ(MyScopedSingleton::get()->string_value, "Banana");
+    EXPECT_EQ(MyScopedSingleton::is_retained(), true);
+    EXPECT_EQ(MyScopedSingleton::get_count(), 1);
   }
+
+  // The only instance got destroyed.
+
+  EXPECT_EQ(MyScopedSingleton::is_retained(), false);
+  EXPECT_EQ(MyScopedSingleton::get_count(), 0);
 
   if constexpr (fst::config::has_assert) {
     EXPECT_DEATH({ MyScopedSingleton::get(); }, "");
@@ -32,6 +46,41 @@ TEST(scoped_singleton, simple_retain) {
   else {
     EXPECT_EQ(MyScopedSingleton::get(), nullptr);
   }
+
+  // Recreate an instance of the singleton, make sure it gets constructed properly.
+  MySingletonInstance instance = MyScopedSingleton::retain("Potato");
+  EXPECT_EQ(MyScopedSingleton::get()->string_value, "Potato");
+  EXPECT_EQ(MyScopedSingleton::is_retained(), true);
+  EXPECT_EQ(MyScopedSingleton::get_count(), 1);
+}
+
+TEST(scoped_singleton, simple_retain_with_args) {
+  MySingletonInstance instance = MyScopedSingleton::retain("Banana");
+  EXPECT_EQ(MyScopedSingleton::get()->string_value, "Banana");
+}
+
+TEST(scoped_singleton, simple_retain_func) {
+  MySingletonInstance instance
+      = MyScopedSingleton::retain_with_initializer([]() { MyScopedSingleton::get()->string_value = "Banana"; });
+  EXPECT_EQ(MyScopedSingleton::get()->string_value, "Banana");
+}
+
+TEST(scoped_singleton, simple_retain_func_with_pointer) {
+  // "Peter" is passed as parameter to MySingleton constructor, then the init function is called.
+  MySingletonInstance instance = MyScopedSingleton::retain_with_initializer(
+      [](MySingleton* my_singleton) {
+        EXPECT_EQ(my_singleton->string_value, "Peter");
+        my_singleton->string_value = "Banana";
+      },
+      "Peter");
+  EXPECT_EQ(MyScopedSingleton::get()->string_value, "Banana");
+
+  // This initializer won't be called since the singleton was already retained and init.
+  // "Apple" would be passed as parameter to MySingleton constructor if it wasn't already retained.
+  MyScopedSingleton::retain_with_initializer(
+      [](MySingleton* my_singleton) { my_singleton->string_value = "Jason"; }, "Apple");
+
+  EXPECT_EQ(MyScopedSingleton::get()->string_value, "Banana");
 }
 
 TEST(scoped_singleton, double_retain) {
@@ -42,11 +91,21 @@ TEST(scoped_singleton, double_retain) {
     instance->string_value = "Banana";
 
     EXPECT_EQ(MyScopedSingleton::get()->string_value, "Banana");
+    EXPECT_EQ(MyScopedSingleton::is_retained(), true);
+    EXPECT_EQ(MyScopedSingleton::get_count(), 1);
 
     // Retain singleton in instance2.
-    instance2 = MyScopedSingleton::retain();
+    // "Peach" would be passed as parameter to MySingleton constructor if it wasn't already retained.
+    // "Banana" should remain as string_value.
+    instance2 = MyScopedSingleton::retain("Peach");
+
+    EXPECT_EQ(MyScopedSingleton::is_retained(), true);
+    EXPECT_EQ(MyScopedSingleton::get_count(), 2);
+    EXPECT_EQ(MyScopedSingleton::get()->string_value, "Banana");
   }
 
+  EXPECT_EQ(MyScopedSingleton::is_retained(), true);
+  EXPECT_EQ(MyScopedSingleton::get_count(), 1);
   EXPECT_NE(MyScopedSingleton::get(), nullptr);
   EXPECT_EQ(MyScopedSingleton::get()->string_value, "Banana");
 }

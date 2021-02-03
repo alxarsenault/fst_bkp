@@ -1,6 +1,8 @@
 #pragma once
 
 #include <memory>
+#include <type_traits>
+
 #include "fst/assert.h"
 
 namespace fst {
@@ -17,12 +19,33 @@ public:
 
   inline static pointer get() {
     fst_assert(is_retained(), "Can't access scoped_singleton if it is not retained somewhere.");
-    return get_weak_instance().lock().get();
+    return get_weak().lock().get();
   }
 
-  inline static shared_ptr_type retain() { return internal_get_instance(); }
+  template <typename... Args>
+  inline static shared_ptr_type retain(Args&&... args) {
+    return get_instance(std::forward<Args>(args)...);
+  }
 
-  inline static bool is_retained() { return get_weak_instance().use_count(); }
+  template <typename _Fct, typename... Args>
+  inline static shared_ptr_type retain_with_initializer(_Fct fct, Args&&... args) {
+    bool needs_init = !is_retained();
+    shared_ptr_type instance = get_instance(std::forward<Args>(args)...);
+
+    if (needs_init) {
+      if constexpr (std::is_invocable<_Fct, pointer>::value) {
+        fct(instance.get());
+      }
+      else if constexpr (std::is_invocable<_Fct>::value) {
+        fct();
+      }
+    }
+
+    return instance;
+  }
+
+  inline static bool is_retained() { return !get_weak().expired(); }
+  inline static std::size_t get_count() { return get_weak().use_count(); }
 
 private:
   scoped_singleton() = default;
@@ -31,15 +54,16 @@ private:
   scoped_singleton& operator=(const scoped_singleton&) = delete;
   scoped_singleton& operator=(scoped_singleton&&) = delete;
 
-  inline static weak_ptr_type& get_weak_instance() {
+  inline static weak_ptr_type& get_weak() {
     static weak_ptr_type __instance_ref;
     return __instance_ref;
   }
 
-  inline static shared_ptr_type internal_get_instance() {
-    weak_ptr_type& __instance_ref = get_weak_instance();
+  template <typename... Args>
+  inline static shared_ptr_type get_instance(Args&&... args) {
+    weak_ptr_type& __instance_ref = get_weak();
     if (!__instance_ref.use_count()) {
-      shared_ptr_type instance(new value_type);
+      shared_ptr_type instance = std::make_shared<value_type>(std::forward<Args>(args)...);
       __instance_ref = instance;
       return instance;
     }
@@ -80,12 +104,12 @@ public:
   scoped_singleton_retainer& operator=(const scoped_singleton_retainer&) = default;
   scoped_singleton_retainer& operator=(scoped_singleton_retainer&&) = default;
 
-  pointer operator->() {
+  inline pointer operator->() {
     fst_assert((bool)_instance_ptr, "Can't access scoped_singleton_retainer if it is not retained somewhere.");
     return _instance_ptr.get();
   }
 
-  const_pointer operator->() const {
+  inline const_pointer operator->() const {
     fst_assert((bool)_instance_ptr, "Can't access scoped_singleton_retainer if it is not retained somewhere.");
     return _instance_ptr.get();
   }
