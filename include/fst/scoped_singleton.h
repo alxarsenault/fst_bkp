@@ -2,7 +2,6 @@
 
 #include <memory>
 #include <type_traits>
-
 #include "fst/assert.h"
 
 namespace fst {
@@ -12,8 +11,8 @@ public:
   using value_type = _Tp;
   using pointer = value_type*;
   using const_pointer = const value_type*;
-  using weak_ptr_type = std::weak_ptr<value_type>;
-  using shared_ptr_type = std::shared_ptr<value_type>;
+  using weak = std::weak_ptr<value_type>;
+  using shared = std::shared_ptr<value_type>;
 
   ~scoped_singleton() = default;
 
@@ -23,14 +22,14 @@ public:
   }
 
   template <typename... Args>
-  inline static shared_ptr_type retain(Args&&... args) {
+  inline static shared retain(Args&&... args) {
     return get_instance(std::forward<Args>(args)...);
   }
 
   template <typename _Fct, typename... Args>
-  inline static shared_ptr_type retain_with_initializer(_Fct fct, Args&&... args) {
+  inline static shared retain_with_initializer(_Fct fct, Args&&... args) {
     bool needs_init = !is_retained();
-    shared_ptr_type instance = get_instance(std::forward<Args>(args)...);
+    shared instance = get_instance(std::forward<Args>(args)...);
 
     if (needs_init) {
       if constexpr (std::is_invocable<_Fct, pointer>::value) {
@@ -54,16 +53,16 @@ private:
   scoped_singleton& operator=(const scoped_singleton&) = delete;
   scoped_singleton& operator=(scoped_singleton&&) = delete;
 
-  inline static weak_ptr_type& get_weak() {
-    static weak_ptr_type __instance_ref;
+  inline static weak& get_weak() {
+    static weak __instance_ref;
     return __instance_ref;
   }
 
   template <typename... Args>
-  inline static shared_ptr_type get_instance(Args&&... args) {
-    weak_ptr_type& __instance_ref = get_weak();
+  inline static shared get_instance(Args&&... args) {
+    weak& __instance_ref = get_weak();
     if (!__instance_ref.use_count()) {
-      shared_ptr_type instance = std::make_shared<value_type>(std::forward<Args>(args)...);
+      shared instance = std::make_shared<value_type>(std::forward<Args>(args)...);
       __instance_ref = instance;
       return instance;
     }
@@ -81,7 +80,7 @@ public:
   using singleton_type = scoped_singleton<value_type>;
   using pointer = value_type*;
   using const_pointer = const value_type*;
-  using shared_ptr_type = typename singleton_type::shared_ptr_type;
+  using shared = typename singleton_type::shared;
 
   template <typename... Args>
   inline scoped_singleton_retainer(Args&&... args) {
@@ -117,6 +116,6 @@ public:
   inline void release() { _instance_ptr.reset(); }
 
 private:
-  shared_ptr_type _instance_ptr;
+  shared _instance_ptr;
 };
 } // namespace fst.
