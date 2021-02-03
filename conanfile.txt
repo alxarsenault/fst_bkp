@@ -1,13 +1,10 @@
-[requires]
-gtest/1.10.0
+[requires] gtest / 1.10.0 benchmark
+    / 1.5.2
 
-[generators]
-cmake_find_package_multi
+        [generators] cmake_find_package_multi
 
-[options]
-gtest:build_gmock=False
+            [options] gtest : build_gmock
+    = False
 
-[imports]
-bin, *.pdb -> ./bin
-bin, *.pdb -> ./lib
-bin, *.dll -> ./bin
+        [imports] bin,
+    *.pdb->./ bin bin, *.pdb->./ lib bin, *.dll->./ bin

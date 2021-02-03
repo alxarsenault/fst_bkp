@@ -31,6 +31,12 @@ template <typename T>
 constexpr T pi_over_four = pi<T> * 0.25;
 
 template <typename T>
+inline constexpr T is_power_of_two(T v) {
+  static_assert(std::is_integral<T>::value, "Integral required.");
+  return v && !(v & (v - 1));
+}
+
+template <typename T>
 inline constexpr int floor(T x) {
   return x >= (T)0.0 ? (int)x : x - (int)x < 0 ? (int)x - 1 : (int)x;
 }
