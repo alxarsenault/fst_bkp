@@ -62,6 +62,7 @@ private:
   inline static shared get_instance(Args&&... args) {
     weak& __instance_ref = get_weak();
     if (!__instance_ref.use_count()) {
+      static_assert(std::is_constructible<value_type, Args...>::value, "Can't construct object in scoped_singleton.");
       shared instance = std::make_shared<value_type>(std::forward<Args>(args)...);
       __instance_ref = instance;
       return instance;

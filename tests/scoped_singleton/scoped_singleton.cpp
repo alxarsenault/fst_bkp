@@ -3,6 +3,27 @@
 #include "fst/scoped_singleton.h"
 
 namespace {
+
+class MySingletonNoDefault {
+public:
+  MySingletonNoDefault(const std::string& str)
+      : string_value(str) {}
+
+  std::string string_value;
+};
+
+TEST(scoped_singleton, simple_retain_no_default) {
+  {
+    auto instance = fst::scoped_singleton<MySingletonNoDefault>::retain("Salad");
+    EXPECT_EQ(fst::scoped_singleton<MySingletonNoDefault>::get()->string_value, "Salad");
+    EXPECT_EQ(fst::scoped_singleton<MySingletonNoDefault>::is_retained(), true);
+    EXPECT_EQ(fst::scoped_singleton<MySingletonNoDefault>::get_count(), 1);
+  }
+
+  EXPECT_EQ(fst::scoped_singleton<MySingletonNoDefault>::is_retained(), false);
+  EXPECT_EQ(fst::scoped_singleton<MySingletonNoDefault>::get_count(), 0);
+}
+
 class MySingleton {
 public:
   MySingleton() = default;
@@ -12,7 +33,7 @@ public:
   std::string string_value;
 };
 
-TEST(scoped_singleton, simple_retain_no_typedef) {
+TEST(scoped_singleton, simple_retain) {
   {
     auto instance = fst::scoped_singleton<MySingleton>::retain("Pear");
     EXPECT_EQ(fst::scoped_singleton<MySingleton>::get()->string_value, "Pear");
@@ -52,7 +73,7 @@ struct MySingletonInitializer {
 
 using MySingletonRetainer = fst::scoped_singleton_retainer<MySingleton, MySingletonInitializer>;
 
-TEST(scoped_singleton, simple_retain) {
+TEST(scoped_singleton, simple_retain_with_typedef) {
   EXPECT_EQ(MyScopedSingleton::is_retained(), false);
   EXPECT_EQ(MyScopedSingleton::get_count(), 0);
 
