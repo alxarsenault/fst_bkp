@@ -126,18 +126,19 @@ namespace byte_vector_detail {
     //
     // MARK: Add elements.
     //
-    template <class _InputIt>
+    template <class _InputIt, bool _IsLittleEndian = true>
     inline void insert(iterator pos, _InputIt first, _InputIt last) {
+      static_assert(_IsLittleEndian, "byte_vector::insert is not supported for big endian.");
       _buffer.insert(pos, first, last);
     }
 
     inline void push_back(value_type value) { _buffer.push_back(value); }
-
     inline void push_back(std::string_view str) { _buffer.insert(_buffer.end(), str.begin(), str.end()); }
 
-    template <template <typename> typename _InputBufferType>
+    template <template <typename> typename _InputBufferType, bool _IsLittleEndian = true>
     inline void push_back(const byte_vector<_InputBufferType>& bvec) {
-      insert(end(), bvec.begin(), bvec.end());
+      static_assert(_IsLittleEndian, "byte_vector::push_back is not supported for big endian.");
+      insert<_IsLittleEndian>(end(), bvec.begin(), bvec.end());
     }
 
     template <typename T, bool _IsLittleEndian = true>
