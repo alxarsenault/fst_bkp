@@ -19,7 +19,7 @@ std::string demangle(const char* mangled_name) {
   char* result = abi::__cxa_demangle(mangled_name, nullptr, &size, &status);
 
   if (status == 0) {
-    std::string name(res, size);
+    std::string name(result, size);
     std::free(result);
     return name;
   }
