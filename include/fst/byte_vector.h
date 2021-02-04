@@ -180,16 +180,38 @@ namespace byte_vector_detail {
     // MARK: Convertions.
     //
     template <typename T, bool _IsLittleEndian = true>
-    inline T as(size_type __index) const {
+    inline T& as_ref(size_type __index) noexcept {
+      static_assert(_IsLittleEndian, "byte_vector::as_ref is not supported for big endian.");
+      static_assert(std::is_trivially_copyable<T>::value, "Type cannot be serialized.");
+      return *data<T>(__index);
+    }
+
+    template <typename T, bool _IsLittleEndian = true>
+    inline const T& as_ref(size_type __index) const noexcept {
+      static_assert(_IsLittleEndian, "byte_vector::as_ref is not supported for big endian.");
+      static_assert(std::is_trivially_copyable<T>::value, "Type cannot be serialized.");
+      return *data<T>(__index);
+    }
+
+    template <typename T, bool _IsLittleEndian = true>
+    inline T as(size_type __index) const noexcept {
       static_assert(std::is_trivially_copyable<T>::value, "Type cannot be serialized.");
 
       if constexpr (_IsLittleEndian) {
-        T value;
-        pointer data = reinterpret_cast<pointer>(&value);
-        for (size_type i = __index, j = 0; i < __index + sizeof(T); i++, j++) {
-          data[j] = _buffer[i];
+        if constexpr (sizeof(T) <= 8) {
+          T value;
+          pointer data = reinterpret_cast<pointer>(&value);
+          for (size_type i = __index, j = 0; i < __index + sizeof(T); i++, j++) {
+            data[j] = _buffer[i];
+          }
+          return value;
         }
-        return value;
+        else {
+          T value;
+          pointer value_data = reinterpret_cast<pointer>(&value);
+          std::memmove(value_data, data<T>(__index), sizeof(T));
+          return value;
+        }
       }
       else {
         T value;
@@ -202,36 +224,17 @@ namespace byte_vector_detail {
     }
 
     template <typename T, bool _IsLittleEndian = true>
-    inline T as(iterator pos) const {
+    inline T as(iterator pos) const noexcept {
       static_assert(std::is_trivially_copyable<T>::value, "Type cannot be serialized.");
       difference_type index = std::distance(pos, _buffer.begin());
       fst_assert(index >= 0, "Wrong iterator position.");
       return as<T, _IsLittleEndian>((size_type)index);
     }
 
-    struct type_index_tag {};
-
     template <typename T, bool _IsLittleEndian = true>
-    inline T as(size_type index, size_type array_index) const {
+    inline T as(size_type index, size_type array_index) const noexcept {
       static_assert(std::is_trivially_copyable<T>::value, "Type cannot be serialized.");
-      index += array_index * sizeof(T);
-
-      if constexpr (_IsLittleEndian) {
-        T value;
-        pointer data = reinterpret_cast<pointer>(&value);
-        for (size_type i = index, j = 0; i < index + sizeof(T); i++, j++) {
-          data[j] = _buffer[i];
-        }
-        return value;
-      }
-      else {
-        T value;
-        pointer data = reinterpret_cast<pointer>(&value);
-        for (size_type i = index, j = sizeof(T) - 1; i < index + sizeof(T); i++, j--) {
-          data[j] = _buffer[i];
-        }
-        return value;
-      }
+      return as<T, _IsLittleEndian>(index + array_index * sizeof(T));
     }
 
     template <typename T, bool _IsLittleEndian = true>
@@ -246,8 +249,13 @@ namespace byte_vector_detail {
     inline void copy_as(T* buffer, size_type index, size_type array_size) const {
       static_assert(std::is_trivially_copyable<T>::value, "Type cannot be serialized.");
 
-      for (size_type i = 0; i < array_size; i++) {
-        buffer[i] = as<T, _IsLittleEndian>(index, i);
+      if constexpr (_IsLittleEndian) {
+        std::memmove(buffer, data<T>(index), array_size * sizeof(T));
+      }
+      else {
+        for (size_type i = 0; i < array_size; i++) {
+          buffer[i] = as<T, _IsLittleEndian>(index, i);
+        }
       }
     }
 

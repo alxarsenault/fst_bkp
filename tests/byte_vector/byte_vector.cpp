@@ -15,6 +15,42 @@ TEST(byte_vector, simple_push) {
   EXPECT_EQ(bv.as<int>(sizeof(a)), b);
 }
 
+struct abc {
+  float a = 32;
+  float b = 22;
+  float c = 12;
+
+  inline bool operator==(const abc& rhs) const { return a == rhs.a && b == rhs.b && c == rhs.c; }
+};
+
+TEST(byte_vector, simple_push_struct) {
+  fst::byte_vector bv;
+  abc a0;
+  abc a1 = { 1, 2, 3 };
+  bv.push_back(a0);
+  bv.push_back(a1);
+
+  EXPECT_EQ(bv.size(), sizeof(a0) + sizeof(a1));
+  EXPECT_EQ(bv.as<float>(0), a0.a);
+  EXPECT_EQ(bv.as<float>(0, 1), a0.b);
+  EXPECT_EQ(bv.as<float>(0, 2), a0.c);
+
+  EXPECT_EQ(bv.as<float>(0, 3), a1.a);
+  EXPECT_EQ(bv.as<float>(0, 4), a1.b);
+  EXPECT_EQ(bv.as<float>(0, 5), a1.c);
+
+  EXPECT_EQ(bv.as<abc>(0), a0);
+  EXPECT_EQ(bv.as<abc>(sizeof(abc)), a1);
+
+  abc& a00 = bv.as_ref<abc>(0);
+  a00.a = 100;
+  a00.b = 101;
+  a00.c = 102;
+  EXPECT_EQ(bv.as<float>(0), 100);
+  EXPECT_EQ(bv.as<float>(0, 1), 101);
+  EXPECT_EQ(bv.as<float>(0, 2), 102);
+}
+
 TEST(byte_vector, vector_push) {
   fst::byte_vector bv;
   std::vector<int> v(10);
