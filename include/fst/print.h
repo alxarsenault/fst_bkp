@@ -3,6 +3,8 @@
 #include "fst/traits.h"
 #include <iostream>
 #include <iomanip>
+#include <ctime>
+#include <string_view>
 
 namespace fst {
 template <typename T>
@@ -132,6 +134,65 @@ inline void warnprint(const T& t, const Ts&... ts) {
     std::cerr << std::endl;
   }
 }
+
+namespace trace_detail {
+#if FST_TRACE_TO_STREAM
+  class trace_stream : public std::ostream {
+  public:
+    trace_stream() { set_stream(std::clog); }
+
+    template <typename _Stream>
+    void set_stream(_Stream& s) {
+      init(s.rdbuf());
+    }
+  };
+
+  inline trace_stream& get_trace_stream() {
+    static trace_stream stream;
+    return stream;
+  }
+#endif // FST_TRACE_TO_STREAM.
+} // namespace trace_detail.
+
+#if FST_TRACE_TO_STREAM
+template <typename D = comma_string, typename T, typename... Ts>
+inline void trace(const T& t, const Ts&... ts) {
+  auto& stream = trace_detail::get_trace_stream();
+
+  char str_buffer[1024];
+  std::time_t tt = std::time(nullptr);
+  int str_len = (int)strftime(str_buffer, 24, "[TRACE - %T]: ", std::localtime(&tt));
+
+  stream << std::string_view(str_buffer, str_len);
+  if constexpr (sizeof...(ts) > 0) {
+    print_element(stream, t);
+    stream << D::value;
+    print_detail::print<D>(stream, ts...);
+  }
+  else {
+    print_element(stream, t);
+    stream << std::endl;
+  }
+}
+#else
+template <typename D = comma_string, typename T, typename... Ts>
+inline void trace(const T& t, const Ts&... ts) {
+  char str_buffer[1024];
+  std::time_t tt = std::time(nullptr);
+  int str_len = (int)strftime(str_buffer, 24, "[TRACE - %T]: ", std::localtime(&tt));
+
+  std::cout << std::string_view(str_buffer, str_len);
+  if constexpr (sizeof...(ts) > 0) {
+    print_element(std::cout, t);
+    std::cout << D::value;
+    print_detail::print<D>(std::cout, ts...);
+  }
+  else {
+    print_element(std::cout, t);
+    std::cout << std::endl;
+  }
+}
+#endif // FST_TRACE_TO_STREAM.
 
 class print_initializer {
 public:
