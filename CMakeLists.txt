@@ -69,7 +69,10 @@ if (${FST_BUILD_TESTS})
     target_link_libraries(${FST_TEST_NAME} PUBLIC
         GTest::GTest
         fst
-    ) 
+    )
+
+    set(FST_TEST_RESOURCES_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/tests/resources")
+    add_definitions(-DFST_TEST_RESOURCES_DIRECTORY="${FST_TEST_RESOURCES_DIRECTORY}")
 endif()
 
 #Benchmarks.
