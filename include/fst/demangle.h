@@ -5,6 +5,7 @@
 
 #if __has_include(<cxxabi.h>)
 #include <cxxabi.h>
+#include <cstdio>
 #define FST_HAS_DEMANGLE 1
 #else
 #define FST_HAS_DEMANGLE 0
@@ -12,39 +13,32 @@
 
 namespace fst {
 #if FST_HAS_DEMANGLE
-template <typename T>
-std::string demangle() {
-  const char* mangled_name = typeid(T).name();
-  char buffer[1024];
-  std::size_t size = 1024;
-  int status;
-  char* res = abi::__cxa_demangle(mangled_name, buffer, &size, &status);
-
-  if (status == 0) {
-    return std::string(res, size);
-  }
-
-  return mangled_name;
-}
-
 std::string demangle(const char* mangled_name) {
-  char buffer[1024];
-  std::size_t size = 1024;
+  std::size_t size;
   int status;
-  char* res = abi::__cxa_demangle(mangled_name, buffer, &size, &status);
+  char* result = abi::__cxa_demangle(mangled_name, nullptr, &size, &status);
 
   if (status == 0) {
-    return std::string(res, size);
+    std::string name(res, size);
+    std::free(result);
+    return name;
   }
 
   return mangled_name;
 }
-#else
+
 template <typename T>
 std::string demangle() {
-  return mangled_name;
+  return demangle(typeid(T).name());
 }
 
-std::string demangle(const char* mangled_name) { return typeid(T).name(); }
-#endif
+#else // No demangle.
+
+std::string demangle(const char* mangled_name) { return mangled_name; }
+
+template <typename T>
+std::string demangle() {
+  return demangle(typeid(T).name());
+}
+#endif // FST_HAS_DEMANGLE.
 } // namespace fst.
