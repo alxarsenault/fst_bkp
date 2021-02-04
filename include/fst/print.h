@@ -171,7 +171,7 @@ inline void trace(const T& t, const Ts&... ts) {
   //  stream << std::string_view(str_buffer, (std::size_t)str_len);
   if constexpr (sizeof...(ts) > 0) {
     print_element(stream, t);
-    stream << Descriptor::separator::value;
+    stream << _Descriptor::separator::value;
     print_detail::print<_Descriptor::separator>(stream, ts...);
   }
   else {
