@@ -1,6 +1,7 @@
 #pragma once
 
 #include <type_traits>
+#include <iterator>
 
 namespace fst::traits {
 template <bool _IsTrue>
@@ -8,6 +9,10 @@ using bool_constant = typename std::conditional<_IsTrue, std::true_type, std::fa
 
 template <typename _A, typename _B>
 using is_not_same = typename std::conditional<!std::is_same<_A, _B>::value, std::true_type, std::false_type>::type;
+
+template <typename _Iterator>
+using is_random_access_iterator
+    = std::is_same<typename std::iterator_traits<_Iterator>::iterator_category, std::random_access_iterator_tag>;
 
 template <class T>
 inline constexpr std::conditional_t<!std::is_move_constructible<T>::value && std::is_copy_constructible<T>::value,
