@@ -242,6 +242,15 @@ namespace byte_vector_detail {
       return as<T, _IsLittleEndian>((size_type)index, array_index);
     }
 
+    template <typename T, bool _IsLittleEndian = true>
+    inline void copy_as(T* buffer, size_type index, size_type array_size) const {
+      static_assert(std::is_trivially_copyable<T>::value, "Type cannot be serialized.");
+
+      for (size_type i = 0; i < array_size; i++) {
+        buffer[i] = as<T, _IsLittleEndian>(index, i);
+      }
+    }
+
     inline bool read_file(const std::filesystem::path& file_path) {
       // Open the file.
       std::ifstream file(file_path, std::ios::binary);
