@@ -155,6 +155,11 @@ namespace trace_detail {
 } // namespace trace_detail.
 
 #if FST_TRACE_TO_STREAM
+template <typename _Stream>
+inline void set_trace_stream(_Stream& s) {
+  trace_detail::get_trace_stream().set_stream(s);
+}
+
 template <typename D = comma_string, typename T, typename... Ts>
 inline void trace(const T& t, const Ts&... ts) {
   auto& stream = trace_detail::get_trace_stream();
