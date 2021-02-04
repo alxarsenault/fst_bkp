@@ -2,6 +2,8 @@
 
 #include "fst/assert.h"
 #include "fst/traits.h"
+#include "fst/buffer_view.h"
+#include "fst/file_buffer.h"
 
 #include <vector>
 #include <iterator>
@@ -173,6 +175,12 @@ namespace byte_vector_detail {
       push_back<T, _IsLittleEndian>(data.data(), data.size());
     }
 
+    template <typename T, bool _IsLittleEndian = true>
+    inline void push_back(const buffer_view<T>& data) {
+      static_assert(std::is_trivially_copyable<T>::value, "Type cannot be serialized.");
+      push_back<T, _IsLittleEndian>(data.data(), data.size());
+    }
+
     // Calling pop_back on an empty container is undefined.
     inline void pop_back() { _buffer.pop_back(); }
 
@@ -260,42 +268,66 @@ namespace byte_vector_detail {
     }
 
     inline bool read_file(const std::filesystem::path& file_path) {
-      // Open the file.
-      std::ifstream file(file_path, std::ios::binary);
-      if (!file.is_open()) {
-        return false;
+      if constexpr(has_memory_map) {
+        file_buffer fb;
+        if(!fb.open(file_path)) {
+          return false;
+        }
+
+        push_back(fb.content());
+        fb.close();
+        return true;
       }
+      else {
+        // Open the file.
+        std::ifstream file(file_path, std::ios::binary);
+        if (!file.is_open()) {
+          return false;
+        }
 
-      // Stop eating new lines in binary mode.
-      file.unsetf(std::ios::skipws);
-      file.seekg(0, std::ios::end);
-      std::streampos file_size = file.tellg();
-      file.seekg(0, std::ios::beg);
+        // Stop eating new lines in binary mode.
+        file.unsetf(std::ios::skipws);
+        file.seekg(0, std::ios::end);
+        std::streampos file_size = file.tellg();
+        file.seekg(0, std::ios::beg);
 
-      // Reserve capacity.
-      resize(file_size);
-      file.read(data<char>(), file_size);
-      file.close();
-      return true;
+        // Reserve capacity.
+        resize(file_size);
+        file.read(data<char>(), file_size);
+        file.close();
+        return true;
+      }
     }
 
     inline static byte_vector from_file(const std::filesystem::path& file_path) {
-      // Open the file.
-      std::ifstream file(file_path, std::ios::binary);
-      if (!file.is_open()) {
-        return byte_vector();
+      if constexpr(has_memory_map) {
+        file_buffer fb;
+        if(!fb.open(file_path)) {
+          return byte_vector();
+        }
+
+        byte_vector bv;
+        bv.push_back(fb.content());
+        fb.close();
       }
+      else {
+        // Open the file.
+        std::ifstream file(file_path, std::ios::binary);
+        if (!file.is_open()) {
+          return byte_vector();
+        }
 
-      // Stop eating new lines in binary mode.
-      file.unsetf(std::ios::skipws);
-      file.seekg(0, std::ios::end);
-      std::streampos file_size = file.tellg();
-      file.seekg(0, std::ios::beg);
+        // Stop eating new lines in binary mode.
+        file.unsetf(std::ios::skipws);
+        file.seekg(0, std::ios::end);
+        std::streampos file_size = file.tellg();
+        file.seekg(0, std::ios::beg);
 
-      byte_vector bv(file_size);
-      file.read(bv.data<char>(), file_size);
-      file.close();
-      return bv;
+        byte_vector bv(file_size);
+        file.read(bv.data<char>(), file_size);
+        file.close();
+        return bv;
+      }
     }
 
     inline bool write_to_file(const std::filesystem::path& file_path) const {
