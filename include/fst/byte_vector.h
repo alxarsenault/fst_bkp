@@ -297,8 +297,9 @@ namespace byte_vector_detail {
         file.seekg(0, std::ios::beg);
 
         // Reserve capacity.
-        resize(file_size);
-        file.read(data<char>(), file_size);
+        size_type write_offset = size();
+        resize(size() + file_size);
+        file.read(data<char>(write_offset), file_size);
         file.close();
         return true;
       }
