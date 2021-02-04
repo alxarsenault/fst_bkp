@@ -1,5 +1,37 @@
-#pragma once
+///
+/// BSD 3-Clause License
+///
+/// Copyright (c) 2020, Alexandre Arsenault
+/// All rights reserved.
+///
+/// Redistribution and use in source and binary forms, with or without
+/// modification, are permitted provided that the following conditions are met:
+///
+/// * Redistributions of source code must retain the above copyright notice, this
+///   list of conditions and the following disclaimer.
+///
+/// * Redistributions in binary form must reproduce the above copyright notice,
+///   this list of conditions and the following disclaimer in the documentation
+///   and/or other materials provided with the distribution.
+///
+/// * Neither the name of the copyright holder nor the names of its
+///   contributors may be used to endorse or promote products derived from
+///   this software without specific prior written permission.
+///
+/// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+/// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+/// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+/// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+/// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+/// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+/// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+/// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+/// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+/// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+/// POSSIBILITY OF SUCH DAMAGE.
+///
 
+#pragma once
 #include "fst/traits.h"
 #include <iostream>
 #include <iomanip>
@@ -89,6 +121,12 @@ namespace print_detail {
   }
 } // namespace print_detail
 
+template <typename _Descriptor, typename... Ts>
+inline void basic_print(std::ostream& stream, const Ts&... ts) {
+  _Descriptor::message(stream);
+  print_detail::print<typename _Descriptor::separator>(stream, ts...);
+}
+
 template <typename D = comma_string, typename T, typename... Ts>
 inline void print(const T& t, const Ts&... ts) {
   if constexpr (sizeof...(ts) > 0) {
@@ -163,16 +201,11 @@ inline void set_trace_stream(_Stream& s) {
 template <typename _Descriptor, typename T, typename... Ts>
 inline void trace(const T& t, const Ts&... ts) {
   auto& stream = trace_detail::get_trace_stream();
-
-  //  char str_buffer[1024];
-  //  std::time_t tt = std::time(nullptr);
-  //  int str_len = (int)strftime(str_buffer, 24, "[TRACE - %T]: ", std::localtime(&tt));
   _Descriptor::message(stream);
-  //  stream << std::string_view(str_buffer, (std::size_t)str_len);
   if constexpr (sizeof...(ts) > 0) {
     print_element(stream, t);
     stream << _Descriptor::separator::value;
-    print_detail::print<_Descriptor::separator>(stream, ts...);
+    print_detail::print<typename _Descriptor::separator>(stream, ts...);
   }
   else {
     print_element(stream, t);
@@ -182,15 +215,11 @@ inline void trace(const T& t, const Ts&... ts) {
 #else
 template <typename _Descriptor, typename T, typename... Ts>
 inline void trace(const T& t, const Ts&... ts) {
-  //  char str_buffer[1024];
-  //  std::time_t tt = std::time(nullptr);
-  //  int str_len = (int)strftime(str_buffer, 24, "[TRACE - %T]: ", std::localtime(&tt));
   _Descriptor::message(std::cout);
-  //  std::cout << std::string_view(str_buffer, (std::size_t)str_len);
   if constexpr (sizeof...(ts) > 0) {
     print_element(std::cout, t);
     std::cout << _Descriptor::separator::value;
-    print_detail::print<_Descriptor::separator>(std::cout, ts...);
+    print_detail::print<typename _Descriptor::separator>(std::cout, ts...);
   }
   else {
     print_element(std::cout, t);
