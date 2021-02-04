@@ -36,22 +36,6 @@
 #else
   namespace fst { inline constexpr bool has_memory_map = false; }
 #endif
-
-//#ifdef _WIN32
-//  #define WIN32_LEAN_AND_MEAN
-//  #include <windows.h>
-//  #define __FST_FILE_BUFFER_USE_WINDOWS_MEMORY_MAP 1
-//
-//#elif __FST_FILE_BUFFER_USE_POSIX_MEMORY_MAP
-//  #include <fcntl.h>
-//  #include <sys/types.h>
-//  #include <sys/mman.h>
-//
-//#else // Not windows and no posix memory map.
-//  // Use fopen and do regular file read.
-//  #include <cstdlib>
-//  #include <cstdio>
-//#endif
 // clang-format on
 
 namespace fst {
