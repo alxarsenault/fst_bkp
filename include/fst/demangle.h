@@ -16,10 +16,12 @@ namespace fst {
 std::string demangle(const char* mangled_name) {
   std::size_t size;
   int status;
+  
+  // https://gcc.gnu.org/onlinedocs/libstdc++/libstdc++-html-USERS-4.3/a01696.html
   char* result = abi::__cxa_demangle(mangled_name, nullptr, &size, &status);
 
   if (status == 0) {
-    std::string name(result, size);
+    std::string name(result);
     std::free(result);
     return name;
   }
