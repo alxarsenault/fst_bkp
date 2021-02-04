@@ -245,12 +245,14 @@ namespace byte_vector_detail {
       return as<T, _IsLittleEndian>((size_type)index);
     }
 
+    // Get array element at array_index from array starting at index.
     template <typename T, bool _IsLittleEndian = true>
     inline T as(size_type index, size_type array_index) const noexcept {
       static_assert(std::is_trivially_copyable<T>::value, "Type cannot be serialized.");
       return as<T, _IsLittleEndian>(index + array_index * sizeof(T));
     }
 
+    // Get array element at array_index from array starting at pos.
     template <typename T, bool _IsLittleEndian = true>
     inline T as(iterator pos, size_type array_index) const {
       static_assert(std::is_trivially_copyable<T>::value, "Type cannot be serialized.");
