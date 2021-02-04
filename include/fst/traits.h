@@ -2,6 +2,8 @@
 
 #include <type_traits>
 #include <iterator>
+#include <complex>
+#include <utility>
 
 namespace fst::traits {
 template <bool _IsTrue>
@@ -42,4 +44,109 @@ using enable_if_same = typename std::enable_if<std::is_same<_D, std::true_type>:
 
 template <bool _Dummy, class _D>
 using enable_if_different = typename std::enable_if<std::is_same<_D, std::false_type>::value>::type;
+
+namespace detector_detail {
+  struct nonesuch {
+    ~nonesuch() = delete;
+    nonesuch(nonesuch const&) = delete;
+    void operator=(nonesuch const&) = delete;
+  };
+
+  template <class Default, class AlwaysVoid, template <class...> class Op, class... Args>
+  struct detector {
+    using value_t = std::false_type;
+    using type = Default;
+  };
+
+  template <class Default, template <class...> class Op, class... Args>
+  struct detector<Default, std::void_t<Op<Args...>>, Op, Args...> {
+    using value_t = std::true_type;
+    using type = Op<Args...>;
+  };
+} // namespace detector_detail
+
+template <template <class...> class Op, class... Args>
+using is_detected = typename detector_detail::detector<detector_detail::nonesuch, void, Op, Args...>::value_t;
+
+template <template <class...> class Op, class... Args>
+using is_detected_t = typename detector_detail::detector<detector_detail::nonesuch, void, Op, Args...>::type;
+
+template <template <class...> class _Op, typename K>
+using type_exist = is_detected<_Op, K>;
+
+// Pair.
+namespace pair_detail {
+  template <typename T>
+  using has_first = decltype(T::first);
+
+  template <typename T>
+  using has_second = decltype(T::second);
+} // namespace pair_detail.
+
+template <typename T>
+using is_pair = std::conjunction<type_exist<pair_detail::has_first, T>, type_exist<pair_detail::has_second, T>>;
+
+template <typename>
+struct is_tuple : std::false_type {};
+
+template <typename... T>
+struct is_tuple<std::tuple<T...>> : std::true_type {};
+
+template <typename>
+struct is_complex : std::false_type {};
+
+template <typename... T>
+struct is_complex<std::complex<T...>> : std::true_type {};
+
+namespace ostream_detail {
+  template <typename = void, typename... Args>
+  struct has_ostream : std::false_type {};
+
+  template <typename... Args>
+  struct has_ostream<std::void_t<decltype(std::declval<std::ostream>().operator<<(std::declval<Args>()...))>, Args...>
+      : std::true_type {};
+
+  template <typename = void, typename... Args>
+  struct has_global_ostream : std::false_type {};
+
+  template <typename... Args>
+  struct has_global_ostream<decltype(operator<<(std::declval<std::ostream&>(), std::declval<const Args&>()...)),
+      Args...> : std::true_type {};
+} // namespace ostream_detail.
+
+template <typename... Args>
+using has_ostream = std::disjunction<ostream_detail::has_ostream<void, Args...>,
+    ostream_detail::has_global_ostream<std::ostream&, Args...>>;
+
+namespace iterable_detail {
+  template <typename T>
+  auto is_iterable_impl(int)
+      -> decltype(std::begin(std::declval<T&>()) != std::end(std::declval<T&>()), // begin/end and operator !=
+          void(), // Handle evil operator ,
+          ++std::declval<decltype(std::begin(std::declval<T&>()))&>(), // operator ++
+          void(*std::begin(std::declval<T&>())), // operator*
+          std::true_type{});
+
+  template <typename T>
+  std::false_type is_iterable_impl(...);
+
+  template <typename T>
+  auto is_const_iterable_impl(int) -> decltype(
+      std::cbegin(std::declval<const T&>()) != std::cend(std::declval<const T&>()), // begin/end and operator !=
+      void(), // Handle evil operator ,
+      ++std::declval<const decltype(std::cbegin(std::declval<const T&>()))&>(), // operator ++
+      void(*std::cbegin(std::declval<const T&>())), // operator*
+      std::true_type{});
+
+  template <typename T>
+  std::false_type is_const_iterable_impl(...);
+} // namespace iterable_detail
+
+// Has begin() and end().
+template <typename T>
+using is_iterable = decltype(iterable_detail::is_iterable_impl<T>(0));
+
+// Has cbegin() and cend().
+template <typename T>
+using is_const_iterable = decltype(iterable_detail::is_const_iterable_impl<T>(0));
 } // namespace fst::traits.
