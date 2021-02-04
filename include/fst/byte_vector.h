@@ -38,6 +38,8 @@ namespace byte_vector_detail {
     // MARK: Constructors.
     //
     inline byte_vector() noexcept = default;
+    inline byte_vector(const byte_vector&) = default;
+    inline byte_vector(byte_vector&&) = default;
 
     inline byte_vector(size_type size)
         : _buffer(size) {}
@@ -51,6 +53,9 @@ namespace byte_vector_detail {
 
     inline byte_vector(std::string_view data)
         : _buffer((const_pointer)data.data(), (const_pointer)data.data() + data.size()) {}
+
+    byte_vector& operator=(const byte_vector&) = default;
+    byte_vector& operator=(byte_vector&&) = default;
 
     //
     // MARK: Iterators.
@@ -268,9 +273,9 @@ namespace byte_vector_detail {
     }
 
     inline bool read_file(const std::filesystem::path& file_path) {
-      if constexpr(has_memory_map) {
+      if constexpr (fst::has_memory_map) {
         file_buffer fb;
-        if(!fb.open(file_path)) {
+        if (!fb.open(file_path)) {
           return false;
         }
 
@@ -300,15 +305,16 @@ namespace byte_vector_detail {
     }
 
     inline static byte_vector from_file(const std::filesystem::path& file_path) {
-      if constexpr(has_memory_map) {
+      if constexpr (fst::has_memory_map) {
         file_buffer fb;
-        if(!fb.open(file_path)) {
+        if (!fb.open(file_path)) {
           return byte_vector();
         }
 
         byte_vector bv;
         bv.push_back(fb.content());
         fb.close();
+        return bv;
       }
       else {
         // Open the file.
