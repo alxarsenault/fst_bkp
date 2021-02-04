@@ -13,7 +13,7 @@
 
 namespace fst {
 #if FST_HAS_DEMANGLE
-std::string demangle(const char* mangled_name) {
+inline std::string demangle(const char* mangled_name) {
   std::size_t size;
   int status;
   
@@ -30,16 +30,16 @@ std::string demangle(const char* mangled_name) {
 }
 
 template <typename T>
-std::string demangle() {
+inline std::string demangle() {
   return demangle(typeid(T).name());
 }
 
 #else // No demangle.
 
-std::string demangle(const char* mangled_name) { return mangled_name; }
+inline std::string demangle(const char* mangled_name) { return mangled_name; }
 
 template <typename T>
-std::string demangle() {
+inline std::string demangle() {
   return demangle(typeid(T).name());
 }
 #endif // FST_HAS_DEMANGLE.
