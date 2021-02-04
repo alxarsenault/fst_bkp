@@ -160,19 +160,19 @@ inline void set_trace_stream(_Stream& s) {
   trace_detail::get_trace_stream().set_stream(s);
 }
 
-template <typename D = comma_string, typename T, typename... Ts>
+template <typename _Descriptor, typename T, typename... Ts>
 inline void trace(const T& t, const Ts&... ts) {
   auto& stream = trace_detail::get_trace_stream();
 
-  char str_buffer[1024];
-  std::time_t tt = std::time(nullptr);
-  int str_len = (int)strftime(str_buffer, 24, "[TRACE - %T]: ", std::localtime(&tt));
-
-  stream << std::string_view(str_buffer, str_len);
+  //  char str_buffer[1024];
+  //  std::time_t tt = std::time(nullptr);
+  //  int str_len = (int)strftime(str_buffer, 24, "[TRACE - %T]: ", std::localtime(&tt));
+  _Descriptor::message(stream);
+  //  stream << std::string_view(str_buffer, (std::size_t)str_len);
   if constexpr (sizeof...(ts) > 0) {
     print_element(stream, t);
-    stream << D::value;
-    print_detail::print<D>(stream, ts...);
+    stream << Descriptor::separator::value;
+    print_detail::print<_Descriptor::separator>(stream, ts...);
   }
   else {
     print_element(stream, t);
@@ -180,17 +180,17 @@ inline void trace(const T& t, const Ts&... ts) {
   }
 }
 #else
-template <typename D = comma_string, typename T, typename... Ts>
+template <typename _Descriptor, typename T, typename... Ts>
 inline void trace(const T& t, const Ts&... ts) {
-  char str_buffer[1024];
-  std::time_t tt = std::time(nullptr);
-  int str_len = (int)strftime(str_buffer, 24, "[TRACE - %T]: ", std::localtime(&tt));
-
-  std::cout << std::string_view(str_buffer, str_len);
+  //  char str_buffer[1024];
+  //  std::time_t tt = std::time(nullptr);
+  //  int str_len = (int)strftime(str_buffer, 24, "[TRACE - %T]: ", std::localtime(&tt));
+  _Descriptor::message(std::cout);
+  //  std::cout << std::string_view(str_buffer, (std::size_t)str_len);
   if constexpr (sizeof...(ts) > 0) {
     print_element(std::cout, t);
-    std::cout << D::value;
-    print_detail::print<D>(std::cout, ts...);
+    std::cout << _Descriptor::separator::value;
+    print_detail::print<_Descriptor::separator>(std::cout, ts...);
   }
   else {
     print_element(std::cout, t);
