@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-
+#include <alloca.h>
 #include "fst/aligned_buffer.h"
 
 namespace helper {
@@ -26,9 +26,10 @@ private:
 };
 
 TEST(aligned_buffer, alignment2) {
+  std::unique_ptr<float> f = std::make_unique<float>(32.0f);
   using type = banana;
-  constexpr std::size_t align = 16;
-  constexpr bool is_heap_buffer = false;
+  constexpr std::size_t align = 512;
+  constexpr bool is_heap_buffer = true;
   fst::aligned_buffer<type, 2, align, is_heap_buffer> a;
   
   

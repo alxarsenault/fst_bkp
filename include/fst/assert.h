@@ -43,7 +43,8 @@
 #define fst_assert(Expr, Msg) fst::assert_detail::custom_assert(#Expr, Expr, __FILE__, __LINE__, Msg)
 #endif
 
-#define fst_error(Msg) fst_assert(false, Msg)
+#define fst_release_assert(Expr, Msg)                                                                                  \
+  fst::assert_detail::global_release_assert::call_assert(#Expr, Expr, __FILE__, __LINE__, Msg)
 
 namespace fst {
 namespace config {
@@ -67,5 +68,42 @@ namespace assert_detail {
     std::abort();
   }
 #endif // NDEBUG
+
+  class global_release_assert {
+  public:
+    using callback_ptr = void (*)(const char*, int, const std::string&);
+
+    inline static void set_callback(callback_ptr callback) { get_callback() = callback; }
+
+    inline static void call_assert(
+        const char* expr_str, bool expr, const char* file, int line, const std::string& msg) {
+      if (expr) {
+        return;
+      }
+
+      callback_ptr& callback = get_callback();
+      if (callback) {
+        callback(file, line, msg);
+      }
+      else {
+        std::cerr << "Assert failed:\t" << msg << "\n"
+                  << "Expected:\t" << expr_str << "\n"
+                  << "Source:\t\t" << file << ", line " << line << "\n";
+        std::abort();
+      }
+    }
+
+  private:
+    global_release_assert() = default;
+    global_release_assert(const global_release_assert&) = delete;
+    global_release_assert(global_release_assert&&) = delete;
+    global_release_assert& operator=(const global_release_assert&) = delete;
+    global_release_assert& operator=(global_release_assert&&) = delete;
+
+    inline static callback_ptr& get_callback() {
+      static callback_ptr callback = nullptr;
+      return callback;
+    }
+  };
 } // namespace assert_detail.
 } // namespace fst.
