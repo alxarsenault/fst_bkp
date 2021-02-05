@@ -50,7 +50,7 @@ public:
 
   inline color darker(float amount) const {
     amount = 1.0f - util::clamp<float>(amount, 0.0f, 1.0f);
-    return color(red() * amount, green() * amount, blue() * amount, alpha());
+    return color(std::uint8_t(red() * amount), std::uint8_t(green() * amount), std::uint8_t(blue() * amount), alpha());
   }
 
 private:

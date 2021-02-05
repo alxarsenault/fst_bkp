@@ -22,9 +22,9 @@ namespace detail {
     }
 
     template <typename T>
-    inline constexpr size(T W = 0, T H = 0) noexcept {
-      width = (value_type)W;
-      height = (value_type)H;
+    inline constexpr size(const size<T>& s) noexcept {
+      width = (value_type)s.width;
+      height = (value_type)s.height;
     }
 
     inline constexpr size(const pair_type& p) noexcept
