@@ -38,7 +38,7 @@
 
 namespace fst {
 template <typename _Tp>
-class scoped_singleton {
+class shared_singleton {
 public:
   using value_type = _Tp;
   using pointer = value_type*;
@@ -46,10 +46,10 @@ public:
   using weak = std::weak_ptr<value_type>;
   using shared = std::shared_ptr<value_type>;
 
-  ~scoped_singleton() = default;
+  ~shared_singleton() = default;
 
   inline static pointer get() {
-    fst_assert(is_retained(), "Can't access scoped_singleton if it is not retained somewhere.");
+    fst_assert(is_retained(), "Can't access shared_singleton if it is not retained somewhere.");
     return get_weak().lock().get();
   }
 
@@ -79,11 +79,11 @@ public:
   inline static std::size_t get_count() { return get_weak().use_count(); }
 
 private:
-  scoped_singleton() = default;
-  scoped_singleton(const scoped_singleton&) = delete;
-  scoped_singleton(scoped_singleton&&) = delete;
-  scoped_singleton& operator=(const scoped_singleton&) = delete;
-  scoped_singleton& operator=(scoped_singleton&&) = delete;
+  shared_singleton() = default;
+  shared_singleton(const shared_singleton&) = delete;
+  shared_singleton(shared_singleton&&) = delete;
+  shared_singleton& operator=(const shared_singleton&) = delete;
+  shared_singleton& operator=(shared_singleton&&) = delete;
 
   void* operator new(size_t size) = delete;
   void operator delete(void* ptr) = delete;
@@ -108,18 +108,18 @@ private:
 };
 
 template <typename _Tp, typename _Initializer = void>
-class scoped_singleton_retainer {
+class shared_singleton_retainer {
 public:
   using value_type = _Tp;
   using initializer = _Initializer;
 
-  using singleton_type = scoped_singleton<value_type>;
+  using singleton_type = shared_singleton<value_type>;
   using pointer = value_type*;
   using const_pointer = const value_type*;
   using shared = typename singleton_type::shared;
 
   template <typename... Args>
-  inline scoped_singleton_retainer(Args&&... args) {
+  inline shared_singleton_retainer(Args&&... args) {
     if constexpr (std::is_same<initializer, void>::value) {
       _instance_ptr = singleton_type::retain();
     }
@@ -133,11 +133,11 @@ public:
     }
   }
 
-  scoped_singleton_retainer(const scoped_singleton_retainer&) = default;
-  scoped_singleton_retainer(scoped_singleton_retainer&&) = default;
+  shared_singleton_retainer(const shared_singleton_retainer&) = default;
+  shared_singleton_retainer(shared_singleton_retainer&&) = default;
 
-  scoped_singleton_retainer& operator=(const scoped_singleton_retainer&) = default;
-  scoped_singleton_retainer& operator=(scoped_singleton_retainer&&) = default;
+  shared_singleton_retainer& operator=(const shared_singleton_retainer&) = default;
+  shared_singleton_retainer& operator=(shared_singleton_retainer&&) = default;
 
   inline pointer operator->() {
     fst_assert((bool)_instance_ptr, "Can't access scoped_singleton_retainer if it is not retained somewhere.");

@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include <string>
-#include "fst/scoped_singleton.h"
+#include "fst/shared_singleton.h"
 
 namespace {
 
@@ -12,16 +12,16 @@ public:
   std::string string_value;
 };
 
-TEST(scoped_singleton, simple_retain_no_default) {
+TEST(shared_singleton, simple_retain_no_default) {
   {
-    auto instance = fst::scoped_singleton<MySingletonNoDefault>::retain("Salad");
-    EXPECT_EQ(fst::scoped_singleton<MySingletonNoDefault>::get()->string_value, "Salad");
-    EXPECT_EQ(fst::scoped_singleton<MySingletonNoDefault>::is_retained(), true);
-    EXPECT_EQ(fst::scoped_singleton<MySingletonNoDefault>::get_count(), 1);
+    auto instance = fst::shared_singleton<MySingletonNoDefault>::retain("Salad");
+    EXPECT_EQ(fst::shared_singleton<MySingletonNoDefault>::get()->string_value, "Salad");
+    EXPECT_EQ(fst::shared_singleton<MySingletonNoDefault>::is_retained(), true);
+    EXPECT_EQ(fst::shared_singleton<MySingletonNoDefault>::get_count(), 1);
   }
 
-  EXPECT_EQ(fst::scoped_singleton<MySingletonNoDefault>::is_retained(), false);
-  EXPECT_EQ(fst::scoped_singleton<MySingletonNoDefault>::get_count(), 0);
+  EXPECT_EQ(fst::shared_singleton<MySingletonNoDefault>::is_retained(), false);
+  EXPECT_EQ(fst::shared_singleton<MySingletonNoDefault>::get_count(), 0);
 }
 
 class MySingleton {
@@ -33,37 +33,37 @@ public:
   std::string string_value;
 };
 
-TEST(scoped_singleton, simple_retain) {
+TEST(shared_singleton, simple_retain) {
   {
-    auto instance = fst::scoped_singleton<MySingleton>::retain("Pear");
-    EXPECT_EQ(fst::scoped_singleton<MySingleton>::get()->string_value, "Pear");
-    EXPECT_EQ(fst::scoped_singleton<MySingleton>::is_retained(), true);
-    EXPECT_EQ(fst::scoped_singleton<MySingleton>::get_count(), 1);
+    auto instance = fst::shared_singleton<MySingleton>::retain("Pear");
+    EXPECT_EQ(fst::shared_singleton<MySingleton>::get()->string_value, "Pear");
+    EXPECT_EQ(fst::shared_singleton<MySingleton>::is_retained(), true);
+    EXPECT_EQ(fst::shared_singleton<MySingleton>::get_count(), 1);
   }
 
-  EXPECT_EQ(fst::scoped_singleton<MySingleton>::is_retained(), false);
-  EXPECT_EQ(fst::scoped_singleton<MySingleton>::get_count(), 0);
+  EXPECT_EQ(fst::shared_singleton<MySingleton>::is_retained(), false);
+  EXPECT_EQ(fst::shared_singleton<MySingleton>::get_count(), 0);
 }
 
-TEST(scoped_singleton, simple_retain_moved) {
-  auto instance = fst::scoped_singleton<MySingleton>::retain("Pear");
+TEST(shared_singleton, simple_retain_moved) {
+  auto instance = fst::shared_singleton<MySingleton>::retain("Pear");
   {
-    auto instance2 = fst::scoped_singleton<MySingleton>::retain();
-    EXPECT_EQ(fst::scoped_singleton<MySingleton>::get()->string_value, "Pear");
-    EXPECT_EQ(fst::scoped_singleton<MySingleton>::is_retained(), true);
-    EXPECT_EQ(fst::scoped_singleton<MySingleton>::get_count(), 2);
+    auto instance2 = fst::shared_singleton<MySingleton>::retain();
+    EXPECT_EQ(fst::shared_singleton<MySingleton>::get()->string_value, "Pear");
+    EXPECT_EQ(fst::shared_singleton<MySingleton>::is_retained(), true);
+    EXPECT_EQ(fst::shared_singleton<MySingleton>::get_count(), 2);
 
     instance = std::move(instance2);
-    EXPECT_EQ(fst::scoped_singleton<MySingleton>::is_retained(), true);
-    EXPECT_EQ(fst::scoped_singleton<MySingleton>::get_count(), 1);
+    EXPECT_EQ(fst::shared_singleton<MySingleton>::is_retained(), true);
+    EXPECT_EQ(fst::shared_singleton<MySingleton>::get_count(), 1);
     EXPECT_EQ((bool)instance2, false);
   }
 
-  EXPECT_EQ(fst::scoped_singleton<MySingleton>::is_retained(), true);
-  EXPECT_EQ(fst::scoped_singleton<MySingleton>::get_count(), 1);
+  EXPECT_EQ(fst::shared_singleton<MySingleton>::is_retained(), true);
+  EXPECT_EQ(fst::shared_singleton<MySingleton>::get_count(), 1);
 }
 
-using MyScopedSingleton = fst::scoped_singleton<MySingleton>;
+using MyScopedSingleton = fst::shared_singleton<MySingleton>;
 using MySingletonInstance = MyScopedSingleton::shared;
 
 struct MySingletonInitializer {
@@ -71,9 +71,9 @@ struct MySingletonInitializer {
   inline static void init() { MyScopedSingleton::get()->string_value = "Peter"; }
 };
 
-using MySingletonRetainer = fst::scoped_singleton_retainer<MySingleton, MySingletonInitializer>;
+using MySingletonRetainer = fst::shared_singleton_retainer<MySingleton, MySingletonInitializer>;
 
-TEST(scoped_singleton, simple_retain_with_typedef) {
+TEST(shared_singleton, simple_retain_with_typedef) {
   EXPECT_EQ(MyScopedSingleton::is_retained(), false);
   EXPECT_EQ(MyScopedSingleton::get_count(), 0);
 
@@ -105,18 +105,18 @@ TEST(scoped_singleton, simple_retain_with_typedef) {
   EXPECT_EQ(MyScopedSingleton::get_count(), 1);
 }
 
-TEST(scoped_singleton, simple_retain_with_args) {
+TEST(shared_singleton, simple_retain_with_args) {
   MySingletonInstance instance = MyScopedSingleton::retain("Banana");
   EXPECT_EQ(MyScopedSingleton::get()->string_value, "Banana");
 }
 
-TEST(scoped_singleton, simple_retain_func) {
+TEST(shared_singleton, simple_retain_func) {
   MySingletonInstance instance
       = MyScopedSingleton::retain_with_initializer([]() { MyScopedSingleton::get()->string_value = "Banana"; });
   EXPECT_EQ(MyScopedSingleton::get()->string_value, "Banana");
 }
 
-TEST(scoped_singleton, simple_retain_func_with_pointer) {
+TEST(shared_singleton, simple_retain_func_with_pointer) {
   // "Peter" is passed as parameter to MySingleton constructor, then the init function is called.
   MySingletonInstance instance = MyScopedSingleton::retain_with_initializer(
       [](MySingleton* my_singleton) {
@@ -134,7 +134,7 @@ TEST(scoped_singleton, simple_retain_func_with_pointer) {
   EXPECT_EQ(MyScopedSingleton::get()->string_value, "Banana");
 }
 
-TEST(scoped_singleton, double_retain) {
+TEST(shared_singleton, double_retain) {
   MySingletonInstance instance2;
 
   {
@@ -161,7 +161,7 @@ TEST(scoped_singleton, double_retain) {
   EXPECT_EQ(MyScopedSingleton::get()->string_value, "Banana");
 }
 
-TEST(scoped_singleton, unretained) {
+TEST(shared_singleton, unretained) {
   if constexpr (fst::config::has_assert) {
     EXPECT_DEATH({ MyScopedSingleton::get(); }, "");
   }
@@ -170,7 +170,7 @@ TEST(scoped_singleton, unretained) {
   }
 }
 
-TEST(scoped_singleton, retain_and_call) {
+TEST(shared_singleton, retain_and_call) {
   MyScopedSingleton::retain()->string_value = "Banana";
 
   if constexpr (fst::config::has_assert) {
@@ -181,7 +181,7 @@ TEST(scoped_singleton, retain_and_call) {
   }
 }
 
-TEST(scoped_singleton, initializer) {
+TEST(shared_singleton, initializer) {
   {
     MySingletonRetainer retainer("Jason");
     EXPECT_EQ(MyScopedSingleton::get()->string_value, "Jason");
@@ -195,7 +195,7 @@ TEST(scoped_singleton, initializer) {
   }
 }
 
-TEST(scoped_singleton, initializer_no_arg) {
+TEST(shared_singleton, initializer_no_arg) {
   {
     MySingletonRetainer retainer;
     EXPECT_EQ(MyScopedSingleton::get()->string_value, "Peter");
@@ -209,9 +209,9 @@ TEST(scoped_singleton, initializer_no_arg) {
   }
 }
 
-TEST(scoped_singleton, initializer_empty) {
+TEST(shared_singleton, initializer_empty) {
   {
-    fst::scoped_singleton_retainer<MySingleton> retainer;
+    fst::shared_singleton_retainer<MySingleton> retainer;
     retainer->string_value = "Peter";
     EXPECT_EQ(MyScopedSingleton::get()->string_value, "Peter");
   }
