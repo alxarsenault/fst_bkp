@@ -35,7 +35,7 @@
 #include "fst/assert.h"
 #include "fst/traits.h"
 #include "fst/buffer_view.h"
-#include "fst/file_buffer.h"
+#include "fst/mapped_file.h"
 
 #include <vector>
 #include <iterator>
@@ -309,7 +309,7 @@ namespace byte_vector_detail {
 
     inline bool read_file(const std::filesystem::path& file_path) {
       if constexpr (fst::config::has_memory_map) {
-        file_buffer fb;
+        mapped_file fb;
         if (!fb.open(file_path)) {
           return false;
         }
@@ -342,7 +342,7 @@ namespace byte_vector_detail {
 
     inline static byte_vector from_file(const std::filesystem::path& file_path) {
       if constexpr (fst::config::has_memory_map) {
-        file_buffer fb;
+        mapped_file fb;
         if (!fb.open(file_path)) {
           return byte_vector();
         }

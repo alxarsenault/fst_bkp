@@ -43,21 +43,21 @@
 #ifdef _WIN32
   #define WIN32_LEAN_AND_MEAN
   #include <windows.h>
-  #define __FST_FILE_BUFFER_USE_WINDOWS_MEMORY_MAP 1
+  #define __FST_MAPPED_FILE_USE_WINDOWS_MEMORY_MAP 1
   namespace fst::config { inline constexpr bool has_memory_map = true; }
 
 #elif defined(unix) || defined(__unix__) || defined(__unix) || defined(__MACH__)
   #include <unistd.h>
 
   #ifdef HAVE_MMAP
-    #define __FST_FILE_BUFFER_USE_POSIX_MEMORY_MAP HAVE_MMAP
+    #define __FST_MAPPED_FILE_USE_POSIX_MEMORY_MAP HAVE_MMAP
   #elif _POSIX_VERSION >= 199506L
-    #define __FST_FILE_BUFFER_USE_POSIX_MEMORY_MAP 1
+    #define __FST_MAPPED_FILE_USE_POSIX_MEMORY_MAP 1
   #else
-    #define __FST_FILE_BUFFER_USE_POSIX_MEMORY_MAP 0
+    #define __FST_MAPPED_FILE_USE_POSIX_MEMORY_MAP 0
   #endif
 
-  #if __FST_FILE_BUFFER_USE_POSIX_MEMORY_MAP
+  #if __FST_MAPPED_FILE_USE_POSIX_MEMORY_MAP
     #include <fcntl.h>
     #include <sys/types.h>
     #include <sys/mman.h>
@@ -71,25 +71,25 @@
 // clang-format on
 
 namespace fst {
-class file_buffer {
+class mapped_file {
 public:
   using value_type = std::uint8_t;
   using pointer = value_type*;
   using size_type = std::size_t;
 
-  file_buffer() noexcept = default;
-  file_buffer(const file_buffer&) = delete;
-  inline file_buffer(file_buffer&& fb) noexcept
+  mapped_file() noexcept = default;
+  mapped_file(const mapped_file&) = delete;
+  inline mapped_file(mapped_file&& fb) noexcept
       : _data(fb._data)
       , _size(fb._size) {
     fb._data = nullptr;
     fb._size = 0;
   }
 
-  inline ~file_buffer() { close(); }
+  inline ~mapped_file() { close(); }
 
-  file_buffer& operator=(const file_buffer&) = delete;
-  inline file_buffer& operator=(file_buffer&& fb) noexcept {
+  mapped_file& operator=(const mapped_file&) = delete;
+  inline mapped_file& operator=(mapped_file&& fb) noexcept {
     _data = fb._data;
     _size = fb._size;
     fb._data = nullptr;
@@ -112,9 +112,9 @@ public:
       close();
     }
 
-#if __FST_FILE_BUFFER_USE_WINDOWS_MEMORY_MAP
-    HANDLE hFile = CreateFileA(
-        file_path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+#if __FST_MAPPED_FILE_USE_WINDOWS_MEMORY_MAP
+    HANDLE hFile = CreateFileA((LPCSTR)file_path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING,
+        FILE_ATTRIBUTE_NORMAL, nullptr);
     if (hFile == INVALID_HANDLE_VALUE) {
       return false;
     }
@@ -140,7 +140,7 @@ public:
     _size = (size_type)size;
     return true;
 
-#elif __FST_FILE_BUFFER_USE_POSIX_MEMORY_MAP
+#elif __FST_MAPPED_FILE_USE_POSIX_MEMORY_MAP
     int fd = ::open(file_path.c_str(), O_RDONLY);
     if (fd < 0) {
       return false;
@@ -204,9 +204,9 @@ public:
       return;
     }
 
-#if __FST_FILE_BUFFER_USE_WINDOWS_MEMORY_MAP
+#if __FST_MAPPED_FILE_USE_WINDOWS_MEMORY_MAP
     UnmapViewOfFile(_data);
-#elif __FST_FILE_BUFFER_USE_POSIX_MEMORY_MAP
+#elif __FST_MAPPED_FILE_USE_POSIX_MEMORY_MAP
     munmap(_data, _size);
 #else
     std::free(_data);
