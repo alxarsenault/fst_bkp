@@ -37,6 +37,7 @@
 #include "fst/buffer_view.h"
 #include "fst/mapped_file.h"
 
+#include <algorithm>
 #include <vector>
 #include <iterator>
 #include <string_view>
@@ -65,6 +66,13 @@ namespace byte_vector_detail {
 
     static_assert(
         traits::is_random_access_iterator<iterator>::value, "buffer_type needs to have random access iterator.");
+
+    enum class convert_options {
+      pcm_8_bit,
+      pcm_16_bit,
+      pcm_24_bit,
+      pcm_32_bit,
+    };
 
     //
     // MARK: Constructors.
@@ -167,6 +175,18 @@ namespace byte_vector_detail {
     inline void push_back(value_type value) { _buffer.push_back(value); }
     inline void push_back(std::string_view str) { _buffer.insert(_buffer.end(), str.begin(), str.end()); }
 
+    inline void push_back(const char* str) {
+      for (std::size_t i = 0; i < std::strlen(str); i++) {
+        _buffer.push_back(static_cast<value_type>(str[i]));
+      }
+    }
+
+    inline void push_back(const std::string& str) {
+      for (std::size_t i = 0; i < str.size(); i++) {
+        _buffer.push_back(static_cast<value_type>(str[i]));
+      }
+    }
+
     template <template <typename> typename _InputBufferType, bool _IsLittleEndian = true>
     inline void push_back(const byte_vector<_InputBufferType>& bvec) {
       static_assert(_IsLittleEndian, "byte_vector::push_back is not supported for big endian.");
@@ -219,8 +239,75 @@ namespace byte_vector_detail {
       push_back<T, _IsLittleEndian>(data.data(), data.size());
     }
 
+    template <typename T, convert_options c_opts>
+    inline void push_back(const T& value) {
+      static_assert(std::is_floating_point<T>::value, "Type must be a floating point.");
+
+      if constexpr (c_opts == convert_options::pcm_8_bit) {
+        T s = fst::util::clamp<T>(value, (T)-1.0, (T)1.0);
+        s = (s + (T)1.0) / (T)2.0;
+        push_back(static_cast<value_type>(s * (T)255.0));
+      }
+      else if constexpr (c_opts == convert_options::pcm_16_bit) {
+        constexpr T mult = (1 << 15) - 1;
+        const T s = fst::util::clamp<T>(value, (T)-1.0, (T)1.0);
+        push_back<std::int16_t>(static_cast<int16_t>(s * mult));
+      }
+      else if constexpr (c_opts == convert_options::pcm_24_bit) {
+        std::int32_t s_int = static_cast<std::int32_t>(value * 8388608.0);
+        push_back(static_cast<value_type>(s_int & 0xFF));
+        push_back(static_cast<value_type>((s_int >> 8) & 0xFF));
+        push_back(static_cast<value_type>((s_int >> 16) & 0xFF));
+      }
+      else if constexpr (c_opts == convert_options::pcm_32_bit) {
+        constexpr T mult_tmp = 1 << 31;
+        constexpr T mult = mult_tmp - 1;
+        const T s = fst::util::clamp<T>(value, (T)-1.0, (T)1.0);
+        push_back<std::int32_t>(static_cast<std::int32_t>(s * mult));
+      }
+    }
+
+    inline void push_padding(std::size_t count) {
+      for (std::size_t i = 0; i < count; i++) {
+        push_back((value_type)0);
+      }
+    }
+
+    inline int push_padding() {
+      if (int padding = size() % 4) {
+        push_padding(4 - padding);
+        return 4 - padding;
+      }
+
+      return 0;
+    }
+
     // Calling pop_back on an empty container is undefined.
     inline void pop_back() { _buffer.pop_back(); }
+
+    //
+    // MARK: Find.
+    //
+    template <class T>
+    inline difference_type find(const T* data, size_type size) const noexcept {
+      typename buffer_type::const_iterator it = std::search(_buffer.cbegin(), _buffer.cend(), data, data + size);
+      if (it == _buffer.cend()) {
+        return -1;
+      }
+
+      return std::distance(_buffer.cbegin(), it);
+    }
+
+    template <class T>
+    inline difference_type find(size_type offset, const T* data, size_type size) const noexcept {
+      typename buffer_type::const_iterator it
+          = std::search(_buffer.cbegin() + offset, _buffer.cend(), data, data + size);
+      if (it == _buffer.cend()) {
+        return -1;
+      }
+
+      return std::distance(_buffer.cbegin(), it);
+    }
 
     //
     // MARK: Convertions.
@@ -286,7 +373,7 @@ namespace byte_vector_detail {
 
     // Get array element at array_index from array starting at pos.
     template <typename T, bool _IsLittleEndian = true>
-    inline T as(iterator pos, size_type array_index) const {
+    inline T as(iterator pos, size_type array_index) const noexcept {
       static_assert(std::is_trivially_copyable<T>::value, "Type cannot be serialized.");
       difference_type index = std::distance(pos, _buffer.begin());
       fst_assert(index >= 0, "Wrong iterator position.");
@@ -294,7 +381,7 @@ namespace byte_vector_detail {
     }
 
     template <typename T, bool _IsLittleEndian = true>
-    inline void copy_as(T* buffer, size_type index, size_type array_size) const {
+    inline void copy_as(T* buffer, size_type index, size_type array_size) const noexcept {
       static_assert(std::is_trivially_copyable<T>::value, "Type cannot be serialized.");
 
       if constexpr (_IsLittleEndian) {
@@ -304,6 +391,33 @@ namespace byte_vector_detail {
         for (size_type i = 0; i < array_size; i++) {
           buffer[i] = as<T, _IsLittleEndian>(index, i);
         }
+      }
+    }
+
+    template <typename T, convert_options c_opts>
+    inline T as(size_type __index) const noexcept {
+      static_assert(std::is_floating_point<T>::value, "Type must be a floating point.");
+
+      if constexpr (c_opts == convert_options::pcm_8_bit) {
+        constexpr T div = 1 << 7;
+        return static_cast<T>(int(_buffer[__index]) - 128) / div;
+      }
+      else if constexpr (c_opts == convert_options::pcm_16_bit) {
+        constexpr T denom = T(1.0) / (T)(1 << 15);
+        return (T)as<std::int16_t>(__index) * denom;
+      }
+      else if constexpr (c_opts == convert_options::pcm_24_bit) {
+        constexpr T denom = 1.0 / (T)8388608.0;
+        std::int32_t value = (static_cast<std::int32_t>(_buffer[__index + 2]) << 16)
+            | (static_cast<std::int32_t>(_buffer[__index + 1]) << 8) | static_cast<std::int32_t>(_buffer[__index]);
+
+        // If the 24th bit is set, this is a negative number in 24-bit world.
+        // Make sure sign is extended to the 32 bit float.
+        return (value & 0x800000 ? (value | ~0xFFFFFF) : value) * denom;
+      }
+      else if constexpr (c_opts == convert_options::pcm_32_bit) {
+        constexpr T div = 1 << 31;
+        return as<std::int32_t>(__index) / div;
       }
     }
 

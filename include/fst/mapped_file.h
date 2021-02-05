@@ -33,6 +33,8 @@
 
 #pragma once
 #include "fst/buffer_view.h"
+#include "fst/byte_buffer_view.h"
+
 #include <cstddef>
 #include <filesystem>
 #include <string_view>
@@ -106,6 +108,8 @@ public:
   inline fst::buffer_view<_ByteType> content() const noexcept {
     return fst::buffer_view<_ByteType>((const _ByteType*)(_data), _size);
   }
+
+  inline byte_buffer_view byte_content() const noexcept { return byte_buffer_view(_data, _size); }
 
   bool open(const std::filesystem::path& file_path) {
     if (_data) {
