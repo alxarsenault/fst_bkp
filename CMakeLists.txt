@@ -25,6 +25,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 project(fst VERSION 1.0.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 #User options
 option(FST_BUILD_TESTS "Build and run tests." ON) 
@@ -40,17 +41,10 @@ make_pretty_source_folders("include/fst" "include" "${FST_SOURCE_FILES}")
 
 add_library(${PROJECT_NAME}  INTERFACE ${FST_SOURCE_FILES})
 
-set_target_properties(${PROJECT_NAME} PROPERTIES
-    CXX_STANDARD 17
-    CXX_EXTENSIONS OFF
-    CMAKE_CXX_FLAGS "-std=c++17 ${CMAKE_CXX_FLAGS}"
-)
-
 target_include_directories(${PROJECT_NAME} INTERFACE ${FST_INCLUDE_DIRECTORY})
 
 #Tests
 if (${FST_BUILD_TESTS})
-    #Tests external dependencies.
     find_package(GTest CONFIG REQUIRED)
 
     #Test Project
@@ -59,15 +53,8 @@ if (${FST_BUILD_TESTS})
 
     add_executable(${FST_TEST_NAME} ${FST_TEST_SOURCES})
 
-    set_target_properties(${FST_TEST_NAME} PROPERTIES
-        CXX_STANDARD 17
-        CXX_EXTENSIONS OFF
-        LINKER_LANGUAGE CXX
-        CMAKE_CXX_FLAGS "-std=c++17 ${CMAKE_CXX_FLAGS}"
-    )
-
     target_link_libraries(${FST_TEST_NAME} PUBLIC
-        GTest::GTest
+        GTest::gtest
         fst
     )
 
@@ -77,7 +64,6 @@ endif()
 
 #Benchmarks.
 if (${FST_BUILD_BENCH})
-
     find_package(benchmark CONFIG REQUIRED)
 
     #Test Project
@@ -85,13 +71,6 @@ if (${FST_BUILD_BENCH})
     file(GLOB_RECURSE FST_BENCH_SOURCES "bench/*.cpp")
 
     add_executable(${FST_BENCH_NAME} ${FST_BENCH_SOURCES})
-
-    set_target_properties(${FST_BENCH_NAME} PROPERTIES
-        CXX_STANDARD 17
-        CXX_EXTENSIONS OFF
-        LINKER_LANGUAGE CXX
-        CMAKE_CXX_FLAGS "-std=c++17 ${CMAKE_CXX_FLAGS}"
-    )
 
     target_link_libraries(${FST_BENCH_NAME} PUBLIC
         fst
