@@ -37,26 +37,40 @@
 #include <iostream>
 #include <string>
 
-#ifdef NDEBUG
-#define fst_assert(Expr, Msg) ;
+// clang-format off
+#ifdef _MSC_VER
+  #define __FST_DEBUG_BREAK __debugbreak()
+#elif defined(__clang__) || defined(__GNUC__) || defined(__MINGW64__)
+  #if __has_builtin(__builtin_debugtrap)
+    #define __FST_DEBUG_BREAK __builtin_debugtrap()
+  #elif defined(unix) || defined(__unix__) || defined(__unix) || defined(__MACH__)
+    #include <signal.h>
+    #define __FST_DEBUG_BREAK raise(SIGTRAP)
+  #else
+    #define __FST_DEBUG_BREAK std::abort()
+  #endif
 #else
-#define fst_assert(Expr, Msg) fst::assert_detail::custom_assert(#Expr, Expr, __FILE__, __LINE__, Msg)
+  #define __FST_DEBUG_BREAK std::abort()
 #endif
 
-#define fst_release_assert(Expr, Msg)                                                                                  \
-  fst::assert_detail::global_release_assert::call_assert(#Expr, Expr, __FILE__, __LINE__, Msg)
+#if defined(NDEBUG) && !defined(FST_USE_ASSERT_IN_RELEASE)
+  #define fst_assert(Expr, Msg) ;
+  #define __FST_HAS_DEBUG_ASSERT 0
+  namespace fst::config { inline constexpr bool has_assert = false; }
+#else
+  #define __FST_HAS_DEBUG_ASSERT 1
+  namespace fst::config { inline constexpr bool has_assert = true; }
+  #define fst_assert(Expr, Msg) fst::assert_detail::custom_assert(#Expr, Expr, __FILE__, __LINE__, Msg)
+#endif
+
+#define __FST_CALL_RELEASE_ASSERT fst::assert_detail::global_release_assert::call_assert
+#define fst_release_assert(Expr, Msg) __FST_CALL_RELEASE_ASSERT(#Expr, Expr, __FILE__, __LINE__, Msg)
+#undef __FST_CALL_RELEASE_ASSERT
+// clang-format on
 
 namespace fst {
-namespace config {
-#ifdef NDEBUG
-  inline constexpr bool has_asser = false;
-#else
-  inline constexpr bool has_assert = true;
-#endif
-} // namespace config.
-
 namespace assert_detail {
-#ifndef NDEBUG
+#if __FST_HAS_DEBUG_ASSERT
   inline void custom_assert(const char* expr_str, bool expr, const char* file, int line, const std::string& msg) {
     if (expr) {
       return;
@@ -65,9 +79,10 @@ namespace assert_detail {
     std::cerr << "Assert failed:\t" << msg << "\n"
               << "Expected:\t" << expr_str << "\n"
               << "Source:\t\t" << file << ", line " << line << "\n";
-    std::abort();
+
+    __FST_DEBUG_BREAK;
   }
-#endif // NDEBUG
+#endif // __FST_HAS_DEBUG_ASSERT
 
   class global_release_assert {
   public:
@@ -106,4 +121,8 @@ namespace assert_detail {
     }
   };
 } // namespace assert_detail.
+
+inline void set_release_assert_callback(assert_detail::global_release_assert::callback_ptr callback) {
+  assert_detail::global_release_assert::set_callback(callback);
+}
 } // namespace fst.
