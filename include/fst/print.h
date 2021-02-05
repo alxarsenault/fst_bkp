@@ -173,60 +173,60 @@ inline void warnprint(const T& t, const Ts&... ts) {
   }
 }
 
-namespace trace_detail {
-#if FST_TRACE_TO_STREAM
-  class trace_stream : public std::ostream {
-  public:
-    trace_stream() { set_stream(std::clog); }
-
-    template <typename _Stream>
-    void set_stream(_Stream& s) {
-      init(s.rdbuf());
-    }
-  };
-
-  inline trace_stream& get_trace_stream() {
-    static trace_stream stream;
-    return stream;
-  }
-#endif // FST_TRACE_TO_STREAM.
-} // namespace trace_detail.
-
-#if FST_TRACE_TO_STREAM
-template <typename _Stream>
-inline void set_trace_stream(_Stream& s) {
-  trace_detail::get_trace_stream().set_stream(s);
-}
-
-template <typename _Descriptor, typename T, typename... Ts>
-inline void trace(const T& t, const Ts&... ts) {
-  auto& stream = trace_detail::get_trace_stream();
-  _Descriptor::message(stream);
-  if constexpr (sizeof...(ts) > 0) {
-    print_element(stream, t);
-    stream << _Descriptor::separator::value;
-    print_detail::print<typename _Descriptor::separator>(stream, ts...);
-  }
-  else {
-    print_element(stream, t);
-    stream << std::endl;
-  }
-}
-#else
-template <typename _Descriptor, typename T, typename... Ts>
-inline void trace(const T& t, const Ts&... ts) {
-  _Descriptor::message(std::cout);
-  if constexpr (sizeof...(ts) > 0) {
-    print_element(std::cout, t);
-    std::cout << _Descriptor::separator::value;
-    print_detail::print<typename _Descriptor::separator>(std::cout, ts...);
-  }
-  else {
-    print_element(std::cout, t);
-    std::cout << std::endl;
-  }
-}
-#endif // FST_TRACE_TO_STREAM.
+// namespace trace_detail {
+//#if FST_TRACE_TO_STREAM
+//  class trace_stream : public std::ostream {
+//  public:
+//    trace_stream() { set_stream(std::clog); }
+//
+//    template <typename _Stream>
+//    void set_stream(_Stream& s) {
+//      init(s.rdbuf());
+//    }
+//  };
+//
+//  inline trace_stream& get_trace_stream() {
+//    static trace_stream stream;
+//    return stream;
+//  }
+//#endif // FST_TRACE_TO_STREAM.
+//} // namespace trace_detail.
+//
+//#if FST_TRACE_TO_STREAM
+// template <typename _Stream>
+// inline void set_trace_stream(_Stream& s) {
+//  trace_detail::get_trace_stream().set_stream(s);
+//}
+//
+// template <typename _Descriptor, typename T, typename... Ts>
+// inline void trace(const T& t, const Ts&... ts) {
+//  auto& stream = trace_detail::get_trace_stream();
+//  _Descriptor::message(stream);
+//  if constexpr (sizeof...(ts) > 0) {
+//    print_element(stream, t);
+//    stream << _Descriptor::separator::value;
+//    print_detail::print<typename _Descriptor::separator>(stream, ts...);
+//  }
+//  else {
+//    print_element(stream, t);
+//    stream << std::endl;
+//  }
+//}
+//#else
+// template <typename _Descriptor, typename T, typename... Ts>
+// inline void trace(const T& t, const Ts&... ts) {
+//  _Descriptor::message(std::cout);
+//  if constexpr (sizeof...(ts) > 0) {
+//    print_element(std::cout, t);
+//    std::cout << _Descriptor::separator::value;
+//    print_detail::print<typename _Descriptor::separator>(std::cout, ts...);
+//  }
+//  else {
+//    print_element(std::cout, t);
+//    std::cout << std::endl;
+//  }
+//}
+//#endif // FST_TRACE_TO_STREAM.
 
 class print_initializer {
 public:
