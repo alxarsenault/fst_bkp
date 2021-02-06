@@ -390,4 +390,10 @@ private:
   buffer_type _data;
   size_type _size = 0;
 };
+
+template <typename _Tp, std::size_t _Size>
+using stack_fixed_vector = fixed_vector<_Tp, _Size, false>;
+
+template <typename _Tp, std::size_t _Size>
+using heap_fixed_vector = fixed_vector<_Tp, _Size, true>;
 } // namespace fst.
