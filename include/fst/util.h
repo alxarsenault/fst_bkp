@@ -85,4 +85,14 @@ template <typename T, typename T1, typename... Ts>
 inline constexpr bool all_equals(T t, T1 t1, Ts... ts) {
   return (t == t1) && all_equals(t, ts...);
 }
+
+template <typename T>
+inline constexpr bool is_in_range(T x, T left, T right) {
+  return x >= left && x <= right;
+}
+
+template <typename T>
+inline constexpr bool is_out_of_range(T x, T left, T right) {
+  return is_in_range(x, left, right);
+}
 } // namespace fst.

@@ -33,6 +33,9 @@
 
 #pragma once
 #include <cmath>
+#include <limits>
+#include <type_traits>
+#include "fst/util.h"
 
 namespace fst::math {
 template <typename T>
@@ -86,5 +89,28 @@ inline constexpr T square(T x) {
 template <typename T>
 inline constexpr T cube(T x) {
   return x * x * x;
+}
+
+template <typename T, typename std::enable_if<std::is_floating_point<T>::value>::type* = nullptr>
+inline constexpr bool is_approximately_equal(T a, T b, T tolerance = std::numeric_limits<T>::epsilon()) {
+  const T diff = abs(a - b);
+  return (diff <= tolerance) || (diff < maximum(abs(a), abs(b)) * tolerance);
+}
+
+template <typename T, typename std::enable_if<std::is_floating_point<T>::value>::type* = nullptr>
+inline constexpr bool is_approximately_zero(T a, T tolerance = std::numeric_limits<T>::epsilon()) {
+  return abs(a) <= tolerance;
+}
+
+template <typename T, typename std::enable_if<std::is_floating_point<T>::value>::type* = nullptr>
+inline constexpr bool is_definitely_less_than(T a, T b, T tolerance = std::numeric_limits<T>::epsilon()) {
+  const T diff = a - b;
+  return (diff < tolerance) || (diff < maximum(abs(a), abs(b)) * tolerance);
+}
+
+template <typename T, typename std::enable_if<std::is_floating_point<T>::value>::type* = nullptr>
+inline constexpr bool is_definitely_greater_than(T a, T b, T tolerance = std::numeric_limits<T>::epsilon()) {
+  const T diff = a - b;
+  return (diff > tolerance) || (diff > maximum(abs(a), abs(b)) * tolerance);
 }
 } // namespace fst::math.
