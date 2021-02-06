@@ -49,7 +49,7 @@ public:
   inline constexpr std::uint8_t alpha() const { return (_rgba & bits_alpha) >> shift_alpha; }
 
   inline color darker(float amount) const {
-    amount = 1.0f - util::clamp<float>(amount, 0.0f, 1.0f);
+    amount = 1.0f - std::clamp<float>(amount, 0.0f, 1.0f);
     return color(std::uint8_t(red() * amount), std::uint8_t(green() * amount), std::uint8_t(blue() * amount), alpha());
   }
 

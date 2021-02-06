@@ -34,8 +34,7 @@
 #pragma once
 #include <type_traits>
 
-namespace fst::util {
-
+namespace fst {
 template <typename T>
 [[deprecated("Use std::clamp instead.")]] inline T clamp(T d, T min, T max) {
   const T t = d < min ? min : d;
@@ -86,4 +85,4 @@ template <typename T, typename T1, typename... Ts>
 inline constexpr bool all_equals(T t, T1 t1, Ts... ts) {
   return (t == t1) && all_equals(t, ts...);
 }
-} // namespace fst::util.
+} // namespace fst.

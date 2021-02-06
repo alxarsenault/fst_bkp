@@ -244,13 +244,13 @@ namespace byte_vector_detail {
       static_assert(std::is_floating_point<T>::value, "Type must be a floating point.");
 
       if constexpr (c_opts == convert_options::pcm_8_bit) {
-        T s = fst::util::clamp<T>(value, (T)-1.0, (T)1.0);
+        T s = std::clamp<T>(value, (T)-1.0, (T)1.0);
         s = (s + (T)1.0) / (T)2.0;
         push_back(static_cast<value_type>(s * (T)255.0));
       }
       else if constexpr (c_opts == convert_options::pcm_16_bit) {
         constexpr T mult = (1 << 15) - 1;
-        const T s = fst::util::clamp<T>(value, (T)-1.0, (T)1.0);
+        const T s = std::clamp<T>(value, (T)-1.0, (T)1.0);
         push_back<std::int16_t>(static_cast<int16_t>(s * mult));
       }
       else if constexpr (c_opts == convert_options::pcm_24_bit) {
@@ -262,7 +262,7 @@ namespace byte_vector_detail {
       else if constexpr (c_opts == convert_options::pcm_32_bit) {
         constexpr T mult_tmp = 1 << 31;
         constexpr T mult = mult_tmp - 1;
-        const T s = fst::util::clamp<T>(value, (T)-1.0, (T)1.0);
+        const T s = std::clamp<T>(value, (T)-1.0, (T)1.0);
         push_back<std::int32_t>(static_cast<std::int32_t>(s * mult));
       }
     }
