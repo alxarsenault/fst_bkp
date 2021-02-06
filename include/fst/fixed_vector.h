@@ -34,71 +34,24 @@
 #pragma once
 #include "fst/assert.h"
 #include "fst/traits.h"
+#include "fst/aligned_buffer.h"
 
 #include <cstddef>
+#include <cstring>
 #include <memory>
 #include <utility>
 #include <iterator>
 #include <algorithm>
+#include <stdexcept>
 
 namespace fst {
-template <typename _Tp, std::size_t _Size, bool _IsHeapBuffer = false>
-class buffer {
-public:
-  using value_type = _Tp;
-  using reference = value_type&;
-  using const_reference = const value_type&;
-  using pointer = value_type*;
-  using const_pointer = const pointer;
-  using size_type = std::size_t;
-
-  using byte_type = std::byte;
-
-  static constexpr size_type maximum_size = _Size;
-  static_assert(maximum_size > 0, "buffer size must be greater than 0");
-
-  inline constexpr reference operator[](size_type n) { return data()[n]; }
-  inline constexpr const_reference operator[](size_type n) const { return data()[n]; }
-
-  inline pointer data() { return static_cast<pointer>(static_cast<void*>(_data)); }
-  inline const_pointer data() const { return (const_pointer)((const void*)(_data)); }
-
-private:
-  byte_type _data[maximum_size * sizeof(value_type)];
-};
-
-template <typename _Tp, std::size_t _Size>
-class buffer<_Tp, _Size, true> {
-public:
-  using value_type = _Tp;
-  using reference = value_type&;
-  using const_reference = const value_type&;
-  using pointer = value_type*;
-  using const_pointer = const pointer;
-  using size_type = std::size_t;
-
-  using byte_type = std::byte;
-
-  static constexpr size_type maximum_size = _Size;
-  static_assert(maximum_size > 0, "buffer size must be greater than 0");
-
-  inline constexpr reference operator[](size_type n) { return data()[n]; }
-  inline constexpr const_reference operator[](size_type n) const { return data()[n]; }
-
-  inline pointer data() { return static_cast<pointer>(static_cast<void*>(_data.get())); }
-  inline const_pointer data() const { return static_cast<const_pointer>(static_cast<void*>(_data.get())); }
-
-private:
-  std::unique_ptr<byte_type[]> _data
-      = { std::unique_ptr<byte_type[]>(new byte_type[maximum_size * sizeof(value_type)]) };
-};
-
 template <typename _Tp, std::size_t _Size, bool _IsHeapBuffer = false>
 class fixed_vector {
 public:
   using value_type = _Tp;
   using reference = value_type&;
-  using const_reference = const value_type&;
+  using const_reference = std::conditional_t<std::is_fundamental<value_type>::value, const value_type&, value_type>;
+  //  using const_reference = const value_type&;
   using pointer = value_type*;
   using const_pointer = const pointer;
   using iterator = pointer;
@@ -123,6 +76,7 @@ private:
   using is_move_constructible = std::bool_constant<std::is_move_constructible<value_type>::value>;
   using is_heap_buffer_condition = std::bool_constant<is_heap_buffer>;
   using is_not_heap_buffer_condition = std::bool_constant<!is_heap_buffer>;
+  using is_fundamental = std::bool_constant<std::is_fundamental<value_type>::value>;
 
   template <bool _Dummy, class _D = dependent_type_condition<_Dummy, is_default_constructible>>
   using enable_if_is_default_constructible = enable_if_same<_Dummy, _D>;
@@ -133,8 +87,13 @@ private:
   template <bool _Dummy, class _D = dependent_type_condition<_Dummy, is_not_copy_constructible>>
   using enable_if_is_not_copy_constructible = enable_if_same<_Dummy, _D>;
 
-  template <bool _Dummy, class _D = dependent_type_condition<_Dummy, is_move_constructible>>
-  using enable_if_is_move_constructible = enable_if_same<_Dummy, _D>;
+  //  template <bool _Dummy, class _D = dependent_type_condition<_Dummy, is_move_constructible>>
+  //  using enable_if_is_move_constructible = enable_if_same<_Dummy, _D>;
+
+  template <bool _Dummy,
+      class _D = dependent_type_condition<_Dummy,
+          typename std::conjunction<is_move_constructible, typename std::negation<is_fundamental>::type>>>
+  using enable_if_is_move_constructible_and_not_fundamental = enable_if_same<_Dummy, _D>;
 
   template <bool _Dummy, class _D = dependent_type_condition<_Dummy, is_heap_buffer_condition>>
   using enable_if_is_heap_buffer = enable_if_same<_Dummy, _D>;
@@ -151,8 +110,15 @@ public:
 
   fixed_vector(const fixed_vector& fv) {
     static_assert(std::is_copy_constructible<value_type>::value, "value_type is not copy constructible");
-    for (size_type i = 0; i < fv.size(); i++) {
-      push_back(fv[i]);
+
+    if constexpr (is_trivial) {
+      _size = fv.size();
+      std::memmove(data(), fv.data(), fv.size() * sizeof(value_type));
+    }
+    else {
+      for (size_type i = 0; i < fv.size(); i++) {
+        push_back(fv[i]);
+      }
     }
   }
 
@@ -167,9 +133,7 @@ public:
     }
     else if constexpr (is_trivial) {
       _size = fv.size();
-      for (size_type i = 0; i < _size; i++) {
-        _data[i] = fv[i];
-      }
+      std::memmove(data(), fv.data(), fv.size() * sizeof(value_type));
       fv._size = 0;
     }
     else if constexpr (is_move_constructible::value) {
@@ -187,7 +151,7 @@ public:
   }
 
   ~fixed_vector() {
-    if constexpr (!is_trivial) {
+    if constexpr (!std::is_trivially_destructible<value_type>::value) {
       for (size_type i = 0; i < _size; i++) {
         _data[i].~value_type();
       }
@@ -200,14 +164,24 @@ public:
     static_assert(std::is_copy_constructible<value_type>::value, "value_type is not copy constructible");
 
     if constexpr (is_trivial) {
-      for (size_type i = 0; i < fv.size(); i++) {
-        _data[i] = fv[i];
+      if constexpr (std::is_trivially_destructible<value_type>::value) {
+        std::memmove(data(), fv.data(), fv.size() * sizeof(value_type));
+        _size = fv.size();
       }
-      _size = fv.size();
+      else {
+        resize(fv.size());
+        std::memmove(data(), fv.data(), fv.size() * sizeof(value_type));
+      }
+      //      for (size_type i = 0; i < fv.size(); i++) {
+      //        _data[i] = fv[i];
+      //      }
+      //      _size = fv.size();
     }
     else {
-      for (size_type i = 0; i < size(); i++) {
-        _data[i].~value_type();
+      if constexpr (!std::is_trivially_destructible<value_type>::value) {
+        for (size_type i = 0; i < size(); i++) {
+          _data[i].~value_type();
+        }
       }
 
       for (size_type i = 0; i < fv.size(); i++) {
@@ -254,20 +228,36 @@ public:
   }
 
   inline reference at(size_type n) {
-    fst_assert(n < maximum_size, "Index out of bounds");
+    if (n >= size()) {
+      throw std::out_of_range("fixed_vector::at");
+    }
     return _data[n];
   }
 
   inline const_reference at(size_type n) const {
-    fst_assert(n < maximum_size, "Index out of bounds");
+    if (n >= size()) {
+      throw std::out_of_range("fixed_vector::at");
+    }
     return _data[n];
   }
 
-  inline reference front() { return _data[0]; }
-  inline const_reference front() const { return _data[0]; }
+  inline reference front() {
+    fst_assert(_size > 0, "fixed_vector::front when empty.");
+    return _data[0];
+  }
+  inline const_reference front() const {
+    fst_assert(_size > 0, "fixed_vector::front when empty.");
+    return _data[0];
+  }
 
-  inline reference back() { return _data[_size - 1]; }
-  inline const_reference back() const { return _data[_size - 1]; }
+  inline reference back() {
+    fst_assert(_size > 0, "fixed_vector::back when empty.");
+    return _data[_size - 1];
+  }
+  inline const_reference back() const {
+    fst_assert(_size > 0, "fixed_vector::back when empty.");
+    return _data[_size - 1];
+  }
 
   inline pointer data() noexcept { return _data.data(); }
   inline const_pointer data() const noexcept { return _data.data(); }
@@ -284,7 +274,8 @@ public:
     }
   }
 
-  template <bool _Dummy = true, class = enable_if_is_move_constructible<_Dummy>>
+  //  template <bool _Dummy = true, class = enable_if_is_move_constructible<_Dummy>>
+  template <bool _Dummy = true, class = enable_if_is_move_constructible_and_not_fundamental<_Dummy>>
   void push_back(value_type&& value) {
     fst_assert(_size < maximum_size, "Out of bounds push_back");
 
@@ -309,7 +300,7 @@ public:
 
   inline void pop_back() {
     fst_assert(_size, "pop_back when empty");
-    if constexpr (!is_trivial) {
+    if constexpr (!std::is_trivially_destructible<value_type>::value) {
       _data[_size - 1].~value_type();
     }
     _size--;
@@ -324,7 +315,7 @@ public:
     }
 
     if (size < _size) {
-      if constexpr (!is_trivial) {
+      if constexpr (!std::is_trivially_destructible<value_type>::value) {
         for (size_type i = size; i < _size; i++) {
           _data[i].~value_type();
         }
@@ -352,7 +343,7 @@ public:
     }
 
     if (size < _size) {
-      if constexpr (!is_trivial) {
+      if constexpr (!std::is_trivially_destructible<value_type>::value) {
         for (size_type i = size; i < _size; i++) {
           _data[i].~value_type();
         }
@@ -384,7 +375,7 @@ public:
       _data[i] = std::move(_data[i + 1]);
     }
 
-    if constexpr (!is_trivial) {
+    if constexpr (!std::is_trivially_destructible<value_type>::value) {
       _data[_size - 1].~value_type();
     }
 
