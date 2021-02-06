@@ -63,8 +63,7 @@ namespace byte_vector_detail {
     using size_type = typename buffer_type::size_type;
     using difference_type = typename buffer_type::difference_type;
 
-    static_assert(
-        traits::is_random_access_iterator<iterator>::value, "buffer_type needs to have random access iterator.");
+    static_assert(is_random_access_iterator<iterator>::value, "buffer_type needs to have random access iterator.");
 
     enum class convert_options {
       pcm_8_bit,
@@ -196,7 +195,7 @@ namespace byte_vector_detail {
     inline void push_back(const T& value) {
       const value_type* data = reinterpret_cast<const value_type*>(&value);
 
-      if constexpr (traits::is_iterable<T>::value) {
+      if constexpr (is_iterable<T>::value) {
         for (const auto& n : value) {
           push_back<std::remove_cvref_t<decltype(n)>, _IsLittleEndian>(n);
         }

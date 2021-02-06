@@ -57,10 +57,10 @@ inline void print_tuple(std::ostream& stream, const std::tuple<Tp...>& t) {
 
 template <typename T>
 inline void print_element(std::ostream& stream, const T& t) {
-  if constexpr (traits::has_ostream<T>::value) {
+  if constexpr (has_ostream<T>::value) {
     stream << t;
   }
-  else if constexpr (traits::is_iterable<T>::value) {
+  else if constexpr (is_iterable<T>::value) {
     stream << "{";
     std::size_t size = t.size();
     std::size_t count = 0;
@@ -70,19 +70,19 @@ inline void print_element(std::ostream& stream, const T& t) {
     }
     stream << "}";
   }
-  else if constexpr (traits::is_pair<T>::value) {
+  else if constexpr (is_pair<T>::value) {
     stream << "{";
     print_element(stream, t.first);
     stream << ", ";
     print_element(stream, t.second);
     stream << "}";
   }
-  else if constexpr (traits::is_tuple<T>::value) {
+  else if constexpr (is_tuple<T>::value) {
     stream << "{";
     print_tuple(stream, t);
     stream << "}";
   }
-  else if constexpr (traits::is_complex<T>::value) {
+  else if constexpr (is_complex<T>::value) {
     stream << "{";
     print_element(stream, t.real());
     stream << ", ";
@@ -182,5 +182,5 @@ public:
   }
 };
 
-//inline const print_initializer __print_initializer;
+// inline const print_initializer __print_initializer;
 } // namespace fst.

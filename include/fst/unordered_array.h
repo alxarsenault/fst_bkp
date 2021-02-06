@@ -48,9 +48,8 @@ public:
 private:
   static constexpr bool has_const_reference = std::is_fundamental<value_type>::value;
 
-  template <bool _Dummy,
-      class _D = traits::dependent_type_condition<_Dummy, traits::bool_constant<has_const_reference>>>
-  using enable_if_has_const_reference = traits::enable_if_same<_Dummy, _D>;
+  template <bool _Dummy, class _D = dependent_type_condition<_Dummy, std::bool_constant<has_const_reference>>>
+  using enable_if_has_const_reference = enable_if_same<_Dummy, _D>;
 
 public:
   using array_type = std::array<value_type, _Size>;
@@ -78,7 +77,7 @@ public:
 
   inline unordered_array(std::initializer_list<value_type> list) {
     for (auto n : list) {
-      push_back(traits::maybe_move(n));
+      push_back(maybe_move(n));
     }
   }
 

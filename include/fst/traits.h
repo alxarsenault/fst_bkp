@@ -37,10 +37,7 @@
 #include <complex>
 #include <utility>
 
-namespace fst::traits {
-template <bool _IsTrue>
-using bool_constant = typename std::conditional<_IsTrue, std::true_type, std::false_type>::type;
-
+namespace fst {
 template <typename _A, typename _B>
 using is_not_same = typename std::conditional<!std::is_same<_A, _B>::value, std::true_type, std::false_type>::type;
 
@@ -100,6 +97,13 @@ using is_detected_t = typename detector_detail::detector<detector_detail::nonesu
 
 template <template <class...> class _Op, typename K>
 using type_exist = is_detected<_Op, K>;
+
+template <class, class = void>
+struct is_defined : std::false_type {};
+
+template <class T>
+struct is_defined<T, std::enable_if_t<std::is_object<T>::value && !std::is_pointer<T>::value && (sizeof(T) > 0)>>
+    : std::true_type {};
 
 // Pair.
 namespace pair_detail {
@@ -176,4 +180,42 @@ using is_iterable = decltype(iterable_detail::is_iterable_impl<T>(0));
 // Has cbegin() and cend().
 template <typename T>
 using is_const_iterable = decltype(iterable_detail::is_const_iterable_impl<T>(0));
-} // namespace fst::traits.
+
+template <template <typename...> class base, typename derived>
+struct is_base_of_template_impl {
+  template <typename... Ts>
+  static constexpr std::true_type test(const base<Ts...>*);
+  static constexpr std::false_type test(...);
+  using type = decltype(test(std::declval<derived*>()));
+};
+
+template <template <typename...> class base, typename derived>
+using is_base_of_template = typename is_base_of_template_impl<base, derived>::type;
+
+template <typename T>
+constexpr typename std::underlying_type<T>::type integral(T value) {
+  return static_cast<typename std::underlying_type<T>::type>(value);
+}
+
+// Fold expressions for c++ < 17.
+// Calls your function with each of the provided variadic argument.
+template <class Func, class... Args>
+constexpr void fold(Func&& func, Args&&... args) {
+  (func(args), ...);
+}
+
+namespace static_for_detail {
+  template <class Func, size_t... I>
+  constexpr void static_for(Func&& func, std::index_sequence<I...>) {
+    return (func(std::integral_constant<size_t, I>{}), ...);
+  }
+} // namespace static_for_detail.
+
+// Call a for loop at compile time.
+// Your lambda is provided with an integral_constant.
+// Accept it with auto, access the index with '::value'.
+template <size_t N, class Func>
+constexpr void static_for(Func&& func) {
+  static_for_detail::static_for(std::forward<Func>(func), std::make_index_sequence<N>{});
+}
+} // namespace fst.

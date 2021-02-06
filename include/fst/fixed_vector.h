@@ -117,30 +117,30 @@ public:
   static constexpr bool is_trivial = std::is_trivial<value_type>::value;
 
 private:
-  using is_default_constructible = traits::bool_constant<std::is_default_constructible<value_type>::value>;
-  using is_copy_constructible = traits::bool_constant<std::is_copy_constructible<value_type>::value>;
-  using is_not_copy_constructible = traits::bool_constant<!std::is_copy_constructible<value_type>::value>;
-  using is_move_constructible = traits::bool_constant<std::is_move_constructible<value_type>::value>;
-  using is_heap_buffer_condition = traits::bool_constant<is_heap_buffer>;
-  using is_not_heap_buffer_condition = traits::bool_constant<!is_heap_buffer>;
+  using is_default_constructible = std::bool_constant<std::is_default_constructible<value_type>::value>;
+  using is_copy_constructible = std::bool_constant<std::is_copy_constructible<value_type>::value>;
+  using is_not_copy_constructible = std::bool_constant<!std::is_copy_constructible<value_type>::value>;
+  using is_move_constructible = std::bool_constant<std::is_move_constructible<value_type>::value>;
+  using is_heap_buffer_condition = std::bool_constant<is_heap_buffer>;
+  using is_not_heap_buffer_condition = std::bool_constant<!is_heap_buffer>;
 
-  template <bool _Dummy, class _D = traits::dependent_type_condition<_Dummy, is_default_constructible>>
-  using enable_if_is_default_constructible = traits::enable_if_same<_Dummy, _D>;
+  template <bool _Dummy, class _D = dependent_type_condition<_Dummy, is_default_constructible>>
+  using enable_if_is_default_constructible = enable_if_same<_Dummy, _D>;
 
-  template <bool _Dummy, class _D = traits::dependent_type_condition<_Dummy, is_copy_constructible>>
-  using enable_if_is_copy_constructible = traits::enable_if_same<_Dummy, _D>;
+  template <bool _Dummy, class _D = dependent_type_condition<_Dummy, is_copy_constructible>>
+  using enable_if_is_copy_constructible = enable_if_same<_Dummy, _D>;
 
-  template <bool _Dummy, class _D = traits::dependent_type_condition<_Dummy, is_not_copy_constructible>>
-  using enable_if_is_not_copy_constructible = traits::enable_if_same<_Dummy, _D>;
+  template <bool _Dummy, class _D = dependent_type_condition<_Dummy, is_not_copy_constructible>>
+  using enable_if_is_not_copy_constructible = enable_if_same<_Dummy, _D>;
 
-  template <bool _Dummy, class _D = traits::dependent_type_condition<_Dummy, is_move_constructible>>
-  using enable_if_is_move_constructible = traits::enable_if_same<_Dummy, _D>;
+  template <bool _Dummy, class _D = dependent_type_condition<_Dummy, is_move_constructible>>
+  using enable_if_is_move_constructible = enable_if_same<_Dummy, _D>;
 
-  template <bool _Dummy, class _D = traits::dependent_type_condition<_Dummy, is_heap_buffer_condition>>
-  using enable_if_is_heap_buffer = traits::enable_if_same<_Dummy, _D>;
+  template <bool _Dummy, class _D = dependent_type_condition<_Dummy, is_heap_buffer_condition>>
+  using enable_if_is_heap_buffer = enable_if_same<_Dummy, _D>;
 
-  template <bool _Dummy, class _D = traits::dependent_type_condition<_Dummy, is_not_heap_buffer_condition>>
-  using enable_if_is_not_heap_buffer = traits::enable_if_same<_Dummy, _D>;
+  template <bool _Dummy, class _D = dependent_type_condition<_Dummy, is_not_heap_buffer_condition>>
+  using enable_if_is_not_heap_buffer = enable_if_same<_Dummy, _D>;
 
 public:
   fixed_vector() = default;
