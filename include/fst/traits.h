@@ -32,10 +32,12 @@
 ///
 
 #pragma once
+#include <cstddef>
 #include <type_traits>
 #include <iterator>
 #include <complex>
 #include <utility>
+#include <tuple>
 
 namespace fst {
 template <typename _A, typename _B>

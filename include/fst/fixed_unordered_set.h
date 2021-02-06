@@ -35,7 +35,7 @@
 #include "fst/assert.h"
 #include "fst/spin_lock.h"
 #include "fst/unordered_array.h"
-#include <bitset>
+#include <array>
 #include <atomic>
 
 namespace fst {
@@ -61,7 +61,7 @@ public:
     }
 
     _array.push_back(value);
-    _is_in_array.set(value);
+    _is_in_array[value] = true;
   }
 
   void erase(value_type value) {
@@ -70,7 +70,7 @@ public:
       return;
     }
 
-    _is_in_array.reset(value);
+    _is_in_array[value] = false;
     _array.erase_first_if([value](value_type v) { return v == value; });
   }
 
@@ -80,7 +80,7 @@ public:
   }
 
   void clear() noexcept {
-    _is_in_array.reset();
+    _is_in_array.fill(false);
     _array.clear();
   }
 
@@ -91,16 +91,13 @@ public:
   }
 
   inline const_iterator begin() const noexcept { return _array.begin(); }
-
   inline const_iterator end() const noexcept { return _array.end(); }
-
   inline size_type size() const noexcept { return _array.size(); }
-
   inline bool empty() const noexcept { return _array.empty(); }
 
 private:
   array_type _array;
-  std::bitset<maximum_size> _is_in_array;
+  std::array<bool, maximum_size> _is_in_array;
 };
 
 template <typename _T, std::size_t _Size>
@@ -127,7 +124,7 @@ public:
     }
 
     _array.push_back(value);
-    _is_in_array.set(value);
+    _is_in_array[value] = true;
   }
 
   void erase(value_type value) {
@@ -138,7 +135,7 @@ public:
       return;
     }
 
-    _is_in_array.reset(value);
+    _is_in_array[value] = false;
     _array.erase_first_if([value](value_type v) { return v == value; });
   }
 
@@ -151,14 +148,16 @@ public:
 
   void clear() noexcept {
     scoped_spin_lock lock(_mutex);
-    _is_in_array.reset();
+    _is_in_array.fill(false);
     _array.clear();
   }
 
   inline array_type get_content_and_clear() noexcept {
     scoped_spin_lock lock(_mutex);
     array_type content = _array;
-    _is_in_array.reset();
+
+    // Can't call clear() here to prevent dead lock.
+    _is_in_array.fill(false);
     _array.clear();
     return content;
   }
@@ -180,7 +179,7 @@ public:
 
 private:
   array_type _array;
-  std::bitset<maximum_size> _is_in_array;
+  std::array<bool, maximum_size> _is_in_array;
   mutable spin_lock_mutex _mutex;
 };
 } // namespace fst.
