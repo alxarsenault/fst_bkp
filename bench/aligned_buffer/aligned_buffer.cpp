@@ -1,19 +1,74 @@
 #include <benchmark/benchmark.h>
 #include "fst/aligned_buffer.h"
+#include "fst/print.h"
+#include <array>
+#include <vector>
 #include <string>
 
-static void BM_StringCreation(benchmark::State& state) {
-  for (auto _ : state)
-    std::string empty_string;
+static void fst_bench_array_loop(benchmark::State& state) {
+  for (auto _ : state) {
+    std::array<float, 512> buffer;
+    for (std::size_t i = 0; i < buffer.size(); i++) {
+      buffer[i] = i;
+    }
+    benchmark::ClobberMemory();
+  }
 }
-// Register the function as a benchmark
-BENCHMARK(BM_StringCreation);
+BENCHMARK(fst_bench_array_loop);
 
-// Define another benchmark
-static void BM_StringCopy(benchmark::State& state) {
-  std::string x = "hello";
-  for (auto _ : state)
-    std::string copy(x);
+static void fst_bench_aligned_buffer_loop(benchmark::State& state) {
+  for (auto _ : state) {
+    fst::stack_buffer<float, 512> buffer;
+    for (std::size_t i = 0; i < buffer.size(); i++) {
+      buffer[i] = i;
+    }
+    benchmark::ClobberMemory();
+  }
 }
-BENCHMARK(BM_StringCopy);
+BENCHMARK(fst_bench_aligned_buffer_loop);
 
+static void fst_bench_struct_array_loop(benchmark::State& state) {
+  for (auto _ : state) {
+    std::array<std::pair<int, int>, 512> buffer;
+    for (std::size_t i = 0; i < buffer.size(); i++) {
+      buffer[i].first = i;
+      buffer[i].second = i * 8;
+    }
+    benchmark::ClobberMemory();
+  }
+}
+BENCHMARK(fst_bench_struct_array_loop);
+
+static void fst_bench_struct_aligned_buffer_loop(benchmark::State& state) {
+  for (auto _ : state) {
+    fst::stack_buffer<std::pair<int, int>, 512> buffer;
+    for (std::size_t i = 0; i < buffer.size(); i++) {
+      buffer[i].first = i;
+      buffer[i].second = i * 8;
+    }
+    benchmark::ClobberMemory();
+  }
+}
+BENCHMARK(fst_bench_struct_aligned_buffer_loop);
+
+static void fst_bench_vector_loop(benchmark::State& state) {
+  for (auto _ : state) {
+    std::vector<float> buffer(512);
+    for (std::size_t i = 0; i < buffer.size(); i++) {
+      buffer[i] = i;
+    }
+    benchmark::ClobberMemory();
+  }
+}
+BENCHMARK(fst_bench_vector_loop);
+
+static void fst_bench_heap_aligned_buffer_loop(benchmark::State& state) {
+  for (auto _ : state) {
+    fst::heap_buffer<float, 512> buffer;
+    for (std::size_t i = 0; i < buffer.size(); i++) {
+      buffer[i] = i;
+    }
+    benchmark::ClobberMemory();
+  }
+}
+BENCHMARK(fst_bench_heap_aligned_buffer_loop);

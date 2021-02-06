@@ -72,6 +72,18 @@ if (${FST_BUILD_BENCH})
 
     add_executable(${FST_BENCH_NAME} ${FST_BENCH_SOURCES})
 
+    set_target_properties(${FST_BENCH_NAME} PROPERTIES
+        # CXX_STANDARD 17
+        # CXX_EXTENSIONS OFF
+        # LINKER_LANGUAGE CXX
+        CMAKE_CXX_FLAGS "-O3 ${CMAKE_CXX_FLAGS}"
+        # FOLDER dev/
+    )
+
+    target_compile_definitions(${FST_BENCH_NAME} PUBLIC
+        NDEBUG
+    )
+
     target_link_libraries(${FST_BENCH_NAME} PUBLIC
         fst
         benchmark::benchmark

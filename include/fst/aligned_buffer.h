@@ -66,16 +66,18 @@ namespace detail {
     static_assert(math::is_power_of_two(alignment), "aligned_buffer alignment is not a power of 2.");
     static_assert(alignment >= value_type_alignement, "aligned_buffer alignment is less than value_type_alignement");
 
-    inline reference operator[](size_type __index) {
+    inline size_type size() const noexcept { return maximum_size; }
+
+    inline reference operator[](size_type __index) noexcept {
       return *std::launder(reinterpret_cast<value_type*>(&_data[__index]));
     }
 
-    inline const_reference operator[](size_type __index) const {
+    inline const_reference operator[](size_type __index) const noexcept {
       return *std::launder(reinterpret_cast<const value_type*>(&_data[__index]));
     }
 
-    inline pointer data() { return std::launder(reinterpret_cast<value_type*>(_data)); }
-    inline const_pointer data() const { return std::launder(reinterpret_cast<const value_type*>(_data)); }
+    inline pointer data() noexcept { return std::launder(reinterpret_cast<value_type*>(_data)); }
+    inline const_pointer data() const noexcept { return std::launder(reinterpret_cast<const value_type*>(_data)); }
 
   private:
     using aligned_type = typename std::aligned_storage<sizeof(value_type), value_type_alignement>::type;
@@ -102,12 +104,13 @@ namespace detail {
     static_assert(math::is_power_of_two(alignment), "aligned_buffer alignment is not a power of 2.");
     static_assert(alignment >= value_type_alignement, "aligned_buffer alignment is less than value_type_alignement");
 
-    inline reference operator[](size_type __index) { return _data[__index]; }
+    inline size_type size() const noexcept { return maximum_size; }
 
-    inline const_reference operator[](size_type __index) const { return _data[__index]; }
+    inline reference operator[](size_type __index) noexcept { return _data[__index]; }
+    inline const_reference operator[](size_type __index) const noexcept { return _data[__index]; }
 
-    inline pointer data() { return _data; }
-    inline const_pointer data() const { return _data; }
+    inline pointer data() noexcept { return _data; }
+    inline const_pointer data() const noexcept { return _data; }
 
   private:
     alignas(alignment) value_type _data[maximum_size];
@@ -132,11 +135,13 @@ namespace detail {
     static_assert(math::is_power_of_two(alignment), "aligned_buffer alignment is not a power of 2.");
     static_assert(alignment >= value_type_alignement, "aligned_buffer alignment is less than value_type_alignement");
 
-    inline reference operator[](size_type __index) { return _data->operator[](__index); }
-    inline const_reference operator[](size_type __index) const { return _data->operator[](__index); }
+    inline size_type size() const noexcept { return maximum_size; }
 
-    inline pointer data() { return _data->data(); }
-    inline const_pointer data() const { return _data->data(); }
+    inline reference operator[](size_type __index) noexcept { return _data->operator[](__index); }
+    inline const_reference operator[](size_type __index) const noexcept { return _data->operator[](__index); }
+
+    inline pointer data() noexcept { return _data->data(); }
+    inline const_pointer data() const noexcept { return _data->data(); }
 
   private:
     using data_buffer_type = aligned_buffer<_Tp, _Size, _Alignement, false, _IsFondamental>;
