@@ -34,7 +34,6 @@
 #pragma once
 #include "fst/assert.h"
 #include "fst/traits.h"
-#include "fst/buffer_view.h"
 #include "fst/mapped_file.h"
 
 #include <algorithm>
@@ -195,17 +194,24 @@ namespace byte_vector_detail {
 
     template <typename T, bool _IsLittleEndian = true>
     inline void push_back(const T& value) {
-      static_assert(std::is_trivially_copyable<T>::value, "Type cannot be serialized.");
       const value_type* data = reinterpret_cast<const value_type*>(&value);
 
-      if constexpr (_IsLittleEndian) {
-        for (std::size_t i = 0; i < sizeof(T); i++) {
-          _buffer.push_back(data[i]);
+      if constexpr (traits::is_iterable<T>::value) {
+        for (const auto& n : value) {
+          push_back<std::remove_cvref_t<decltype(n)>, _IsLittleEndian>(n);
         }
       }
       else {
-        for (int i = sizeof(T) - 1; i >= 0; i--) {
-          _buffer.push_back(data[i]);
+        static_assert(std::is_trivially_copyable<T>::value, "Type cannot be serialized.");
+        if constexpr (_IsLittleEndian) {
+          for (std::size_t i = 0; i < sizeof(T); i++) {
+            _buffer.push_back(data[i]);
+          }
+        }
+        else {
+          for (int i = sizeof(T) - 1; i >= 0; i--) {
+            _buffer.push_back(data[i]);
+          }
         }
       }
     }
@@ -233,11 +239,11 @@ namespace byte_vector_detail {
       push_back<T, _IsLittleEndian>(data.data(), data.size());
     }
 
-    template <typename T, bool _IsLittleEndian = true>
-    inline void push_back(const buffer_view<T>& data) {
-      static_assert(std::is_trivially_copyable<T>::value, "Type cannot be serialized.");
-      push_back<T, _IsLittleEndian>(data.data(), data.size());
-    }
+    //    template <typename T, bool _IsLittleEndian = true>
+    //    inline void push_back(const std::span<T>& data) {
+    //      static_assert(std::is_trivially_copyable<T>::value, "Type cannot be serialized.");
+    //      push_back<T, _IsLittleEndian>(data.data(), data.size());
+    //    }
 
     template <typename T, convert_options c_opts>
     inline void push_back(const T& value) {

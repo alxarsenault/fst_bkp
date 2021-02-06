@@ -36,17 +36,24 @@
 #include <cstddef>
 #include <new>
 #include <algorithm>
+#include <span>
+#include <stdexcept>
 
 namespace fst {
-class byte_buffer_view {
+class byte_view : public std::span<const std::uint8_t> {
 public:
-  using value_type = std::uint8_t;
-  using pointer = value_type*;
-  using const_pointer = const value_type*;
-  using const_reference = const value_type&;
-  using const_iterator = const_pointer;
-  using size_type = std::size_t;
-  using difference_type = std::ptrdiff_t;
+  using span_type = std::span<const std::uint8_t>;
+  using value_type = typename span_type::value_type;
+  using size_type = typename span_type::size_type;
+  using difference_type = typename span_type::difference_type;
+  using pointer = typename span_type::pointer;
+  using const_pointer = typename span_type::const_pointer;
+  using reference = typename span_type::reference;
+  using const_reference = typename span_type::const_reference;
+  using iterator = typename span_type::iterator;
+  using const_iterator = typename span_type::const_iterator;
+  using reverse_iterator = typename span_type::reverse_iterator;
+  using const_reverse_iterator = typename span_type::const_reverse_iterator;
 
   enum class convert_options {
     pcm_8_bit,
@@ -55,58 +62,57 @@ public:
     pcm_32_bit,
   };
 
-  inline byte_buffer_view(const_pointer data = nullptr, size_type size = 0) noexcept
-      : _data(data)
-      , _size(size) {}
+  using span_type::span_type;
 
-  byte_buffer_view(const byte_buffer_view&) noexcept = default;
-  byte_buffer_view(byte_buffer_view&& bv) noexcept
-      : _data(bv._data)
-      , _size(bv._size) {
-    bv._data = nullptr;
-    bv._size = 0;
-  }
+  template <typename T>
+  inline byte_view(const std::span<T>& buffer)
+      : span_type((pointer)buffer.data(), buffer.size_bytes()) {}
 
-  byte_buffer_view& operator=(const byte_buffer_view&) noexcept = default;
-  byte_buffer_view& operator=(byte_buffer_view&& bv) noexcept {
-    _data = bv._data;
-    _size = bv._size;
-    bv._data = nullptr;
-    bv._size = 0;
-    return *this;
+  using span_type::operator=;
+
+  template <typename T>
+  inline byte_view& operator=(const std::span<T>& buffer) {
+    return (*this).operator=(byte_span((pointer)buffer.data(), buffer.size_bytes()));
   }
 
   //
   // MARK: Iterators.
   //
-  inline const_iterator begin() const noexcept { return _data; }
-  inline const_iterator end() const noexcept { return _data + _size; }
+  using span_type::begin;
+  using span_type::cbegin;
+  using span_type::cend;
+  using span_type::end;
 
   //
   // MARK: Capacity.
   //
-  [[nodiscard]] inline bool is_valid() const noexcept { return _data; }
-  [[nodiscard]] inline size_type size() const noexcept { return _size; }
-  [[nodiscard]] inline bool empty() const noexcept { return _size == 0; }
+  [[nodiscard]] inline bool is_valid() const noexcept { return size() != 0; }
+  using span_type::empty;
+  using span_type::size;
 
   //
   // MARK: Element access.
   //
-  inline const_reference operator[](size_type __index) const noexcept { return _data[__index]; }
-  inline const_reference at(size_type __index) const { return _data[__index]; }
-  inline const_reference front() const noexcept { return _data[0]; }
-  inline const_reference back() const noexcept { return _data[_size - 1]; }
-  inline const_pointer data() const noexcept { return _data; }
-  inline const_pointer data(size_type __index) const noexcept { return _data + __index; }
+  using span_type::operator[];
+  using span_type::back;
+  using span_type::data;
+  using span_type::front;
+  inline const_reference at(size_type __index) const {
+    if (__index >= size()) {
+      throw std::out_of_range("byte_span::at");
+    }
+    return data()[__index];
+  }
+  inline const_pointer data(size_type __index) const noexcept { return data() + __index; }
 
   template <typename T>
   inline const T* data() const noexcept {
-    return std::launder(reinterpret_cast<const T*>(_data));
+    return std::launder(reinterpret_cast<const T*>(data()));
   }
 
   template <typename T>
   inline const T* data(size_type __index) const noexcept {
-    return std::launder(reinterpret_cast<const T*>(_data + __index));
+    return std::launder(reinterpret_cast<const T*>(data() + __index));
   }
 
   //
@@ -114,22 +120,22 @@ public:
   //
   template <class T>
   inline difference_type find(const T* data, size_type size) const noexcept {
-    const_iterator it = std::search(begin(), end(), data, data + size);
+    const_iterator it = std::search(cbegin(), cend(), data, data + size);
     if (it == end()) {
       return -1;
     }
 
-    return std::distance(begin(), it);
+    return std::distance(cbegin(), it);
   }
 
   template <class T>
   inline difference_type find(size_type offset, const T* data, size_type size) const noexcept {
-    const_iterator it = std::search(begin() + offset, end(), data, data + size);
+    const_iterator it = std::search(cbegin() + offset, cend(), data, data + size);
     if (it == end()) {
       return -1;
     }
 
-    return std::distance(begin(), it);
+    return std::distance(cbegin(), it);
   }
 
   //
@@ -149,24 +155,24 @@ public:
     if constexpr (_IsLittleEndian) {
       if constexpr (sizeof(T) <= 8) {
         T value;
-        pointer data = reinterpret_cast<pointer>(&value);
+        value_type* value_data = reinterpret_cast<value_type*>(&value);
         for (size_type i = __index, j = 0; i < __index + sizeof(T); i++, j++) {
-          data[j] = _data[i];
+          value_data[j] = data()[i];
         }
         return value;
       }
       else {
         T value;
-        pointer value_data = reinterpret_cast<pointer>(&value);
+        value_type* value_data = reinterpret_cast<value_type*>(&value);
         std::memmove(value_data, data<T>(__index), sizeof(T));
         return value;
       }
     }
     else {
       T value;
-      pointer data = reinterpret_cast<pointer>(&value);
+      value_type* value_data = reinterpret_cast<value_type*>(&value);
       for (size_type i = __index, j = sizeof(T) - 1; i < __index + sizeof(T); i++, j--) {
-        data[j] = _data[i];
+        value_data[j] = data()[i];
       }
       return value;
     }
@@ -175,7 +181,7 @@ public:
   template <typename T, bool _IsLittleEndian = true>
   inline T as(const_iterator pos) const noexcept {
     static_assert(std::is_trivially_copyable<T>::value, "Type cannot be serialized.");
-    difference_type index = std::distance(pos, begin());
+    difference_type index = std::distance(pos, cbegin());
     fst_assert(index >= 0, "Wrong iterator position.");
     return as<T, _IsLittleEndian>((size_type)index);
   }
@@ -191,7 +197,7 @@ public:
   template <typename T, bool _IsLittleEndian = true>
   inline T as(const_iterator pos, size_type array_index) const noexcept {
     static_assert(std::is_trivially_copyable<T>::value, "Type cannot be serialized.");
-    difference_type index = std::distance(pos, begin());
+    difference_type index = std::distance(pos, cbegin());
     fst_assert(index >= 0, "Wrong iterator position.");
     return as<T, _IsLittleEndian>((size_type)index, array_index);
   }
@@ -216,7 +222,7 @@ public:
 
     if constexpr (c_opts == convert_options::pcm_8_bit) {
       constexpr T div = 1 << 7;
-      return static_cast<T>(int(_data[__index]) - 128) / div;
+      return static_cast<T>(int(data()[__index]) - 128) / div;
     }
     else if constexpr (c_opts == convert_options::pcm_16_bit) {
       constexpr T denom = T(1.0) / (T)(1 << 15);
@@ -224,8 +230,8 @@ public:
     }
     else if constexpr (c_opts == convert_options::pcm_24_bit) {
       constexpr T denom = 1.0 / (T)8388608.0;
-      std::int32_t value = (static_cast<std::int32_t>(_data[__index + 2]) << 16)
-          | (static_cast<std::int32_t>(_data[__index + 1]) << 8) | static_cast<std::int32_t>(_data[__index]);
+      std::int32_t value = (static_cast<std::int32_t>(data()[__index + 2]) << 16)
+          | (static_cast<std::int32_t>(data()[__index + 1]) << 8) | static_cast<std::int32_t>(data()[__index]);
 
       // If the 24th bit is set, this is a negative number in 24-bit world.
       // Make sure sign is extended to the 32 bit float.
@@ -236,9 +242,5 @@ public:
       return as<std::int32_t>(__index) / div;
     }
   }
-
-private:
-  const_pointer _data;
-  size_type _size;
 };
 } // namespace fst.

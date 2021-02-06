@@ -32,14 +32,12 @@
 ///
 
 #pragma once
-#include "fst/buffer_view.h"
-#include "fst/byte_buffer_view.h"
-
 #include <cstddef>
 #include <filesystem>
 #include <string_view>
 #include <cstdlib>
 #include <cstdio>
+#include <span>
 
 // clang-format off
 #ifdef _WIN32
@@ -102,14 +100,9 @@ public:
   inline bool is_valid() const noexcept { return _data && _size; }
   inline size_type size() const noexcept { return _size; }
   inline std::string_view str() const noexcept { return std::string_view((const char*)(_data), _size); }
-  inline fst::buffer_view<value_type> content() const noexcept { return fst::buffer_view<value_type>(_data, _size); }
-
-  template <typename _ByteType>
-  inline fst::buffer_view<_ByteType> content() const noexcept {
-    return fst::buffer_view<_ByteType>((const _ByteType*)(_data), _size);
+  inline std::span<const value_type> content() const noexcept {
+    return std::span<const value_type>((const value_type*)_data, _size);
   }
-
-  inline byte_buffer_view byte_content() const noexcept { return byte_buffer_view(_data, _size); }
 
   bool open(const std::filesystem::path& file_path) {
     if (_data) {

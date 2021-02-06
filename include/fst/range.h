@@ -51,7 +51,7 @@ inline constexpr range<T> make_range(T min, T max) {
 
 template <const auto& _Range>
 struct clipped_value {
-  using value_type = typename fst::remove_cvref_t<decltype(_Range)>::value_type;
+  using value_type = typename std::remove_cvref_t<decltype(_Range)>::value_type;
 
 #if __FST_HAS_DEBUG_ASSERT
   clipped_value(value_type v) {
