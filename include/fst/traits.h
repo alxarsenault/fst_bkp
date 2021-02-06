@@ -37,6 +37,16 @@
 #include <complex>
 #include <utility>
 
+namespace fst {
+template <class T>
+struct remove_cvref {
+  typedef std::remove_cv_t<std::remove_reference_t<T>> type;
+};
+
+template <class T>
+using remove_cvref_t = typename remove_cvref<T>::type;
+} // namespace fst.
+
 namespace fst::traits {
 template <bool _IsTrue>
 using bool_constant = typename std::conditional<_IsTrue, std::true_type, std::false_type>::type;

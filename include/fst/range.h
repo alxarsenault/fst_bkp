@@ -32,58 +32,39 @@
 ///
 
 #pragma once
-#include <type_traits>
+#include "fst/assert.h"
+#include "fst/traits.h"
+#include <algorithm>
 
-namespace fst::util {
+namespace fst {
+template <typename T>
+struct range {
+  using value_type = T;
+  T min;
+  T max;
+};
 
 template <typename T>
-[[deprecated("Use std::clamp instead.")]] inline T clamp(T d, T min, T max) {
-  const T t = d < min ? min : d;
-  return t > max ? max : t;
-}
+inline constexpr range<T> make_range(T min, T max) {
+  return range<T>{ min, max };
+};
 
-template <typename T, typename TMin, typename TMax>
-inline bool clamp_inplace(T& d, TMin min, TMax max) {
-  T old_d = d;
-  const T t = static_cast<T>(d < min ? min : d);
-  return old_d != (d = static_cast<T>(t > max ? max : t));
-}
+template <const auto& _Range>
+struct clipped_value {
+  using value_type = typename fst::remove_cvref_t<decltype(_Range)>::value_type;
 
-template <typename T>
-inline constexpr T minimum(T t) {
-  return t;
-}
-template <typename T0, typename T1, typename... Ts>
-inline constexpr typename std::common_type<T0, T1, Ts...>::type minimum(T0 v1, T1 v2, Ts... vs) {
-  return v2 < v1 ? minimum(v2, vs...) : minimum(v1, vs...);
-}
+#if __FST_HAS_DEBUG_ASSERT
+  clipped_value(value_type v) {
+    fst_assert(v >= _Range.min && v <= _Range.max, "clip_range out of range.");
+    value = std::clamp(v, _Range.min, _Range.max);
+  }
+#else
+  clipped_value(value_type v)
+      : value(std::clamp(v, _Range.min, _Range.max)) {}
+#endif // __FST_HAS_DEBUG_ASSERT
 
-template <typename T>
-inline constexpr T maximum(T t) {
-  return t;
-}
-template <typename T0, typename T1, typename... Ts>
-inline constexpr typename std::common_type<T0, T1, Ts...>::type maximum(T0 v1, T1 v2, Ts... vs) {
-  return v2 > v1 ? maximum(v2, vs...) : maximum(v1, vs...);
-}
+  inline operator value_type() const noexcept { return value; }
 
-template <typename T, typename T1>
-inline constexpr bool is_one_of(T t, T1 t1) {
-  return t == t1;
-}
-
-template <typename T, typename T1, typename... Ts>
-inline constexpr bool is_one_of(T t, T1 t1, Ts... ts) {
-  return (t == t1) || is_one_of(t, ts...);
-}
-
-template <typename T, typename T1>
-inline constexpr bool all_equals(T t, T1 t1) {
-  return t == t1;
-}
-
-template <typename T, typename T1, typename... Ts>
-inline constexpr bool all_equals(T t, T1 t1, Ts... ts) {
-  return (t == t1) && all_equals(t, ts...);
-}
-} // namespace fst::util.
+  value_type value;
+};
+} // namespace fst.
