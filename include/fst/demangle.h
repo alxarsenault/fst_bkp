@@ -40,8 +40,10 @@
   #include <cxxabi.h>
   #include <cstdio>
   #define FST_HAS_DEMANGLE 1
+  namespace fst::config { inline constexpr bool has_demangle = true; }
 #else
   #define FST_HAS_DEMANGLE 0
+  namespace fst::config { inline constexpr bool has_demangle = false; }
 #endif
 // clang-format on
 
