@@ -32,39 +32,7 @@
 ///
 
 #pragma once
-#include "fst/assert.h"
-#include "fst/traits.h"
-#include <algorithm>
-
 namespace fst {
-template <typename T>
-struct range {
-  using value_type = T;
-  T min;
-  T max;
-};
-
-template <typename T>
-inline constexpr range<T> make_range(T min, T max) {
-  return range<T>{ min, max };
-}
-
-template <const auto& _Range>
-struct clipped_value {
-  using value_type = typename std::remove_cvref_t<decltype(_Range)>::value_type;
-
-#if __FST_HAS_DEBUG_ASSERT
-  clipped_value(value_type v) {
-    fst_assert(v >= _Range.min && v <= _Range.max, "value out of range, should be inside [" + std::to_string(_Range.min) + ", " + std::to_string(_Range.max) + "].");
-    value = std::clamp(v, _Range.min, _Range.max);
-  }
-#else
-  clipped_value(value_type v)
-      : value(std::clamp(v, _Range.min, _Range.max)) {}
-#endif // __FST_HAS_DEBUG_ASSERT
-
-  inline operator value_type() const noexcept { return value; }
-
-  value_type value;
-};
-} // namespace fst.
+template <typename... Types>
+inline constexpr void unused(Types&&...) noexcept {}
+} // namespace fst
