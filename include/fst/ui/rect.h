@@ -128,6 +128,11 @@ namespace detail {
       return rect(position.x + point.x, position.y + point.y, size.width - (value_type)(2.0 * point.x),
           size.height - (value_type)(2.0 * point.y));
     }
+    
+     inline constexpr rect get_exterior_rect(const point_type& point) const {
+      return rect(position.x - point.x, position.y - point.y, size.width + (value_type)(2.0 * point.x),
+          size.height + (value_type)(2.0 * point.y));
+    }
 
     inline constexpr void reduce(const point_type& point) {
       position.x += point.x;

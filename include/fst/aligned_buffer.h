@@ -68,6 +68,11 @@ namespace detail {
 
     inline size_type size() const noexcept { return maximum_size; }
 
+    template<typename ...Args>
+    inline void construct(size_type __index, Args&& ... args) noexcept {
+      new (&_data[__index]) value_type{std::forward<Args>(args)...};
+    }
+
     inline reference operator[](size_type __index) noexcept {
       return *std::launder(reinterpret_cast<value_type*>(&_data[__index]));
     }

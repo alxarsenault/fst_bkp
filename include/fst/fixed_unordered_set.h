@@ -90,6 +90,10 @@ public:
     return content;
   }
 
+  inline const array_type& content() const {
+    return _array;
+  }
+
   inline const_iterator begin() const noexcept { return _array.begin(); }
   inline const_iterator end() const noexcept { return _array.end(); }
   inline size_type size() const noexcept { return _array.size(); }

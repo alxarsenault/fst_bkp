@@ -50,6 +50,7 @@ template <typename T> constexpr T one_over_pi_2 = 1.0 / (pi<T> * pi<T>);
 template <typename T> constexpr T one_over_two_pi = 1.0 / two_pi<T>;
 template <typename T> constexpr T pi_over_two = pi<T> * 0.5;
 template <typename T> constexpr T pi_over_four = pi<T> * 0.25;
+template <typename T> constexpr T sqrt_2_over_2 = T(0.7071067811865476);
 
 template <typename T> struct zero_t { static constexpr T value = zero<T>; };
 template <typename T> struct one_t { static constexpr T value = one<T>; };
@@ -61,6 +62,7 @@ template <typename T> struct two_over_pi_t { static constexpr T value = two_over
 template <typename T> struct one_over_pi_2_t { static constexpr T value = one_over_pi_2<T>; };
 template <typename T> struct pi_over_two_t { static constexpr T value = pi_over_two<T>; };
 template <typename T> struct pi_over_four_t { static constexpr T value = pi_over_four<T>; };
+template <typename T> struct sqrt_2_over_2_t { static constexpr T value = sqrt_2_over_2<T>; };
 // clang-format on
 
 template <typename T, typename std::enable_if<std::is_integral<T>::value>::type* = nullptr>

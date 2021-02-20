@@ -48,6 +48,12 @@ inline bool clamp_inplace(T& d, TMin min, TMax max) {
   return old_d != (d = static_cast<T>(t > max ? max : t));
 }
 
+template <typename T, typename TMin, typename TMax>
+inline T clamp_to(T d, TMin min, TMax max, TMin min_if_below_min, TMax max_if_above_max) {
+  const T t = d < min ? min_if_below_min : d;
+  return t > max ? max_if_above_max : t;
+}
+
 template <typename T>
 inline constexpr T minimum(T t) {
   return t;
@@ -95,4 +101,15 @@ template <typename T>
 inline constexpr bool is_out_of_range(T x, T left, T right) {
   return is_in_range(x, left, right);
 }
+
+template<typename T>
+[[nodiscard]] inline constexpr bool assign(T& dst, T src) {
+  if(dst == src) {
+    return false;
+  }
+
+  dst = src;
+  return true;
+}
+
 } // namespace fst.
