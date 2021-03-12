@@ -384,6 +384,32 @@ public:
 
   void erase(iterator it) { erase((size_type)std::distance(begin(), it)); }
 
+  inline void unordered_erase(size_type index) {
+    if (index >= _size) {
+      return;
+    }
+
+    if (_size == 0) {
+      return;
+    }
+
+    if (index == _size - 1) {
+      if constexpr (!std::is_trivially_destructible<value_type>::value) {
+        _data[_size - 1].~value_type();
+      }
+      _size--;
+      return;
+    }
+
+    _data[index] = std::move(_data[_size - 1]);
+
+    if constexpr (!std::is_trivially_destructible<value_type>::value) {
+      _data[_size - 1].~value_type();
+    }
+
+    _size--;
+  }
+
   void clear() { resize(0); }
 
 private:

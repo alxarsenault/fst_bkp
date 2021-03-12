@@ -55,7 +55,7 @@ public:
 
   static_assert(std::is_integral<value_type>::value, "Integral type required.");
 
-  void insert(value_type value) {
+  inline void insert(value_type value) {
     fst_assert(value < maximum_size, "fixed_unordered_set::insert Out of bound value.");
     if (_is_in_array[value]) {
       return;
@@ -65,7 +65,7 @@ public:
     _is_in_array[value] = true;
   }
 
-  void erase(value_type value) {
+  inline void erase(value_type value) {
     fst_assert(value < maximum_size, "fixed_unordered_set::erase Out of bound value.");
     if (!_is_in_array[value]) {
       return;
@@ -75,12 +75,12 @@ public:
     _array.erase_first_if([value](value_type v) { return v == value; });
   }
 
-  bool contains(value_type value) const noexcept {
+  inline bool contains(value_type value) const noexcept {
     fst_assert(value < maximum_size, "fixed_unordered_set::contains Out of bound value.");
     return _is_in_array[value];
   }
 
-  void clear() noexcept {
+  inline void clear() noexcept {
     _is_in_array.fill(false);
     _array.clear();
   }
@@ -95,6 +95,81 @@ public:
     return _array;
   }
 
+  inline const_reference operator[](size_type index) const { return _array[index]; }
+
+  inline const_iterator begin() const noexcept { return _array.begin(); }
+  inline const_iterator end() const noexcept { return _array.end(); }
+  inline size_type size() const noexcept { return _array.size(); }
+  inline bool empty() const noexcept { return _array.empty(); }
+
+private:
+  array_type _array;
+  std::array<bool, maximum_size> _is_in_array;
+};
+
+// template <class T, class Enum, size_t N = size_t(Enum::count)>
+template <class _T, class Enum, std::size_t _Size = std::size_t(Enum::count)>
+class enum_unordered_set {
+public:
+  using value_type = _T;
+  using enum_type = Enum;
+  using reference = value_type&;
+  using const_reference = const value_type&;
+  using const_pointer = const value_type*;
+  using const_iterator = const_pointer;
+  using size_type = std::size_t;
+  using difference_type = std::ptrdiff_t;
+  static constexpr size_type maximum_size = _Size;
+
+  using array_type = unordered_array<value_type, maximum_size>;
+
+  static_assert(std::is_integral<value_type>::value, "Integral type required.");
+
+  inline void insert(value_type value) {
+    fst_assert(value < maximum_size, "fixed_unordered_set::insert Out of bound value.");
+    if (_is_in_array[value]) {
+      return;
+    }
+
+    _array.push_back(value);
+    _is_in_array[value] = true;
+  }
+
+  inline void insert(enum_type e) { insert((std::size_t)e); }
+
+  inline void erase(value_type value) {
+    fst_assert(value < maximum_size, "fixed_unordered_set::erase Out of bound value.");
+    if (!_is_in_array[value]) {
+      return;
+    }
+
+    _is_in_array[value] = false;
+    _array.erase_first_if([value](value_type v) { return v == value; });
+  }
+
+  inline void erase(enum_type e) { erase((std::size_t)e); }
+
+  inline bool contains(value_type value) const noexcept {
+    fst_assert(value < maximum_size, "fixed_unordered_set::contains Out of bound value.");
+    return _is_in_array[value];
+  }
+
+  inline bool contains(enum_type e) const noexcept { return contains((std::size_t)e); }
+
+  inline void clear() noexcept {
+    _is_in_array.fill(false);
+    _array.clear();
+  }
+
+  inline array_type get_and_clear() {
+    array_type content = _array;
+    clear();
+    return content;
+  }
+
+  inline const array_type& content() const { return _array; }
+
+  inline const_reference operator[](enum_type e) noexcept { return _array[(std::size_t)e]; }
   inline const_reference operator[](size_type index) const { return _array[index]; }
 
   inline const_iterator begin() const noexcept { return _array.begin(); }
@@ -122,7 +197,7 @@ public:
 
   static_assert(std::is_integral<value_type>::value, "Integral type required.");
 
-  void insert(value_type value) {
+  inline void insert(value_type value) {
     fst_assert(value < maximum_size, "lock_free_fixed_unordered_set::insert Out of bound value.");
 
     scoped_spin_lock lock(_mutex);
@@ -134,7 +209,7 @@ public:
     _is_in_array[value] = true;
   }
 
-  void erase(value_type value) {
+  inline void erase(value_type value) {
     fst_assert(value < maximum_size, "lock_free_fixed_unordered_set::erase Out of bound value.");
 
     scoped_spin_lock lock(_mutex);
@@ -146,14 +221,14 @@ public:
     _array.erase_first_if([value](value_type v) { return v == value; });
   }
 
-  bool contains(value_type value) const {
+  inline bool contains(value_type value) const {
     fst_assert(value < maximum_size, "lock_free_fixed_unordered_set::contains Out of bound value.");
 
     scoped_spin_lock lock(_mutex);
     return _is_in_array[value];
   }
 
-  void clear() noexcept {
+  inline void clear() noexcept {
     scoped_spin_lock lock(_mutex);
     _is_in_array.fill(false);
     _array.clear();
