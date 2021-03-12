@@ -71,6 +71,14 @@ using enable_if_same = typename std::enable_if<std::is_same<_D, std::true_type>:
 template <bool _Dummy, class _D>
 using enable_if_different = typename std::enable_if<std::is_same<_D, std::false_type>::value>::type;
 
+template <typename T, typename R = void>
+struct enabled_if_or_void {
+  using type = R;
+};
+
+template <typename T, typename R = void>
+using enabled_if_t_or_void = typename enabled_if_or_void<T, R>::type;
+
 namespace detector_detail {
   struct nonesuch {
     ~nonesuch() = delete;

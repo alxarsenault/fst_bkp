@@ -43,6 +43,7 @@ template <typename _T, std::size_t _Size>
 class fixed_unordered_set {
 public:
   using value_type = _T;
+  using reference = value_type&;
   using const_reference = const value_type&;
   using const_pointer = const value_type*;
   using const_iterator = const_pointer;
@@ -93,6 +94,8 @@ public:
   inline const array_type& content() const {
     return _array;
   }
+
+  inline const_reference operator[](size_type index) const { return _array[index]; }
 
   inline const_iterator begin() const noexcept { return _array.begin(); }
   inline const_iterator end() const noexcept { return _array.end(); }

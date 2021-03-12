@@ -50,6 +50,7 @@ template <typename T> constexpr T one_over_pi_2 = 1.0 / (pi<T> * pi<T>);
 template <typename T> constexpr T one_over_two_pi = 1.0 / two_pi<T>;
 template <typename T> constexpr T pi_over_two = pi<T> * 0.5;
 template <typename T> constexpr T pi_over_four = pi<T> * 0.25;
+template <typename T> constexpr T sqrt_2 = T(1.4142135623730951);
 template <typename T> constexpr T sqrt_2_over_2 = T(0.7071067811865476);
 
 template <typename T> struct zero_t { static constexpr T value = zero<T>; };
@@ -62,12 +63,36 @@ template <typename T> struct two_over_pi_t { static constexpr T value = two_over
 template <typename T> struct one_over_pi_2_t { static constexpr T value = one_over_pi_2<T>; };
 template <typename T> struct pi_over_two_t { static constexpr T value = pi_over_two<T>; };
 template <typename T> struct pi_over_four_t { static constexpr T value = pi_over_four<T>; };
+template <typename T> struct sqrt_2_t { static constexpr T value = sqrt_2<T>; };
 template <typename T> struct sqrt_2_over_2_t { static constexpr T value = sqrt_2_over_2<T>; };
 // clang-format on
 
 template <typename T, typename std::enable_if<std::is_integral<T>::value>::type* = nullptr>
 inline constexpr T is_power_of_two(T v) {
   return v && !(v & (v - 1));
+}
+
+// https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
+template <typename T>
+inline constexpr T round_to_pow_of_2(T value) {
+  // Compute the next highest power of 2 of 32-bit v.
+  unsigned int v = static_cast<unsigned int>(value);
+  v--;
+  v |= v >> 1;
+  v |= v >> 2;
+  v |= v >> 4;
+  v |= v >> 8;
+  v |= v >> 16;
+  v++;
+  return v;
+}
+
+// https://graphics.stanford.edu/~seander/bithacks.html#IntegerLog
+inline constexpr int log2_of_power_of_2(std::uint32_t v) {
+  constexpr int multiply_debruijn_bit_position_2[32] = { 0, 1, 28, 2, 29, 14, 24, 3, 30, 22, 20, 15, 25, 17, 4, 8, 31,
+    27, 13, 23, 21, 19, 16, 7, 26, 12, 18, 6, 11, 5, 10, 9 };
+
+  return multiply_debruijn_bit_position_2[(uint32_t)(v * 0x077CB531U) >> 27];
 }
 
 template <typename T>

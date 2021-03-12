@@ -33,6 +33,7 @@
 
 #pragma once
 #include <type_traits>
+#include <array>
 
 namespace fst {
 template <typename T>
@@ -102,6 +103,28 @@ inline constexpr bool is_out_of_range(T x, T left, T right) {
   return is_in_range(x, left, right);
 }
 
+// Boolean only one true.
+template <typename... Ts>
+inline constexpr bool is_only_one_true(Ts... ts) {
+  return (ts ^ ...);
+}
+
+template <bool... Bs>
+struct is_only_one_true_t {
+  static constexpr bool value = (Bs ^ ...);
+};
+
+// Boolean only one false.
+template <typename... Ts>
+inline constexpr bool is_only_one_false(Ts... ts) {
+  return (!ts ^ ...);
+}
+
+template <bool... Bs>
+struct is_only_one_false_t {
+  static constexpr bool value = (!Bs ^ ...);
+};
+
 template<typename T>
 [[nodiscard]] inline constexpr bool assign(T& dst, T src) {
   if(dst == src) {
@@ -112,4 +135,17 @@ template<typename T>
   return true;
 }
 
+template <typename T, typename... Args>
+inline constexpr std::array<T, sizeof...(Args)> make_array(Args&&... args) {
+  return std::array<T, sizeof...(Args)>{ std::forward<Args>(args)... };
+}
+
+template <typename T, std::size_t N>
+inline constexpr std::array<T, N> make_array(const T (&values)[N]) {
+  std::array<T, N> array;
+  for (std::size_t i = 0; i < N; i++) {
+    array[i] = values[i];
+  }
+  return array;
+}
 } // namespace fst.
