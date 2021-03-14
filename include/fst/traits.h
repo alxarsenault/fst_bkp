@@ -36,6 +36,7 @@
 #include <type_traits>
 #include <iterator>
 #include <complex>
+#include <string_view>
 #include <utility>
 #include <tuple>
 
@@ -138,6 +139,11 @@ struct is_complex : std::false_type {};
 
 template <typename... T>
 struct is_complex<std::complex<T...>> : std::true_type {};
+
+template <class _CharT, class _Traits, class _Tp>
+struct is_convertible_to_string_view
+    : public std::bool_constant<std::is_convertible<const _Tp&, std::basic_string_view<_CharT, _Traits>>::value
+          && !std::is_convertible<const _Tp&, const _CharT*>::value> {};
 
 namespace ostream_detail {
   template <typename = void, typename... Args>

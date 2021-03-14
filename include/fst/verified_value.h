@@ -64,6 +64,8 @@ public:
   inline bool operator!=(bool b) const { return _is_valid != b; }
   inline bool operator!() const { return !_is_valid; }
 
+  inline operator value_type() const { return get(); }
+
 private:
   using aligned_type = typename std::aligned_storage<sizeof(value_type), alignof(value_type)>::type;
   aligned_type _value;
