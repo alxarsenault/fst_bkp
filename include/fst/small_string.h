@@ -32,10 +32,12 @@
 ///
 
 #pragma once
+#include "fst/ascii.h"
 #include "fst/assert.h"
 #include "fst/traits.h"
 #include "fst/util.h"
 #include "fst/verified_value.h"
+#include "fst/string_conv.h"
 #include <algorithm>
 #include <array>
 #include <cstring>
@@ -313,6 +315,27 @@ public:
     _data[_size] = 0;
   }
 
+  //
+  // Append.
+  //
+
+  //  inline constexpr bool is_appendable(const basic_small_string& other) const noexcept {
+  //    return _size + other.size() <= maximum_size;
+  //  }
+  //
+  //  inline constexpr bool is_appendable(const basic_small_string& other, size_type pos, size_type count = npos) const
+  //  noexcept {
+  //    return (pos <= other.size()) && (_size + fst::minimum(count, other.size() - pos) <= maximum_size);
+  //  }
+
+  inline constexpr bool is_appendable(size_type count) const noexcept { return _size + count <= maximum_size; }
+
+  inline constexpr bool is_appendable(view_type v) const noexcept { return _size + v.size() <= maximum_size; }
+
+  inline constexpr bool is_appendable(view_type v, size_type pos, size_type count = npos) const noexcept {
+    return (pos <= v.size()) && (_size + fst::minimum(count, v.size() - pos) <= maximum_size);
+  }
+
   inline constexpr basic_small_string& append(size_type count, value_type c) noexcept {
     fst_assert(
         _size + count <= maximum_size, "basic_small_string::append size would end up greather than maximum_size.");
@@ -334,7 +357,7 @@ public:
   inline constexpr basic_small_string& append(
       const basic_small_string& other, size_type pos, size_type count = npos) noexcept {
     fst_assert(pos <= other.size(), "basic_small_string pos must be smaller or equal to string size.");
-    size_type o_size = fst::minimum(count, other.size()) - pos;
+    size_type o_size = fst::minimum(count, other.size() - pos);
     fst_assert(
         _size + o_size <= maximum_size, "basic_small_string::append size would end up greather than maximum_size.");
 
@@ -356,7 +379,7 @@ public:
 
   inline constexpr basic_small_string& append(view_type v, size_type pos, size_type count = npos) noexcept {
     fst_assert(pos <= v.size(), "basic_small_string pos must be smaller or equal to view size.");
-    size_type o_size = fst::minimum(count, v.size()) - pos;
+    size_type o_size = fst::minimum(count, v.size() - pos);
     fst_assert(
         _size + o_size <= maximum_size, "basic_small_string::append size would end up greather than maximum_size.");
 
@@ -421,8 +444,144 @@ public:
   }
 
   //
+  // Insert.
   //
+  inline constexpr basic_small_string& insert(size_type index, size_type count, value_type c) {
+    fst_assert(index <= _size, "basic_small_string::insert index out of bounds.");
+    fst_assert(
+        count + _size <= maximum_size, "basic_small_string::insert size would end up greather than maximum_size.");
+    size_type delta = _size - index;
+    std::memmove(
+        (void*)(_data.data() + index + count), (const void*)(_data.data() + index), delta * sizeof(value_type));
+    std::fill_n(_data.data() + index, count, c);
+    _size += count;
+    _data[_size] = 0;
+    return *this;
+  }
 
+  inline constexpr basic_small_string& insert(size_type index, view_type v) {
+    fst_assert(index <= _size, "basic_small_string::insert index out of bounds.");
+    fst_assert(
+        v.size() + _size <= maximum_size, "basic_small_string::insert size would end up greather than maximum_size.");
+    size_type delta = _size - index;
+    std::memmove(
+        (void*)(_data.data() + index + v.size()), (const void*)(_data.data() + index), delta * sizeof(value_type));
+    std::copy_n(v.data(), v.size(), _data.data() + index);
+    _size += v.size();
+    _data[_size] = 0;
+    return *this;
+  }
+
+  inline constexpr basic_small_string& insert(size_type index, view_type v, size_type count) {
+    fst_assert(index <= _size, "basic_small_string::insert index out of bounds.");
+    fst_assert(count <= v.size(), "basic_small_string::insert count out of bounds.");
+    fst_assert(
+        count + _size <= maximum_size, "basic_small_string::insert size would end up greather than maximum_size.");
+    size_type delta = _size - index;
+    std::memmove(
+        (void*)(_data.data() + index + count), (const void*)(_data.data() + index), delta * sizeof(value_type));
+    std::copy_n(v.data(), count, _data.data() + index);
+    _size += count;
+    _data[_size] = 0;
+    return *this;
+  }
+
+  inline constexpr basic_small_string& insert(size_type index, view_type v, size_type index_str, size_type count) {
+    fst_assert(index <= _size, "basic_small_string::insert index out of bounds.");
+    fst_assert(index_str <= v.size(), "basic_small_string::insert index_str out of bounds.");
+    size_type s_size = fst::minimum(count, v.size() - index_str);
+    fst_assert(
+        s_size + _size <= maximum_size, "basic_small_string::insert size would end up greather than maximum_size.");
+
+    size_type delta = _size - index;
+    std::memmove(
+        (void*)(_data.data() + index + s_size), (const void*)(_data.data() + index), delta * sizeof(value_type));
+    std::copy_n(v.data() + index_str, s_size, _data.data() + index);
+    _size += s_size;
+    _data[_size] = 0;
+    return *this;
+  }
+
+  inline constexpr basic_small_string& insert(size_type index, const value_type* s) {
+    return insert(index, view_type(s));
+  }
+
+  inline constexpr basic_small_string& insert(size_type index, const value_type* s, size_type count) {
+    return insert(index, view_type(s), count);
+  }
+
+  inline constexpr basic_small_string& insert(size_type index, const basic_small_string& str) {
+    fst_assert(index <= _size, "basic_small_string::insert index out of bounds.");
+    fst_assert(
+        str.size() + _size <= maximum_size, "basic_small_string::insert size would end up greather than maximum_size.");
+    size_type delta = _size - index;
+    std::memmove(
+        (void*)(_data.data() + index + str.size()), (const void*)(_data.data() + index), delta * sizeof(value_type));
+    std::copy_n(str.data(), str.size(), _data.data() + index);
+    _size += str.size();
+    _data[_size] = 0;
+    return *this;
+  }
+
+  inline constexpr basic_small_string& insert(
+      size_type index, const basic_small_string& str, size_type index_str, size_type count = npos) {
+    fst_assert(index <= _size, "basic_small_string::insert index out of bounds.");
+    fst_assert(index_str <= str.size(), "basic_small_string::insert index_str out of bounds.");
+    size_type s_size = fst::minimum(count, str.size() - index_str);
+    fst_assert(
+        s_size + _size <= maximum_size, "basic_small_string::insert size would end up greather than maximum_size.");
+
+    size_type delta = _size - index;
+    std::memmove(
+        (void*)(_data.data() + index + s_size), (const void*)(_data.data() + index), delta * sizeof(value_type));
+    std::copy_n(str.data() + index_str, s_size, _data.data() + index);
+    _size += s_size;
+    _data[_size] = 0;
+    return *this;
+  }
+
+  //  inline constexpr iterator insert(const_iterator pos, CharT ch ) {
+  //
+  //  }
+  // constexpr iterator insert( const_iterator pos, size_type count, CharT ch );
+  // template< class InputIt >
+  // constexpr iterator insert( const_iterator pos, InputIt first, InputIt last );
+
+  // constexpr iterator insert( const_iterator pos, std::initializer_list<CharT> ilist );
+
+  template <class T,
+      class =
+          typename std::enable_if<fst::is_convertible_to_string_view<value_type, traits_type, T>::value, void>::type>
+  inline constexpr basic_small_string& insert(size_type index, const T& t) {
+    return insert(index, view_type(t));
+  }
+
+  template <class T,
+      class =
+          typename std::enable_if<fst::is_convertible_to_string_view<value_type, traits_type, T>::value, void>::type>
+  constexpr basic_small_string& insert(size_type index, const T& t, size_type index_str, size_type count = npos) {
+    return insert(index, view_type(t), index_str, count);
+  }
+
+  //
+  //
+  //
+  inline constexpr basic_small_string& erase(size_type index = 0, size_type count = npos) {
+    fst_assert(index <= _size, "basic_small_string::insert index out of bounds.");
+    size_type s_size = fst::minimum(count, _size - index);
+    size_type delta = _size - s_size;
+    std::memmove(
+        (void*)(_data.data() + index), (const void*)(_data.data() + index + s_size), delta * sizeof(value_type));
+    _size -= s_size;
+    _data[_size] = 0;
+    return *this;
+  }
+
+  //  constexpr iterator erase( const_iterator position );
+  //  constexpr iterator erase( const_iterator first, const_iterator last );
+
+  //
+  // Resize.
   //
   inline constexpr void resize(size_type count, value_type c = value_type()) {
     fst_assert(count <= maximum_size, "basic_small_string::resize count must be smaller or equal to maximum_size.");
@@ -438,6 +597,21 @@ public:
   }
 
   //
+  //
+  //
+  inline constexpr void to_upper_case() {
+    for (std::size_t i = 0; i < _size; i++) {
+      _data[i] = fst::to_upper_case(_data[i]);
+    }
+  }
+
+  inline constexpr void to_lower_case() {
+    for (std::size_t i = 0; i < _size; i++) {
+      _data[i] = fst::to_lower_case(_data[i]);
+    }
+  }
+
+  //
   // Convert.
   //
   inline string_type to_string() const { return string_type(data(), size()); }
@@ -447,26 +621,45 @@ public:
   inline constexpr operator view_type() const { return to_view(); }
 
   template <typename T, class = typename std::enable_if<std::is_arithmetic<T>::value, void>::type>
-  inline fst::verified_value<std::remove_cvref_t<T>> to() const {
-    using v_value = fst::verified_value<std::remove_cvref_t<T>>;
-    std::remove_cvref_t<T> result;
-    return std::sscanf(_data.data(), type_to_format<std::remove_cvref_t<T>>(), &result) == EOF ? v_value::invalid()
-                                                                                               : v_value(result);
+  inline fst::verified_value<std::remove_cvref_t<T>> to_number() const {
+    using t_type = std::remove_cvref_t<T>;
+    using v_value = fst::verified_value<t_type>;
+    t_type value;
+    bool is_valid = string_conv::to_number(_data.data(), string_conv::type_to_format<t_type>(), value);
+    return is_valid ? v_value(value) : v_value::invalid();
   }
 
   template <typename T, class = typename std::enable_if<std::is_arithmetic<T>::value, void>::type>
-  inline bool from(T value) {
-    int result
-        = std::snprintf(_data.data(), maximum_size_with_escape_char, type_to_format<std::remove_cvref_t<T>>(), value);
-    _size = fst::maximum(result, 0);
-    return _size;
+  inline bool to_number(T& value) const {
+    return string_conv::to_number(_data.data(), string_conv::type_to_format<std::remove_cvref_t<T>>(), value);
+  }
+
+  template <typename T, class = typename std::enable_if<std::is_arithmetic<T>::value, void>::type>
+  inline basic_small_string& from_number(T value) {
+    _size = string_conv::from_number(
+        value, _data.data(), string_conv::type_to_format<std::remove_cvref_t<T>>(), maximum_size_with_escape_char);
+    _data[_size] = 0;
+    return *this;
+  }
+
+  template <std::size_t Precision, typename T,
+      class = typename std::enable_if<std::is_arithmetic<T>::value, void>::type>
+  inline basic_small_string& from_number(T value) {
+    constexpr auto format = string_conv::type_to_format<std::remove_cvref_t<T>, Precision>();
+    _size = string_conv::from_number(value, _data.data(), format.data(), maximum_size_with_escape_char);
+    _data[_size] = 0;
+    return *this;
   }
 
   template <typename T, class = typename std::enable_if<std::is_arithmetic<T>::value, void>::type>
   inline static basic_small_string to_string(T value) {
-    basic_small_string s;
-    s.from(value);
-    return s;
+    return basic_small_string().from_number<T>(value);
+  }
+
+  template <std::size_t Precision, typename T,
+      class = typename std::enable_if<std::is_arithmetic<T>::value, void>::type>
+  inline static basic_small_string to_string(T value) {
+    return basic_small_string().from_number<Precision, T>(value);
   }
 
   friend std::ostream& operator<<(std::ostream& stream, const basic_small_string& bss) {
@@ -479,64 +672,6 @@ private:
   std::size_t _size = 0;
 
   inline constexpr size_type c_strlen(const char* str) noexcept { return *str ? 1 + c_strlen(str + 1) : 0; }
-
-  template <typename T, class = typename std::enable_if<std::is_arithmetic<T>::value, void>::type>
-  inline const char* type_to_format() const {
-    if constexpr (std::is_integral<T>::value) {
-      if constexpr (std::is_same<T, std::size_t>::value) {
-        return "%zu";
-      }
-      else if constexpr (std::is_same<T, std::ptrdiff_t>::value) {
-        return "%td";
-      }
-      else if constexpr (std::is_same<T, char>::value) {
-        return "%hhd";
-      }
-      else if constexpr (std::is_same<T, short>::value) {
-        return "%hd";
-      }
-      else if constexpr (std::is_same<T, int>::value) {
-        return "%d";
-      }
-      else if constexpr (std::is_same<T, long>::value) {
-        return "%ld";
-      }
-      else if constexpr (std::is_same<T, long long>::value) {
-        return "%lld";
-      }
-      else if constexpr (std::is_same<T, unsigned char>::value) {
-        return "%hhu";
-      }
-      else if constexpr (std::is_same<T, unsigned short>::value) {
-        return "%hu";
-      }
-      else if constexpr (std::is_same<T, unsigned int>::value) {
-        return "%u";
-      }
-      else if constexpr (std::is_same<T, unsigned long>::value) {
-        return "%lu";
-      }
-      else if constexpr (std::is_same<T, unsigned long long>::value) {
-        return "%llu";
-      }
-      else {
-        return "%d";
-      }
-    }
-    else if constexpr (std::is_floating_point<T>::value) {
-      if constexpr (std::is_same<T, float>::value) {
-        return "%f";
-      }
-      else if constexpr (std::is_same<T, long double>::value) {
-        return "%LF";
-      }
-      else {
-        return "%lf";
-      }
-    }
-
-    return "%d";
-  }
 };
 
 //
@@ -668,16 +803,13 @@ inline basic_small_string<_CharT, _Size> operator+(
   return s;
 }
 
-// template<class _CharT, class _Traits, class _Allocator>
-// basic_string<_CharT, _Traits, _Allocator>
-// operator+(_CharT __lhs, const basic_string<_CharT,_Traits,_Allocator>& __rhs)
-//{
-//    basic_string<_CharT, _Traits, _Allocator> __r(__rhs.get_allocator());
-//    typename basic_string<_CharT, _Traits, _Allocator>::size_type __rhs_sz = __rhs.size();
-//    __r.__init(&__lhs, 1, 1 + __rhs_sz);
-//    __r.append(__rhs.data(), __rhs_sz);
-//    return __r;
-//}
+template <class _CharT, std::size_t _Size>
+inline basic_small_string<_CharT, _Size> operator+(_CharT __lhs, const basic_small_string<_CharT, _Size>& __rhs) {
+  basic_small_string<_CharT, _Size> s;
+  s.push_back(__lhs);
+  s.append(__rhs);
+  return s;
+}
 
 template <class _CharT, std::size_t _Size>
 inline basic_small_string<_CharT, _Size> operator+(
@@ -709,11 +841,11 @@ inline basic_small_string<_CharT, _Size> operator+(
   return std::move(__lhs.append(__rhs));
 }
 
-// template <class _CharT, std::size_t _Size>
-// inline basic_small_string<_CharT, _Size> operator+(const basic_small_string<_CharT, _Size>& __lhs,
-// basic_small_string<_CharT, _Size>&& __rhs) noexcept{
-//  return std::move(__rhs.insert(0, __lhs));
-//}
+template <class _CharT, std::size_t _Size>
+inline basic_small_string<_CharT, _Size> operator+(
+    const basic_small_string<_CharT, _Size>& __lhs, basic_small_string<_CharT, _Size>&& __rhs) noexcept {
+  return std::move(__rhs.insert(0, __lhs));
+}
 
 template <class _CharT, std::size_t _Size>
 inline basic_small_string<_CharT, _Size> operator+(
@@ -727,17 +859,17 @@ inline basic_small_string<_CharT, _Size> operator+(
   return std::move(__lhs.append(__rhs));
 }
 
-// template <class _CharT, std::size_t _Size>
-// inline basic_small_string<_CharT, _Size> operator+(const _CharT* __lhs, basic_small_string<_CharT, _Size>&& __rhs)
-// noexcept{
-//  return std::move(__rhs.insert(0, __lhs));
-//}
+template <class _CharT, std::size_t _Size>
+inline basic_small_string<_CharT, _Size> operator+(
+    const _CharT* __lhs, basic_small_string<_CharT, _Size>&& __rhs) noexcept {
+  return std::move(__rhs.insert(0, __lhs));
+}
 
-// template <class _CharT, std::size_t _Size>
-// inline basic_small_string<_CharT, _Size> operator+(_CharT __lhs, basic_small_string<_CharT, _Size>&& __rhs) noexcept{
-//  __rhs.insert(__rhs.begin(), __lhs);
-//  return std::move(__rhs);
-//}
+template <class _CharT, std::size_t _Size>
+inline basic_small_string<_CharT, _Size> operator+(_CharT __lhs, basic_small_string<_CharT, _Size>&& __rhs) noexcept {
+  __rhs.insert(__rhs.begin(), __lhs);
+  return std::move(__rhs);
+}
 
 template <class _CharT, std::size_t _Size>
 inline basic_small_string<_CharT, _Size> operator+(basic_small_string<_CharT, _Size>&& __lhs, _CharT __rhs) noexcept {
@@ -745,193 +877,6 @@ inline basic_small_string<_CharT, _Size> operator+(basic_small_string<_CharT, _S
   return std::move(__lhs);
 }
 
-// template <typename _CharT, std::size_t _Size>
-// class basic_small_string_allocator {
-// public:
-//  using value_type = _CharT;
-//  using size_type = std::size_t;
-//  using difference_type = std::ptrdiff_t;
-//  using propagate_on_container_move_assignment = std::true_type;
-//
-//  template <class U>
-//  struct rebind {
-//    typedef basic_small_string_allocator<U, _Size> other;
-//  };
-//
-//  basic_small_string_allocator() = default;
-//
-//  inline basic_small_string_allocator(const basic_small_string_allocator&)
-//      : basic_small_string_allocator() {}
-//
-//  inline basic_small_string_allocator(basic_small_string_allocator&& m)
-//      : _buffer(std::move(m._buffer))
-//      , _index(m._index) {
-//    m._index = 0;
-//  }
-//
-//  basic_small_string_allocator& operator=(const basic_small_string_allocator&) = delete;
-//
-//  inline basic_small_string_allocator& operator=(basic_small_string_allocator&& m) {
-//    _buffer = std::move(m._buffer);
-//    _index = m._index;
-//    m._index = 0;
-//    return *this;
-//  }
-//
-//  inline static constexpr std::size_t size() noexcept { return _Size; }
-//
-//  inline value_type* allocate(std::size_t n) {
-//    std::size_t byte_size = n * sizeof(value_type);
-//    fst_assert(_index + byte_size <= _Size, "Out of memory.");
-//    value_type* ptr = _buffer.data() + _index;
-//    _index += byte_size;
-//    return ptr;
-//  }
-//
-//  inline void deallocate(value_type*, std::size_t n) {
-//    std::size_t byte_size = n * sizeof(value_type);
-//    fst_assert(byte_size <= _index, "Deallocating too much memory.");
-//    _index -= byte_size;
-//  }
-//
-// private:
-//  std::array<value_type, _Size> _buffer;
-//  std::size_t _index = 0;
-//};
-//
-// template <typename T, typename U, std::size_t _Size>
-// inline bool operator==(const basic_small_string_allocator<T, _Size>&, const basic_small_string_allocator<U, _Size>&)
-// {
-//  return true;
-//}
-//
-// template <typename T, typename U, std::size_t _Size>
-// inline bool operator!=(const basic_small_string_allocator<T, _Size>&, const basic_small_string_allocator<U, _Size>&)
-// {
-//  return false;
-//}
-
-// namespace small_string_detail {
-//  template <typename _Tp, std::size_t _Size>
-//  class small_string_allocator {
-//  public:
-//    using value_type = _Tp;
-//    using size_type = std::size_t;
-//    using difference_type = std::ptrdiff_t;
-//    using propagate_on_container_move_assignment = std::true_type;
-//
-//    template <class U>
-//    struct rebind {
-//      typedef small_string_allocator<U, _Size> other;
-//    };
-//
-//    small_string_allocator() = default;
-//
-//    inline small_string_allocator(const small_string_allocator&)
-//        : small_string_allocator() {}
-//
-//    inline small_string_allocator(small_string_allocator&& m)
-//        : _buffer(std::move(m._buffer))
-//        , _index(m._index) {
-//      m._index = 0;
-//    }
-//
-//    small_string_allocator& operator=(const small_string_allocator&) = delete;
-//    small_string_allocator& operator=(small_string_allocator&& m) {
-//      _buffer = std::move(m._buffer);
-//      _index = m._index;
-//      m._index = 0;
-//      return *this;
-//    }
-//
-//    inline static constexpr std::size_t size() noexcept { return _Size; }
-//
-//    inline value_type* allocate(std::size_t n) {
-//      std::size_t byte_size = n * sizeof(value_type);
-//      fst_assert(_index + byte_size <= _Size, "Out of memory.");
-//      value_type* ptr = _buffer.data() + _index;
-//      _index += byte_size;
-//      return ptr;
-//    }
-//
-//    void deallocate(value_type*, std::size_t n) {
-//      std::size_t byte_size = n * sizeof(value_type);
-//      fst_assert(byte_size <= _index, "Deallocating too much memory.");
-//      _index -= byte_size;
-//    }
-//
-//  private:
-//    std::array<value_type, _Size> _buffer;
-//    std::size_t _index = 0;
-//  };
-//
-//  template <typename T, typename U, std::size_t _Size>
-//  inline bool operator==(const small_string_allocator<T, _Size>&, const small_string_allocator<U, _Size>&) {
-//    return true;
-//  }
-//
-//  template <typename T, typename U, std::size_t _Size>
-//  inline bool operator!=(const small_string_allocator<T, _Size>&, const small_string_allocator<U, _Size>&) {
-//    return false;
-//  }
-//
-//  template <std::size_t _Size>
-//  using string = std::basic_string<char, std::char_traits<char>, small_string_allocator<char, _Size>>;
-//
-//  template <std::size_t _Size>
-//  using stringstream = std::basic_stringstream<char, std::char_traits<char>, small_string_allocator<char, _Size>>;
-//} // namespace small_string_detail.
-//
-// template <std::size_t _Size = 32>
-// class small_string : public small_string_detail::string<_Size> {
-// public:
-//  using base_type = small_string_detail::string<_Size>;
-//  using base_type::base_type;
-//  using base_type::operator=;
-//  using base_type::size;
-//
-//  small_string(const small_string_detail::string<_Size>& s)
-//      : base_type(s) {}
-//
-//  inline std::string to_str_string() const { return std::string(base_type::data(), base_type::size()); }
-//  inline operator std::string() const { return std::string(base_type::data(), base_type::size()); }
-//};
-//
-// template <std::size_t _Size>
-// inline small_string<_Size> operator+(const small_string<_Size>& lhs, const small_string<_Size>& rhs) {
-//  return lhs + rhs;
-//}
-//
-// template <std::size_t _Size = 32>
-// using small_stringstream = small_string_detail::stringstream<_Size>;
-//
-// template <typename T, std::size_t _Size>
-// inline T from_string(const char* str, std::size_t size) {
-//  small_stringstream<_Size> ss;
-//  ss << std::string_view(str, size);
-//  T result;
-//  ss >> result;
-//  return result;
-//}
-//
-// template <typename T, std::size_t _Size>
-// inline T from_string(const char* str) {
-//  small_stringstream<_Size> ss;
-//  ss << std::string_view(str);
-//  T result;
-//  ss >> result;
-//  return result;
-//}
-//
-// template <typename T, std::size_t _Size>
-// inline T from_string(const std::string_view& str) {
-//  small_stringstream<_Size> ss;
-//  ss << str;
-//  T result;
-//  ss >> result;
-//  return result;
-//}
-//
 // template <typename T, std::size_t _Size>
 // inline std::pair<bool, T> to_number(std::string_view str) {
 //  T value;
