@@ -189,7 +189,10 @@ public:
   inline constexpr basic_small_string& operator=(view_type v) noexcept {
     fst_assert(v.size() <= maximum_size, "basic_small_string view size must be smaller or equal to maximum_size.");
     _size = v.size();
-    std::copy_n(v.begin(), v.end(), _data.data());
+    for (size_type i = 0; i < _size; i++) {
+      _data[i] = v[i];
+    }
+
     _data[_size] = 0;
     return *this;
   }
@@ -217,6 +220,10 @@ public:
       class =
           typename std::enable_if<fst::is_convertible_to_string_view<value_type, traits_type, T>::value, void>::type>
   inline constexpr basic_small_string& operator=(const T& t) noexcept {
+    //    view_type v(t);
+    //    fst_assert(v.size() <= maximum_size, "basic_small_string view size must be smaller or equal to
+    //    maximum_size."); _size = v.size(); std::copy_n(v.data(), v.data() + v.size(), _data.data()); _data[_size] = 0;
+    //    return *this;
     return operator=(view_type(t));
   }
 
@@ -305,7 +312,7 @@ public:
   inline constexpr void push_back(value_type c) noexcept {
     fst_assert(
         _size + 1 <= maximum_size, "basic_small_string::push_back size would end up greather than maximum_size.");
-    _data[++_size] = c;
+    _data[_size++] = c;
     _data[_size] = 0;
   }
 
@@ -334,6 +341,14 @@ public:
 
   inline constexpr bool is_appendable(view_type v, size_type pos, size_type count = npos) const noexcept {
     return (pos <= v.size()) && (_size + fst::minimum(count, v.size() - pos) <= maximum_size);
+  }
+
+  inline constexpr basic_small_string& append(value_type c) noexcept {
+    fst_assert(
+        _size + 1 <= maximum_size, "basic_small_string::push_back size would end up greather than maximum_size.");
+    _data[_size++] = c;
+    _data[_size] = 0;
+    return *this;
   }
 
   inline constexpr basic_small_string& append(size_type count, value_type c) noexcept {
@@ -876,6 +891,9 @@ inline basic_small_string<_CharT, _Size> operator+(basic_small_string<_CharT, _S
   __lhs.push_back(__rhs);
   return std::move(__lhs);
 }
+
+template <std::size_t N>
+using small_string = basic_small_string<char, N>;
 
 // template <typename T, std::size_t _Size>
 // inline std::pair<bool, T> to_number(std::string_view str) {
