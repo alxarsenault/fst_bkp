@@ -75,6 +75,8 @@ class mapped_file {
 public:
   using value_type = std::uint8_t;
   using pointer = value_type*;
+  using const_pointer = const value_type*;
+  using const_iterator = const_pointer;
   using size_type = std::size_t;
 
   mapped_file() noexcept = default;
@@ -102,6 +104,35 @@ public:
   inline std::string_view str() const noexcept { return std::string_view((const char*)(_data), _size); }
   inline std::span<const value_type> content() const noexcept {
     return std::span<const value_type>((const value_type*)_data, _size);
+  }
+
+  inline const_pointer data() const { return _data; }
+
+  inline const_iterator begin() const noexcept { return _data; }
+  inline const_iterator end() const noexcept { return _data + _size; }
+  inline const_iterator cbegin() const noexcept { return begin(); }
+  inline const_iterator cend() const noexcept { return end(); }
+
+  inline value_type operator[](size_type __n) const noexcept {
+    fst_assert(__n < size(), "index out of bounds");
+    return _data[__n];
+  }
+
+  inline value_type at(size_type __n) const {
+    if (__n >= size()) {
+      throw std::out_of_range("mapped_file");
+    }
+    return _data[__n];
+  }
+
+  inline value_type front() const noexcept {
+    //    fst_assert(!empty(), "front() called for empty wire");
+    return *_data;
+  }
+
+  inline value_type back() const noexcept {
+    //    fst_assert(!empty(), "back() called for empty wire");
+    return *(_data + _size - 1);
   }
 
   bool open(const std::filesystem::path& file_path) {
