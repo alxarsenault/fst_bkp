@@ -39,6 +39,8 @@
 #include <cstdio>
 #include <span>
 
+#include "fst/assert.h"
+
 // clang-format off
 #ifdef _WIN32
   #define WIN32_LEAN_AND_MEAN
