@@ -42,6 +42,8 @@ struct range {
   using value_type = T;
   T min;
   T max;
+
+  inline bool is_inside(value_type value) const { return value >= min && value <= max; }
 };
 
 template <typename T>

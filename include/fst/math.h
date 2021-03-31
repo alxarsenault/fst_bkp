@@ -74,7 +74,7 @@ inline constexpr T is_power_of_two(T v) {
 
 // https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
 template <typename T>
-inline constexpr T round_to_pow_of_2(T value) {
+inline constexpr T round_to_power_of_two(T value) {
   // Compute the next highest power of 2 of 32-bit v.
   unsigned int v = static_cast<unsigned int>(value);
   v--;
@@ -88,7 +88,7 @@ inline constexpr T round_to_pow_of_2(T value) {
 }
 
 // https://graphics.stanford.edu/~seander/bithacks.html#IntegerLog
-inline constexpr int log2_of_power_of_2(std::uint32_t v) {
+inline constexpr int log2_of_power_of_two(std::uint32_t v) {
   constexpr int multiply_debruijn_bit_position_2[32] = { 0, 1, 28, 2, 29, 14, 24, 3, 30, 22, 20, 15, 25, 17, 4, 8, 31,
     27, 13, 23, 21, 19, 16, 7, 26, 12, 18, 6, 11, 5, 10, 9 };
 
