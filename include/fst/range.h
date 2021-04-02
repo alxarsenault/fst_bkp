@@ -43,7 +43,23 @@ struct range {
   T min;
   T max;
 
-  inline bool is_inside(value_type value) const { return value >= min && value <= max; }
+  inline constexpr bool is_ordered() const { return min <= max; }
+  inline constexpr bool is_symmetric() const { return std::abs(min) == std::abs(max); }
+  inline constexpr bool contains(value_type value) const { return value >= min && value <= max; }
+  inline constexpr bool contains(const range<value_type>& r) const { return contains(r.min) && contains(r.max); }
+  inline constexpr bool contains_index(value_type value) const { return value >= min && value < max; }
+
+  inline constexpr value_type length() const { return max - min; }
+
+  inline constexpr value_type clipped_value(value_type value) const { return std::clamp(value, min, max); }
+
+  inline void order() {
+    if (is_ordered()) {
+      return;
+    }
+
+    std::swap(min, max);
+  }
 };
 
 template <typename T>

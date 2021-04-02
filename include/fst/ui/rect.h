@@ -119,7 +119,7 @@ namespace detail {
     }
 
     template <typename _PointValueType>
-    inline constexpr bool is_inside(const detail::point<_PointValueType>& pos) const {
+    inline constexpr bool contains(const detail::point<_PointValueType>& pos) const {
       return pos.x >= position.x && pos.x <= position.x + size.width && pos.y >= position.y
           && pos.y <= position.y + size.height;
     }
