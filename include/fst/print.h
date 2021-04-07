@@ -94,6 +94,10 @@ inline void print_element(std::ostream& stream, const T& t) {
   }
 }
 
+struct empty_string {
+  static constexpr const char* value = "";
+};
+
 struct space_string {
   static constexpr const char* value = " ";
 };

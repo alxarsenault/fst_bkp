@@ -238,7 +238,7 @@ public:
       return (value & 0x800000 ? (value | ~0xFFFFFF) : value) * denom;
     }
     else if constexpr (c_opts == convert_options::pcm_32_bit) {
-      constexpr T div = 1 << 31;
+      constexpr T div = long(1) << long(31);
       return as<std::int32_t>(__index) / div;
     }
   }

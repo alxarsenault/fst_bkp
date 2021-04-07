@@ -254,7 +254,8 @@ namespace byte_vector_detail {
         push_back(static_cast<value_type>(s * (T)255.0));
       }
       else if constexpr (c_opts == convert_options::pcm_16_bit) {
-        constexpr T mult = (1 << 15) - 1;
+        //        constexpr T mult = (1 << 15) - 1;
+        constexpr T mult = (1 << 15);
         const T s = std::clamp<T>(value, (T)-1.0, (T)1.0);
         push_back<std::int16_t>(static_cast<int16_t>(s * mult));
       }
@@ -265,7 +266,7 @@ namespace byte_vector_detail {
         push_back(static_cast<value_type>((s_int >> 16) & 0xFF));
       }
       else if constexpr (c_opts == convert_options::pcm_32_bit) {
-        constexpr T mult_tmp = 1 << 31;
+        constexpr T mult_tmp = 1L << 31L;
         constexpr T mult = mult_tmp - 1;
         const T s = std::clamp<T>(value, (T)-1.0, (T)1.0);
         push_back<std::int32_t>(static_cast<std::int32_t>(s * mult));
@@ -421,7 +422,7 @@ namespace byte_vector_detail {
         return (value & 0x800000 ? (value | ~0xFFFFFF) : value) * denom;
       }
       else if constexpr (c_opts == convert_options::pcm_32_bit) {
-        constexpr T div = 1 << 31;
+        constexpr T div = 1L << 31L;
         return as<std::int32_t>(__index) / div;
       }
     }

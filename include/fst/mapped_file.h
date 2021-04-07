@@ -183,7 +183,14 @@ public:
       return false;
     }
 
-    pointer data = (pointer)mmap(nullptr, (size_type)size, PROT_READ, MAP_SHARED, fd, 0);
+    // MAP_PRIVATE
+    // Create a private copy-on-write mapping. Updates to the mapping are not visible to other
+    // processes mapping the same file, and are not carried through to the underlying file.
+    // It is unspecified whether changes made to the file after the mmap() call are visible
+    // in the mapped region.
+    pointer data = (pointer)mmap(nullptr, (size_type)size, PROT_READ, MAP_PRIVATE, fd, 0);
+    // pointer data = (pointer)mmap(nullptr, (size_type)size, PROT_READ, MAP_SHARED, fd, 0);
+
     if (data == MAP_FAILED) {
       ::close(fd);
       return false;
