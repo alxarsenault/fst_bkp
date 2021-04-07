@@ -254,7 +254,7 @@ namespace byte_vector_detail {
         push_back(static_cast<value_type>(s * (T)255.0));
       }
       else if constexpr (c_opts == convert_options::pcm_16_bit) {
-        //        constexpr T mult = (1 << 15) - 1;
+        // constexpr T mult = (1 << 15) - 1;
         constexpr T mult = (1 << 15);
         const T s = std::clamp<T>(value, (T)-1.0, (T)1.0);
         push_back<std::int16_t>(static_cast<int16_t>(s * mult));
@@ -267,7 +267,7 @@ namespace byte_vector_detail {
       }
       else if constexpr (c_opts == convert_options::pcm_32_bit) {
         constexpr T mult_tmp = 1L << 31L;
-        constexpr T mult = mult_tmp - 1;
+        constexpr T mult = mult_tmp; // - 1;
         const T s = std::clamp<T>(value, (T)-1.0, (T)1.0);
         push_back<std::int32_t>(static_cast<std::int32_t>(s * mult));
       }
