@@ -43,6 +43,8 @@ struct range {
   T min;
   T max;
 
+  static inline constexpr range with_length(T min, T size) { return { min, min + size }; }
+
   inline constexpr bool is_ordered() const { return min <= max; }
   inline constexpr bool is_symmetric() const { return std::abs(min) == std::abs(max); }
   inline constexpr bool contains(value_type value) const { return value >= min && value <= max; }
@@ -85,7 +87,9 @@ struct assert_clipped_value {
 
 #if __FST_HAS_DEBUG_ASSERT
   assert_clipped_value(value_type v) {
-    fst_assert(v >= _Range.min && v <= _Range.max, "value out of range, should be inside [" + std::to_string(_Range.min) + ", " + std::to_string(_Range.max) + "].");
+    fst_assert(v >= _Range.min && v <= _Range.max,
+        "value out of range, should be inside [" + std::to_string(_Range.min) + ", " + std::to_string(_Range.max)
+            + "].");
     value = std::clamp(v, _Range.min, _Range.max);
   }
 #else

@@ -51,7 +51,6 @@ public:
   using value_type = _Tp;
   using reference = value_type&;
   using const_reference = std::conditional_t<std::is_fundamental<value_type>::value, const value_type&, value_type>;
-  //  using const_reference = const value_type&;
   using pointer = value_type*;
   using const_pointer = const pointer;
   using iterator = pointer;

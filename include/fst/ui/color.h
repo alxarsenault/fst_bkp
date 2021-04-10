@@ -80,14 +80,17 @@ public:
   inline constexpr std::uint8_t blue() const { return (_rgba & bits_blue) >> shift_blue; }
   inline constexpr std::uint8_t alpha() const { return (_rgba & bits_alpha) >> shift_alpha; }
 
+  inline constexpr float f_red() const { return red() / 255.0f; }
+  inline constexpr float f_green() const { return green() / 255.0f; }
+  inline constexpr float f_blue() const { return blue() / 255.0f; }
+  inline constexpr float f_alpha() const { return alpha() / 255.0f; }
+
   inline constexpr color darker(float amount) const {
     amount = 1.0f - std::clamp<float>(amount, 0.0f, 1.0f);
     return color(std::uint8_t(red() * amount), std::uint8_t(green() * amount), std::uint8_t(blue() * amount), alpha());
   }
-  
-  inline constexpr color with_alpha(std::uint8_t alpha) const {
-    return color(red(), green(), blue(), alpha);
-  }
+
+  inline constexpr color with_alpha(std::uint8_t alpha) const { return color(red(), green(), blue(), alpha); }
 
 private:
   enum shift : std::uint32_t {
