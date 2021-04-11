@@ -158,18 +158,19 @@ namespace detail {
       return *this;
     }
 
-    inline constexpr bool operator==(const size& size) noexcept {
+    inline constexpr bool operator==(const size& size) const noexcept {
       return (width == size.width && height == size.height);
     }
-    inline constexpr bool operator!=(const size& size) noexcept {
+
+    inline constexpr bool operator!=(const size& size) const noexcept {
       return !(width == size.width && height == size.height);
     }
-    inline constexpr bool operator<(const size& size) noexcept { return (width < size.width && height < size.height); }
-    inline constexpr bool operator<=(const size& size) noexcept {
+    inline constexpr bool operator<(const size& size) const noexcept { return (width < size.width && height < size.height); }
+    inline constexpr bool operator<=(const size& size) const noexcept {
       return (width <= size.width && height <= size.height);
     }
-    inline constexpr bool operator>(const size& size) noexcept { return (width > size.width && height > size.height); }
-    inline constexpr bool operator>=(const size& size) noexcept {
+    inline constexpr bool operator>(const size& size) const noexcept  { return (width > size.width && height > size.height); }
+    inline constexpr bool operator>=(const size& size) const noexcept {
       return (width >= size.width && height >= size.height);
     }
 

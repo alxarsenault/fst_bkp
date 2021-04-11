@@ -186,6 +186,13 @@ namespace detail {
     }
     inline constexpr point_type next_up(value_type delta) const { return point_type(position.x, position.y - delta); }
 
+    inline constexpr void clip_to(const rect& rect) {
+      x = fst::maximum(rect.x, x);
+      y = fst::maximum(rect.y, y);
+      width = fst::minimum(rect.width, width);
+      height = fst::minimum(rect.height, height);
+    }
+
     friend std::ostream& operator<<(std::ostream& stream, const rect& rect) {
       stream << rect.position.x << ", " << rect.position.y << ", " << rect.size.width << ", " << rect.size.height;
       return stream;

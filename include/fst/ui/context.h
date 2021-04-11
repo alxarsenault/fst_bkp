@@ -57,6 +57,15 @@ public:
   inline context(native_context c, int top_level_height);
 
   inline ~context();
+  
+  inline void save_state();
+  inline void restore_state();
+  
+  inline void translate(const fst::ui::fpoint& pos);
+  
+  inline void clip_to_rect(const fst::ui::frect& rect);
+  inline fst::ui::frect get_clipping_rect();
+
   inline void set_color(const fst::ui::color& c);
   inline void fill_path(const fst::ui::path& p);
   inline void draw_image(const fst::ui::image& img, const fst::ui::frect& rect);
@@ -106,6 +115,27 @@ context::context(native_context c)
     CGContextRestoreGState(_context);
   }
   
+  inline void context::save_state() {
+    CGContextSaveGState(_context);
+  }
+
+  inline void context::restore_state() {
+    CGContextRestoreGState(_context);
+  }
+  
+  inline void context::translate(const fst::ui::fpoint& pos) {
+    CGContextTranslateCTM(_context, pos.x, pos.y);
+  }
+  
+  inline void context::clip_to_rect(const fst::ui::frect& rect) {
+    CGContextClipToRect(_context, CGRectMake(rect.x, rect.y, rect.width, rect.height));
+  }
+  
+  inline fst::ui::frect context::get_clipping_rect() {
+    CGRect r = CGContextGetClipBoundingBox(_context);
+    return fst::ui::frect(r.origin.x, r.origin.y, r.size.width, r.size.width);
+  }
+
   inline void context::set_color(const fst::ui::color& c) {
     CGContextSetRGBFillColor(_context, c.f_red(), c.f_green(), c.f_blue(), c.f_alpha());
     CGContextSetAlpha(_context, 1);
