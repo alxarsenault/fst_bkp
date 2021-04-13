@@ -177,10 +177,13 @@ public:
 
   optional_owned_ptr(pointer ptr, bool owned = true)
       : _ptr(ptr)
-      , _is_owned(owned) {}
+      , _is_owned(_ptr == nullptr ? false : owned) {}
 
   optional_owned_ptr(std::nullptr_t, bool owned) noexcept
       : optional_owned_ptr() {}
+
+  optional_owned_ptr(std::unique_ptr<element_type>&& ptr) noexcept
+      : optional_owned_ptr(ptr.release(), true) {}
 
   optional_owned_ptr(const optional_owned_ptr& oop) {
     fst_assert(!oop.is_owned(), "Can't copy an owned pointer.");
@@ -217,6 +220,11 @@ public:
     reset();
     _ptr = ptr;
     _is_owned = _ptr != nullptr;
+    return *this;
+  }
+
+  optional_owned_ptr& operator=(std::unique_ptr<element_type>&& ptr) {
+    reset(ptr.release(), true);
     return *this;
   }
 
