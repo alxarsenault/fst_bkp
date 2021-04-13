@@ -35,6 +35,7 @@
 #include "fst/assert.h"
 #include <algorithm>
 #include <cstddef>
+#include <memory>
 #include <type_traits>
 #include <iosfwd>
 
@@ -159,4 +160,117 @@ template <class T>
 not_null<T> operator+(const not_null<T>&, std::ptrdiff_t) = delete;
 template <class T>
 not_null<T> operator+(std::ptrdiff_t, const not_null<T>&) = delete;
+
+template <typename _Tp>
+class optional_owned_ptr {
+public:
+  using element_type = std::remove_cvref_t<_Tp>;
+  using pointer = element_type*;
+  using const_pointer = const element_type*;
+
+  optional_owned_ptr() noexcept
+      : _ptr(nullptr)
+      , _is_owned(false) {}
+
+  optional_owned_ptr(std::nullptr_t) noexcept
+      : optional_owned_ptr() {}
+
+  optional_owned_ptr(pointer ptr, bool owned = true)
+      : _ptr(ptr)
+      , _is_owned(owned) {}
+
+  optional_owned_ptr(std::nullptr_t, bool owned) noexcept
+      : optional_owned_ptr() {}
+
+  optional_owned_ptr(const optional_owned_ptr& oop) {
+    fst_assert(!oop.is_owned(), "Can't copy an owned pointer.");
+    _ptr = oop._ptr;
+    _is_owned = false;
+  }
+
+  optional_owned_ptr(optional_owned_ptr&& oop)
+      : _ptr(oop._ptr)
+      , _is_owned(oop._is_owned) {
+    oop._ptr = nullptr;
+    oop._is_owned = false;
+  }
+
+  ~optional_owned_ptr() { reset(); }
+
+  optional_owned_ptr& operator=(const optional_owned_ptr& oop) {
+    fst_assert(!oop.is_owned(), "Can't copy an owned pointer.");
+
+    reset();
+    _ptr = oop._ptr;
+    _is_owned = false;
+    return *this;
+  }
+
+  optional_owned_ptr& operator=(optional_owned_ptr&& oop) {
+    bool owned = oop.is_owned();
+    pointer ptr = oop.release();
+    reset(ptr, owned);
+    return *this;
+  }
+
+  optional_owned_ptr& operator=(pointer ptr) {
+    reset();
+    _ptr = ptr;
+    _is_owned = _ptr != nullptr;
+    return *this;
+  }
+
+  optional_owned_ptr& operator=(std::nullptr_t) {
+    reset();
+    return *this;
+  }
+
+  inline bool is_valid() const { return _ptr != nullptr; }
+
+  inline bool is_owned() const { return _is_owned; }
+
+  inline pointer get() const noexcept { return _ptr; }
+
+  typename std::add_lvalue_reference<element_type>::type operator*() const { return *_ptr; }
+
+  inline pointer operator->() const noexcept { return _ptr; }
+
+  inline explicit operator bool() const noexcept { return is_valid(); }
+
+  inline void reset() {
+    if (is_valid() && is_owned()) {
+      delete _ptr;
+    }
+
+    _ptr = nullptr;
+    _is_owned = false;
+  }
+
+  inline void reset(pointer ptr, bool owned) {
+    reset();
+    _ptr = ptr;
+    _is_owned = _ptr == nullptr ? false : owned;
+  }
+
+  inline void reset(std::nullptr_t ptr, bool owned) {
+    reset();
+
+    _ptr = ptr;
+    _is_owned = false;
+  }
+
+  /// Releases the ownership of the managed object if any.
+  inline pointer release(bool keed_unowned = false) {
+    pointer ptr = _ptr;
+    if (!keed_unowned) {
+      _ptr = nullptr;
+    }
+    _is_owned = false;
+    return ptr;
+  }
+
+private:
+  pointer _ptr;
+  bool _is_owned;
+};
 } // namespace fst.
