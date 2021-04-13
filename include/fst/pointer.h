@@ -216,13 +216,6 @@ public:
     return *this;
   }
 
-  optional_owned_ptr& operator=(pointer ptr) {
-    reset();
-    _ptr = ptr;
-    _is_owned = _ptr != nullptr;
-    return *this;
-  }
-
   optional_owned_ptr& operator=(std::unique_ptr<element_type>&& ptr) {
     reset(ptr.release(), true);
     return *this;
