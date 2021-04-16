@@ -32,10 +32,7 @@
 ///
 
 #pragma once
-#include <cmath>
-#include <limits>
-#include <type_traits>
-#include "fst/util.h"
+#include "fst/traits.h"
 
 namespace fst {
 template <class _Iter>
