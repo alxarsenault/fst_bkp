@@ -636,8 +636,8 @@ public:
   inline constexpr operator view_type() const { return to_view(); }
 
   template <typename T, class = typename std::enable_if<std::is_arithmetic<T>::value, void>::type>
-  inline fst::verified_value<std::remove_cvref_t<T>> to_number() const {
-    using t_type = std::remove_cvref_t<T>;
+  inline fst::verified_value<fst::remove_cvref_t<T>> to_number() const {
+    using t_type = fst::remove_cvref_t<T>;
     using v_value = fst::verified_value<t_type>;
     t_type value;
     bool is_valid = string_conv::to_number(_data.data(), string_conv::type_to_format<t_type>(), value);
@@ -646,13 +646,13 @@ public:
 
   template <typename T, class = typename std::enable_if<std::is_arithmetic<T>::value, void>::type>
   inline bool to_number(T& value) const {
-    return string_conv::to_number(_data.data(), string_conv::type_to_format<std::remove_cvref_t<T>>(), value);
+    return string_conv::to_number(_data.data(), string_conv::type_to_format<fst::remove_cvref_t<T>>(), value);
   }
 
   template <typename T, class = typename std::enable_if<std::is_arithmetic<T>::value, void>::type>
   inline basic_small_string& from_number(T value) {
     _size = string_conv::from_number(
-        value, _data.data(), string_conv::type_to_format<std::remove_cvref_t<T>>(), maximum_size_with_escape_char);
+        value, _data.data(), string_conv::type_to_format<fst::remove_cvref_t<T>>(), maximum_size_with_escape_char);
     _data[_size] = 0;
     return *this;
   }
@@ -660,7 +660,7 @@ public:
   template <std::size_t Precision, typename T,
       class = typename std::enable_if<std::is_arithmetic<T>::value, void>::type>
   inline basic_small_string& from_number(T value) {
-    constexpr auto format = string_conv::type_to_format<std::remove_cvref_t<T>, Precision>();
+    constexpr auto format = string_conv::type_to_format<fst::remove_cvref_t<T>, Precision>();
     _size = string_conv::from_number(value, _data.data(), format.data(), maximum_size_with_escape_char);
     _data[_size] = 0;
     return *this;

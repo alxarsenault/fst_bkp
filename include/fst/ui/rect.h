@@ -34,6 +34,7 @@
 #pragma once
 #include "fst/ui/point.h"
 #include "fst/ui/size.h"
+#include "fst/util.h"
 
 namespace fst::ui {
 namespace detail {

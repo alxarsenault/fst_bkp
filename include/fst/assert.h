@@ -32,6 +32,7 @@
 ///
 
 #pragma once
+#include "fst/common.h"
 #include <cstddef>
 #include <cstdlib>
 #include <iostream>

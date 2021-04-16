@@ -33,16 +33,16 @@
 
 #pragma once
 #include "fst/assert.h"
+#include "fst/span.h"
 #include <cstddef>
 #include <new>
 #include <algorithm>
-#include <span>
 #include <stdexcept>
 
 namespace fst {
-class byte_view : public std::span<const std::uint8_t> {
+class byte_view : public fst::span<const std::uint8_t> {
 public:
-  using span_type = std::span<const std::uint8_t>;
+  using span_type = fst::span<const std::uint8_t>;
   using value_type = typename span_type::value_type;
   using size_type = typename span_type::size_type;
   using difference_type = typename span_type::difference_type;
@@ -51,9 +51,7 @@ public:
   using reference = typename span_type::reference;
   using const_reference = typename span_type::const_reference;
   using iterator = typename span_type::iterator;
-  using const_iterator = typename span_type::const_iterator;
   using reverse_iterator = typename span_type::reverse_iterator;
-  using const_reverse_iterator = typename span_type::const_reverse_iterator;
 
   enum class convert_options {
     pcm_8_bit,
@@ -65,13 +63,13 @@ public:
   using span_type::span_type;
 
   template <typename T>
-  inline byte_view(const std::span<T>& buffer)
+  inline byte_view(const fst::span<T>& buffer)
       : span_type((pointer)buffer.data(), buffer.size_bytes()) {}
 
   using span_type::operator=;
 
   template <typename T>
-  inline byte_view& operator=(const std::span<T>& buffer) {
+  inline byte_view& operator=(const fst::span<T>& buffer) {
     return (*this).operator=(byte_span((pointer)buffer.data(), buffer.size_bytes()));
   }
 
@@ -79,8 +77,6 @@ public:
   // MARK: Iterators.
   //
   using span_type::begin;
-  using span_type::cbegin;
-  using span_type::cend;
   using span_type::end;
 
   //
@@ -120,22 +116,22 @@ public:
   //
   template <class T>
   inline difference_type find(const T* data, size_type size) const noexcept {
-    const_iterator it = std::search(cbegin(), cend(), data, data + size);
+    iterator it = std::search(begin(), end(), data, data + size);
     if (it == end()) {
       return -1;
     }
 
-    return std::distance(cbegin(), it);
+    return std::distance(begin(), it);
   }
 
   template <class T>
   inline difference_type find(size_type offset, const T* data, size_type size) const noexcept {
-    const_iterator it = std::search(cbegin() + offset, cend(), data, data + size);
+    iterator it = std::search(begin() + offset, end(), data, data + size);
     if (it == end()) {
       return -1;
     }
 
-    return std::distance(cbegin(), it);
+    return std::distance(begin(), it);
   }
 
   //
@@ -179,9 +175,9 @@ public:
   }
 
   template <typename T, bool _IsLittleEndian = true>
-  inline T as(const_iterator pos) const noexcept {
+  inline T as(iterator pos) const noexcept {
     static_assert(std::is_trivially_copyable<T>::value, "Type cannot be serialized.");
-    difference_type index = std::distance(pos, cbegin());
+    difference_type index = std::distance(pos, begin());
     fst_assert(index >= 0, "Wrong iterator position.");
     return as<T, _IsLittleEndian>((size_type)index);
   }
@@ -195,9 +191,9 @@ public:
 
   // Get array element at array_index from array starting at pos.
   template <typename T, bool _IsLittleEndian = true>
-  inline T as(const_iterator pos, size_type array_index) const noexcept {
+  inline T as(iterator pos, size_type array_index) const noexcept {
     static_assert(std::is_trivially_copyable<T>::value, "Type cannot be serialized.");
-    difference_type index = std::distance(pos, cbegin());
+    difference_type index = std::distance(pos, begin());
     fst_assert(index >= 0, "Wrong iterator position.");
     return as<T, _IsLittleEndian>((size_type)index, array_index);
   }

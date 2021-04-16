@@ -33,6 +33,7 @@
 
 #pragma once
 #include "fst/assert.h"
+#include "fst/span.h"
 #include <algorithm>
 #include <span>
 #include <vector>
@@ -112,8 +113,8 @@ public:
     _content_size = 0;
   }
 
-  inline std::span<const value_type> content() const {
-    return std::span<const value_type>(&_content[0], _content_size);
+  inline fst::span<const value_type> content() const {
+    return fst::span<const value_type>(&_content[0], _content_size);
   }
 
   inline const_reference operator[](size_type index) const { return _content[index]; }

@@ -33,6 +33,7 @@
 
 #pragma once
 #include "fst/assert.h"
+#include "fst/traits.h"
 #include <algorithm>
 #include <cstddef>
 #include <memory>
@@ -164,7 +165,7 @@ not_null<T> operator+(std::ptrdiff_t, const not_null<T>&) = delete;
 template <typename _Tp>
 class optional_owned_ptr {
 public:
-  using element_type = std::remove_cvref_t<_Tp>;
+  using element_type = fst::remove_cvref_t<_Tp>;
   using pointer = element_type*;
   using const_pointer = const element_type*;
 

@@ -36,6 +36,9 @@
 #include "fst/traits.h"
 #include "fst/mapped_file.h"
 
+/// IF DEBUG
+#include "fst/print.h"
+
 #include <algorithm>
 #include <vector>
 #include <iterator>
@@ -197,7 +200,7 @@ namespace byte_vector_detail {
 
       if constexpr (is_iterable<T>::value) {
         for (const auto& n : value) {
-          push_back<std::remove_cvref_t<decltype(n)>, _IsLittleEndian>(n);
+          push_back<fst::remove_cvref_t<decltype(n)>, _IsLittleEndian>(n);
         }
       }
       else {
@@ -468,6 +471,7 @@ namespace byte_vector_detail {
         }
 
         byte_vector bv;
+        fst::print("FSLKJFKL", fb.content().size());
         bv.push_back(fb.content());
         fb.close();
         return bv;

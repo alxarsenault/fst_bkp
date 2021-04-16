@@ -37,9 +37,9 @@
 #include <string_view>
 #include <cstdlib>
 #include <cstdio>
-#include <span>
 
 #include "fst/assert.h"
+#include "fst/span.h"
 
 // clang-format off
 #ifdef _WIN32
@@ -104,8 +104,8 @@ public:
   inline bool is_valid() const noexcept { return _data && _size; }
   inline size_type size() const noexcept { return _size; }
   inline std::string_view str() const noexcept { return std::string_view((const char*)(_data), _size); }
-  inline std::span<const value_type> content() const noexcept {
-    return std::span<const value_type>((const value_type*)_data, _size);
+  inline fst::span<const value_type> content() const noexcept {
+    return fst::span<const value_type>((const value_type*)_data, _size);
   }
 
   inline const_pointer data() const { return _data; }

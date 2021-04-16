@@ -17,7 +17,7 @@ TEST(unordered_set, constructor) {
 
   EXPECT_EQ(2, set[0]);
 
-  std::span<const int> sp = set.content();
+  fst::span<const int> sp = set.content();
   for (int i : sp) {
     EXPECT_EQ(2, i);
   }
