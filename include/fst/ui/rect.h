@@ -46,6 +46,12 @@ namespace detail {
     using size_type = detail::size<value_type>;
     using point_type = detail::point<value_type>;
 
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wnested-anon-types"
+#pragma clang diagnostic ignored "-Wgnu-anonymous-struct"
+#endif
+
     union {
       point_type position;
       struct {
@@ -59,6 +65,10 @@ namespace detail {
         value_type width, height;
       };
     };
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 
     inline constexpr rect(const point_type& pt_ = point_type(0, 0), const size_type& size_ = size_type(0, 0))
         : position(pt_)

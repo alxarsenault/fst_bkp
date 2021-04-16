@@ -3,63 +3,6 @@
 #include "fst/byte_vector.h"
 #include "fst/byte_view.h"
 #include "fst/print.h"
-// namespace fst {
-// template<typename T>
-// class ptr_iterator
-////    : public std::iterator<std::forward_iterator_tag, T>
-//{
-// public:
-//    typedef T                                                      iterator_type;
-//    typedef typename std::iterator_traits<iterator_type>::iterator_category iterator_category;
-//    typedef typename std::iterator_traits<iterator_type>::value_type        value_type;
-//    typedef typename std::iterator_traits<iterator_type>::difference_type   difference_type;
-//    typedef typename std::iterator_traits<iterator_type>::pointer           pointer;
-//    typedef typename std::iterator_traits<iterator_type>::reference         reference;
-////    typedef ptr_iterator<T>  iterator;
-//
-// private:
-//    iterator_type pos_;
-//
-////    pointer pos_;
-// public:
-//    ptr_iterator() : pos_(nullptr) {}
-//    ptr_iterator(T* v) : pos_(v) {}
-//    ~ptr_iterator() {}
-//
-//    iterator_type  operator++(int) /* postfix */         { return pos_++; }
-//    iterator_type& operator++()    /* prefix */          { ++pos_; return *this; }
-//    reference operator* () const                    { return *pos_; }
-//    pointer   operator->() const                    { return pos_; }
-//    iterator_type  operator+ (difference_type v)   const { return pos_ + v; }
-//    bool      operator==(const iterator_type& rhs) const { return pos_ == rhs.pos_; }
-//    bool      operator!=(const iterator_type& rhs) const { return pos_ != rhs.pos_; }
-//};
-//
-// template<typename T>
-// ptr_iterator<T> begin(T *val) { return ptr_iterator<T>(val); }
-//
-//
-// template<typename T, typename Tsize>
-// ptr_iterator<T> end(T *val, Tsize size) { return ptr_iterator<T>(val) + size; }
-//}
-//
-//
-//
-// inline void banana(std::size_t k) {
-//
-//}
-//
-// inline void banana(fst::ptr_iterator<const std::uint8_t*> k) {
-//
-//}
-//
-////inline void banana(std::nullptr_t n) {
-////
-////}
-//
-// TEST(byte_vector, test_ambiguous) {
-//  banana(0);
-//}
 
 namespace {
 TEST(byte_vector, simple_push) {

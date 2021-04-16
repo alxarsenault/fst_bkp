@@ -93,13 +93,13 @@ public:
     return *this;
   }
 
-  wrap_iterator operator++(int) /* postfix */ { return __i++; }
-  wrap_iterator& operator++() /* prefix */ {
+  wrap_iterator operator++(int) { return __i++; }
+  wrap_iterator& operator++() {
     ++__i;
     return *this;
   }
-  wrap_iterator operator--(int) /* postfix */ { return __i--; }
-  wrap_iterator& operator--() /* prefix */ {
+  wrap_iterator operator--(int) { return __i--; }
+  wrap_iterator& operator--() {
     --__i;
     return *this;
   }
