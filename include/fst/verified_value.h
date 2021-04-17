@@ -16,8 +16,14 @@ public:
 
   verified_value() = delete;
   verified_value(const verified_value&) = delete;
-  verified_value(verified_value&&) = delete;
-  
+  verified_value(verified_value&& vv)
+      : _is_valid(vv._is_valid) {
+    if (_is_valid) {
+      new (&_value) value_type(std::move(get()));
+      vv._is_valid = false;
+    }
+  }
+
   inline verified_value(invalid_tag) noexcept : _is_valid(false) {}
 
   inline constexpr verified_value(const value_type& value)

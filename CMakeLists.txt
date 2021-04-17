@@ -30,6 +30,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 #User options
 option(FST_BUILD_TESTS "Build and run tests." ON) 
 option(FST_BUILD_BENCH "Build and run benchmarks." OFF)
+option(FST_BUILD_DEV "Build dev." OFF)
 
 set(FST_INCLUDE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
@@ -90,7 +91,7 @@ if (${FST_BUILD_BENCH})
     )
 endif()
 
-# if (${FST_BUILD_BENCH})
+if (${FST_BUILD_DEV})
     # find_package(dev CONFIG REQUIRED)
 
     #Test Project
@@ -116,4 +117,4 @@ endif()
         fst
         # benchmark::benchmark
     )
-# endif()
+endif()
