@@ -63,7 +63,7 @@ TEST(byte_vector, vector_push) {
   fst::byte_vector bv;
   std::vector<int> v(10);
   for (std::size_t i = 0; i < v.size(); i++) {
-    v[i] = i;
+    v[i] = (int)i;
   }
   bv.push_back(v);
 
@@ -89,7 +89,7 @@ TEST(byte_vector, array_fill) {
   fst::byte_vector bv;
   std::vector<int> v(10);
   for (std::size_t i = 0; i < v.size(); i++) {
-    v[i] = i;
+    v[i] = (int)i;
   }
   bv.push_back(v);
 
