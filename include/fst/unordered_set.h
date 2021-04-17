@@ -35,7 +35,6 @@
 #include "fst/assert.h"
 #include "fst/span.h"
 #include <algorithm>
-#include <span>
 #include <vector>
 
 namespace fst {
