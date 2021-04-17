@@ -50,7 +50,7 @@
   #define __FST_MAPPED_FILE_USE_WINDOWS_MEMORY_MAP 1
   namespace fst::config { inline constexpr bool has_memory_map = true; }
 
-#elif defined(unix) || defined(__unix__) || defined(__unix) || defined(__MACH__)
+#elif __FST_UNISTD__
   #include <unistd.h>
 
   #ifdef HAVE_MMAP
@@ -140,12 +140,16 @@ public:
   }
 
   bool open(const std::filesystem::path& file_path) {
+    fst::print("mapped_file : Before close");
     if (_data) {
       close();
     }
+    fst::print("mapped_file : After close");
 
 #if __FST_MAPPED_FILE_USE_WINDOWS_MEMORY_MAP
-    HANDLE hFile = CreateFileA((LPCSTR)file_path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING,
+    std::filesystem::path w_path = file_path;
+    w_path.make_preferred();
+    HANDLE hFile = CreateFileA((LPCSTR)w_path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING,
         FILE_ATTRIBUTE_NORMAL, nullptr);
     if (hFile == INVALID_HANDLE_VALUE) {
       //DWORD GetLastError();
