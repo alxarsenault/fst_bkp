@@ -57,13 +57,13 @@ inline bool operator<(const fst::wrap_iterator<Iterator1>& lhs, const fst::wrap_
 template <class Iterator1, class Iterator2>
 inline bool operator<=(const fst::wrap_iterator<Iterator1>& lhs, const fst::wrap_iterator<Iterator2>& rhs);
 
-template <class Iter>
-inline fst::wrap_iterator<Iter> operator+(
-    typename fst::wrap_iterator<Iter>::difference_type n, const fst::wrap_iterator<Iter>& it);
-
 template <class Iterator>
-inline typename fst::wrap_iterator<Iterator>::difference_type operator-(
-    const fst::wrap_iterator<Iterator>& lhs, const fst::wrap_iterator<Iterator>& rhs);
+inline fst::wrap_iterator<Iterator> operator+(
+    typename fst::wrap_iterator<Iterator>::difference_type n, const fst::wrap_iterator<Iterator>& it);
+
+template <class Iterator1, class Iterator2>
+inline typename fst::wrap_iterator<Iterator1>::difference_type operator-(
+    const fst::wrap_iterator<Iterator1>& lhs, const fst::wrap_iterator<Iterator2>& rhs);
 
 namespace fst {
 template <typename _Tp>
@@ -128,18 +128,30 @@ public:
 private:
   iterator_type __i = nullptr;
 
-  friend bool ::operator==(const wrap_iterator& lhs, const wrap_iterator& rhs);
-  friend bool ::operator!=(const wrap_iterator& lhs, const wrap_iterator& rhs);
-  friend bool ::operator>(const wrap_iterator& lhs, const wrap_iterator& rhs);
-  friend bool ::operator>=(const wrap_iterator& lhs, const wrap_iterator& rhs);
-  friend bool ::operator<(const wrap_iterator& lhs, const wrap_iterator& rhs);
-  friend bool ::operator<=(const wrap_iterator& lhs, const wrap_iterator& rhs);
+  template <class It1, class It2>
+  friend bool ::operator==(const wrap_iterator<It1>& lhs, const wrap_iterator& rhs);
 
-  friend wrap_iterator<iterator_type> operator+(
-      typename wrap_iterator<iterator_type>::difference_type n, const wrap_iterator<iterator_type>& it);
+  template <class It1, class It2>
+  friend bool ::operator!=(const wrap_iterator<It1>& lhs, const wrap_iterator& rhs);
 
-  friend typename wrap_iterator<iterator_type>::difference_type operator-(
-      const wrap_iterator<iterator_type>& lhs, const wrap_iterator<iterator_type>& rhs);
+  template <class It1, class It2>
+  friend bool ::operator>(const wrap_iterator<It1>& lhs, const wrap_iterator& rhs);
+
+  template <class It1, class It2>
+  friend bool ::operator>=(const wrap_iterator<It1>& lhs, const wrap_iterator& rhs);
+
+  template <class It1, class It2>
+  friend bool ::operator<(const wrap_iterator<It1>& lhs, const wrap_iterator& rhs);
+
+  template <class It1, class It2>
+  friend bool ::operator<=(const wrap_iterator<It1>& lhs, const wrap_iterator& rhs);
+
+  template <class It>
+  friend wrap_iterator<It> operator+(typename wrap_iterator<It>::difference_type n, const wrap_iterator<It>& it);
+
+  template <class It1, class It2>
+  friend typename wrap_iterator<It1>::difference_type operator-(
+      const wrap_iterator<It1>& lhs, const wrap_iterator<It2>& rhs);
 };
 
 } // namespace fst.
@@ -183,14 +195,14 @@ inline bool operator<=(const fst::wrap_iterator<Iterator1>& lhs, const fst::wrap
   return lhs.__i <= rhs.__i;
 }
 
-template <class Iter>
-inline fst::wrap_iterator<Iter> operator+(
-    typename fst::wrap_iterator<Iter>::difference_type n, const fst::wrap_iterator<Iter>& it) {
+template <class Iterator>
+inline fst::wrap_iterator<Iterator> operator+(
+    typename fst::wrap_iterator<Iterator>::difference_type n, const fst::wrap_iterator<Iterator>& it) {
   return it.__i + n;
 }
 
-template <class Iterator>
-inline typename fst::wrap_iterator<Iterator>::difference_type operator-(
-    const fst::wrap_iterator<Iterator>& lhs, const fst::wrap_iterator<Iterator>& rhs) {
+template <class Iterator1, class Iterator2>
+inline typename fst::wrap_iterator<Iterator1>::difference_type operator-(
+    const fst::wrap_iterator<Iterator1>& lhs, const fst::wrap_iterator<Iterator2>& rhs) {
   return lhs.__i - rhs.__i;
 }
