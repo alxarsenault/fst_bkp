@@ -53,7 +53,7 @@ inline std::size_t get_page_size() {
 //inline std::size_t get_page_size() {
 //  SYSTEM_INFO sys_info;
 //  GetSystemInfo(&sys_info);
-//  return sysInfo.dwPageSize >= 0 ? (std::size_t)sysInfo.dwPageSize : 0;
+//  return sys_info.dwPageSize >= 0 ? (std::size_t)sys_info.dwPageSize : 0;
 //}
 
 #else
