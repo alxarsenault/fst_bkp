@@ -35,7 +35,7 @@
 #include <cstddef>
 
 namespace fst {
-inline constexpr std::size_t distance_between_lower_and_upper_case() { return 'a' - 'A'; }
+inline constexpr char distance_between_lower_and_upper_case() { return 'a' - 'A'; }
 
 inline constexpr bool is_char(char c) { return c >= 0 && c <= 127; }
 

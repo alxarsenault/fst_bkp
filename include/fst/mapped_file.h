@@ -149,7 +149,7 @@ public:
       return false;
     }
 
-    std::ptrdiff_t size = GetFileSize(hFile, nullptr);
+    DWORD size = GetFileSize(hFile, nullptr);
     if (size == INVALID_FILE_SIZE || size == 0) {
       CloseHandle(hFile);
       return false;
