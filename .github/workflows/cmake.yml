@@ -6,10 +6,7 @@ env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
 
-strategy:
-  matrix:
-    - { compiler: GNU,  CC: gcc-10,   CXX: g++-10 }
-    - { compiler: LLVM, CC: clang-10, CXX: clang++-10 }
+
 
 jobs:
   build:
@@ -18,6 +15,11 @@ jobs:
     # cross-platform coverage.
     # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
     runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+      - { compiler: GNU,  CC: gcc-10,   CXX: g++-10 }
+      - { compiler: LLVM, CC: clang-10, CXX: clang++-10 }
 
     steps:
     - uses: actions/checkout@v2
