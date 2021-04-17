@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <string>
+#include "fst/common.h"
 #include "fst/shared_singleton.h"
 
 namespace {
@@ -91,12 +92,14 @@ TEST(shared_singleton, simple_retain_with_typedef) {
   EXPECT_EQ(MyScopedSingleton::is_retained(), false);
   EXPECT_EQ(MyScopedSingleton::get_count(), 0);
 
+  #if !__FST_WINDOWS__
   if constexpr (fst::config::has_assert) {
     EXPECT_DEATH({ MyScopedSingleton::get(); }, "");
   }
   else {
     EXPECT_EQ(MyScopedSingleton::get(), nullptr);
   }
+  #endif // !__FST_WINDOWS__
 
   // Recreate an instance of the singleton, make sure it gets constructed properly.
   MySingletonInstance instance = MyScopedSingleton::retain("Potato");
@@ -162,23 +165,27 @@ TEST(shared_singleton, double_retain) {
 }
 
 TEST(shared_singleton, unretained) {
+  #if !__FST_WINDOWS__
   if constexpr (fst::config::has_assert) {
     EXPECT_DEATH({ MyScopedSingleton::get(); }, "");
   }
   else {
     EXPECT_EQ(MyScopedSingleton::get(), nullptr);
   }
+  #endif
 }
 
 TEST(shared_singleton, retain_and_call) {
   MyScopedSingleton::retain()->string_value = "Banana";
 
+  #if !__FST_WINDOWS__
   if constexpr (fst::config::has_assert) {
     EXPECT_DEATH({ MyScopedSingleton::get(); }, "");
   }
   else {
     EXPECT_EQ(MyScopedSingleton::get(), nullptr);
   }
+  #endif
 }
 
 TEST(shared_singleton, initializer) {
@@ -187,12 +194,14 @@ TEST(shared_singleton, initializer) {
     EXPECT_EQ(MyScopedSingleton::get()->string_value, "Jason");
   }
 
+  #if !__FST_WINDOWS__
   if constexpr (fst::config::has_assert) {
     EXPECT_DEATH({ MyScopedSingleton::get(); }, "");
   }
   else {
     EXPECT_EQ(MyScopedSingleton::get(), nullptr);
   }
+  #endif
 }
 
 TEST(shared_singleton, initializer_no_arg) {
@@ -201,12 +210,14 @@ TEST(shared_singleton, initializer_no_arg) {
     EXPECT_EQ(MyScopedSingleton::get()->string_value, "Peter");
   }
 
+  #if !__FST_WINDOWS__
   if constexpr (fst::config::has_assert) {
     EXPECT_DEATH({ MyScopedSingleton::get(); }, "");
   }
   else {
     EXPECT_EQ(MyScopedSingleton::get(), nullptr);
   }
+  #endif
 }
 
 TEST(shared_singleton, initializer_empty) {
@@ -216,11 +227,13 @@ TEST(shared_singleton, initializer_empty) {
     EXPECT_EQ(MyScopedSingleton::get()->string_value, "Peter");
   }
 
+  #if !__FST_WINDOWS__
   if constexpr (fst::config::has_assert) {
     EXPECT_DEATH({ MyScopedSingleton::get(); }, "");
   }
   else {
     EXPECT_EQ(MyScopedSingleton::get(), nullptr);
   }
+  #endif
 }
 } // namespace

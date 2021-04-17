@@ -145,10 +145,12 @@ TEST(small_string, insert_char) {
     EXPECT_EQ(s, "ABCaa");
   }
 
+  #if !__FST_WINDOWS__
   if constexpr (fst::config::has_assert) {
     fst::basic_small_string<char, 32> s = "ABC";
     EXPECT_DEATH({ s.insert(4, 2, 'a'); }, "");
   }
+  #endif
 }
 
 TEST(small_string, insert_view) {
@@ -233,10 +235,12 @@ TEST(small_string, insert_view_count) {
     EXPECT_EQ(s, "cABC");
   }
 
+  #if !__FST_WINDOWS__
   if constexpr (fst::config::has_assert) {
     fst::basic_small_string<char, 32> s = "ABC";
     EXPECT_DEATH({ s.insert(0, "abc", 4); }, "");
   }
+  #endif
 }
 
 TEST(small_string, erase) {
