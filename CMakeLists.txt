@@ -29,7 +29,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 #User options
 option(FST_BUILD_TESTS "Build and run tests." ON) 
-option(FST_BUILD_BENCH "Build and run benchmarks." ON)
+option(FST_BUILD_BENCH "Build and run benchmarks." OFF)
 
 set(FST_INCLUDE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
