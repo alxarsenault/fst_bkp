@@ -37,8 +37,8 @@
 #if __FST_UNISTD__
 #include <unistd.h>
 #elif __FST_WINDOWS__
-#include <windows.h>
-#include <sysinfoapi.h>
+//#include <windows.h>
+//#include <sysinfoapi.h>
 #endif
 
 // clang-format off
@@ -49,12 +49,12 @@ inline std::size_t get_page_size() {
   return pagesize >= 0 ? (std::size_t)pagesize : 0;
 }
 
-#elif __FST_WINDOWS__
-inline std::size_t get_page_size() {
-  SYSTEM_INFO sys_info;
-  GetSystemInfo(&sys_info);
-  return sysInfo.dwPageSize >= 0 ? (std::size_t)sysInfo.dwPageSize : 0;
-}
+//#elif __FST_WINDOWS__
+//inline std::size_t get_page_size() {
+//  SYSTEM_INFO sys_info;
+//  GetSystemInfo(&sys_info);
+//  return sysInfo.dwPageSize >= 0 ? (std::size_t)sysInfo.dwPageSize : 0;
+//}
 
 #else
 inline std::size_t get_page_size() {
