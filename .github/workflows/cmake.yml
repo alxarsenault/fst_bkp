@@ -134,7 +134,6 @@ jobs:
     
     - name: Install conan
       run: |
-        set PATH=%PATH%;%PYTHON%/Scripts/
         pip.exe install conan
         conan user
         conan remote add bincrafters https://api.bintray.com/conan/conan/conan-center
