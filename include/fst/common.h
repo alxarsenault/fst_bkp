@@ -37,9 +37,10 @@
 #include <cstdint>
 
 namespace fst::config {
+  inline constexpr std::uint8_t version[3] = {1, 0, 0};
   enum class cpp_version_type {unknown, cpp_17, cpp_20};
   enum class bitness_type { unknown, b_32, b_64 };
-  enum class compiler_type { unknown, clang, gcc, intel, msvc };
+  enum class compiler_type { unknown, clang, wasm, gcc, intel, mingw, msvc };
   enum class platform_type { unknown, android, bsd, ios, linux, macos, solaris, windows };
 
   //
@@ -98,14 +99,18 @@ namespace fst::config {
   #undef __FST_CLANG__
   #undef __FST_GCC__
   #undef __FST_INTEL__
+  #undef __FST_MINGW__
   #undef __FST_MSVC__
+  #undef __FST_WASM__
 
   // Clang.
   #if defined(__clang__)
     #define __FST_CLANG__ 1
     #define __FST_GCC__   0
     #define __FST_INTEL__ 0
+    #define __FST_MINGW__ 0
     #define __FST_MSVC__  0
+    #define __FST_WASM__  0
     inline constexpr compiler_type compiler = compiler_type::clang;
 
   // GCC.
@@ -113,7 +118,9 @@ namespace fst::config {
     #define __FST_CLANG__ 0
     #define __FST_GCC__   1
     #define __FST_INTEL__ 0
+    #define __FST_MINGW__ 0
     #define __FST_MSVC__  0
+    #define __FST_WASM__  0
     inline constexpr compiler_type compiler = compiler_type::gcc;
 
   // Intel.
@@ -121,23 +128,49 @@ namespace fst::config {
     #define __FST_CLANG__ 0
     #define __FST_GCC__   0
     #define __FST_INTEL__ 1
+    #define __FST_MINGW__ 0
     #define __FST_MSVC__  0
+    #define __FST_WASM__  0
     inline constexpr compiler_type compiler = compiler_type::intel;
+
+  // MinGW.
+  #elif defined(__MINGW32__) || defined(__MINGW64__)
+    #define __FST_CLANG__ 0
+    #define __FST_GCC__   0
+    #define __FST_INTEL__ 0
+    #define __FST_MINGW__ 1
+    #define __FST_MSVC__  0
+    #define __FST_WASM__  0
+    inline constexpr compiler_type compiler = compiler_type::mingw;
 
   // Microsoft visual studio.
   #elif defined(_MSC_VER)
     #define __FST_CLANG__ 0
     #define __FST_GCC__   0
     #define __FST_INTEL__ 0
+    #define __FST_MINGW__ 0
     #define __FST_MSVC__  1
+    #define __FST_WASM__  0
     inline constexpr compiler_type compiler = compiler_type::msvc;
+
+  // Web assembly.
+  #elif defined(__EMSCRIPTEN__)
+    #define __FST_CLANG__ 0
+    #define __FST_GCC__   0
+    #define __FST_INTEL__ 0
+    #define __FST_MINGW__ 0
+    #define __FST_MSVC__  0
+    #define __FST_WASM__  1
+    inline constexpr compiler_type compiler = compiler_type::wasm;
 
   // Unknown compiler.
   #else
     #define __FST_CLANG__ 0
     #define __FST_GCC__   0
     #define __FST_INTEL__ 0
+    #define __FST_MINGW__ 0
     #define __FST_MSVC__  0
+    #define __FST_WASM__  0
     inline constexpr compiler_type compiler = compiler_type::unknown;
     #error "fst unsupported compiler."
   #endif
