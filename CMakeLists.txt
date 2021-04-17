@@ -3,10 +3,6 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.conan.txt)
 
 cmake_minimum_required(VERSION 3.8.0)
 
-# IF( NOT CMAKE_BUILD_TYPE )
-SET( CMAKE_BUILD_TYPE Release FORCE )
-# ENDIF()
-
 function(make_pretty_source_folders BASE_PATH PREFIX_PATH REQUIRED_ARG)
 	foreach(SOURCE IN ITEMS ${REQUIRED_ARG})
 		get_filename_component(SOURCE_PATH "${SOURCE}" PATH)
