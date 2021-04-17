@@ -37,6 +37,7 @@
 #if __FST_UNISTD__
 #include <unistd.h>
 #elif __FST_WINDOWS__
+#include <windows.h>
 #include <sysinfoapi.h>
 #endif
 
