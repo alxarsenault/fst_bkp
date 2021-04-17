@@ -89,3 +89,31 @@ if (${FST_BUILD_BENCH})
         benchmark::benchmark
     )
 endif()
+
+# if (${FST_BUILD_BENCH})
+    # find_package(dev CONFIG REQUIRED)
+
+    #Test Project
+    set(FST_DEV_NAME ${PROJECT_NAME}_dev)
+    file(GLOB_RECURSE FST_DEV_INCLUDE "dev/*.h")
+    file(GLOB_RECURSE FST_DEV_SOURCES "dev/*.cpp")
+
+    add_executable(${FST_DEV_NAME} ${FST_DEV_INCLUDE} ${FST_DEV_SOURCES})
+
+    # set_target_properties(${FST_DEV_NAME} PROPERTIES
+    #     # CXX_STANDARD 17
+    #     # CXX_EXTENSIONS OFF
+    #     # LINKER_LANGUAGE CXX
+    #     # CMAKE_CXX_FLAGS "-O3 ${CMAKE_CXX_FLAGS}"
+    #     # FOLDER dev/
+    # )
+
+    target_compile_definitions(${FST_DEV_NAME} PUBLIC
+        NDEBUG
+    )
+
+    target_link_libraries(${FST_DEV_NAME} PUBLIC
+        fst
+        # benchmark::benchmark
+    )
+# endif()

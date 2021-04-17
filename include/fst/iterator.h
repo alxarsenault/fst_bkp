@@ -117,6 +117,8 @@ public:
   reference operator*() const { return *__i; }
   pointer operator->() const { return __i; }
 
+  inline operator pointer() { return __i; }
+
   inline reference operator[](difference_type __n) const { return __i[__n]; }
 
   bool operator==(const wrap_iterator& rhs) const { return __i == rhs.__i; }
