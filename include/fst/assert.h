@@ -39,9 +39,10 @@
 #include <string>
 
 // clang-format off
-#ifdef _MSC_VER
+#if __FST_MSVC__
   #define __FST_DEBUG_BREAK __debugbreak()
-#elif defined(__clang__) || defined(__GNUC__) || defined(__MINGW64__)
+
+#elif __FST_CLANG__
   #if __has_builtin(__builtin_debugtrap)
     #define __FST_DEBUG_BREAK __builtin_debugtrap()
   #elif defined(unix) || defined(__unix__) || defined(__unix) || defined(__MACH__)
