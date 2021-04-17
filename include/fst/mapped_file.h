@@ -38,12 +38,13 @@
 #include <cstdlib>
 #include <cstdio>
 
+#include "fst/common.h"
 #include "fst/assert.h"
 #include "fst/print.h"
 #include "fst/span.h"
 
 // clang-format off
-#ifdef _WIN32
+#if __FST_WINDOWS__
   #define WIN32_LEAN_AND_MEAN
   #include <windows.h>
   #define __FST_MAPPED_FILE_USE_WINDOWS_MEMORY_MAP 1
@@ -147,30 +148,31 @@ public:
     HANDLE hFile = CreateFileA((LPCSTR)file_path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING,
         FILE_ATTRIBUTE_NORMAL, nullptr);
     if (hFile == INVALID_HANDLE_VALUE) {
-      fst::errprint("mapped_file : CreateFileA -> INVALID_HANDLE_VALUE");
+      //DWORD GetLastError();
+      fst::print("mapped_file : CreateFileA -> INVALID_HANDLE_VALUE");
       return false;
     }
 
     DWORD size = GetFileSize(hFile, nullptr);
     if (size == INVALID_FILE_SIZE || size == 0) {
-      fst::errprint("mapped_file : CreateFileA -> INVALID_FILE_SIZE");
+      fst::print("mapped_file : CreateFileA -> INVALID_FILE_SIZE");
       CloseHandle(hFile);
       return false;
     }
 
     HANDLE hMap = CreateFileMappingA(hFile, nullptr, PAGE_READONLY, 0, size, nullptr);
     if (!hMap) {
-      fst::errprint("mapped_file : CreateFileMappingA -> nulll");
+      fst::print("mapped_file : CreateFileMappingA -> nulll");
       CloseHandle(hFile);
       return false;
     }
 
     pointer data = (pointer)MapViewOfFile(hMap, FILE_MAP_READ, 0, 0, size);
-    fst::errprint("mapped_file : MapViewOfFile", data == nullptr);
+    fst::print("mapped_file : MapViewOfFile", data == nullptr);
 
     // We can call CloseHandle here, but it will not be closed until we unmap the view.
     CloseHandle(hMap);
-
+    fst::print("mapped_file: ", data, size);
     _data = data;
     _size = (size_type)size;
     return true;
