@@ -1,5 +1,6 @@
 #include "fst/print.h"
 #include "fst/span.h"
+#include "fst/memory.h"
 #include <array>
 #include <unordered_map>
 #include <thread>
@@ -21,7 +22,7 @@ void* operator new(std::size_t s) {
 }
 
 void operator delete(void* p) throw() {
-  fst::print("---alloc", alloc, p);
+  //  fst::print("---alloc", alloc, p);
   --alloc;
   free(p);
 }
@@ -323,6 +324,7 @@ bool operator!=(const stack_allocator<T1>& lhs, const stack_allocator<T2>& rhs) 
 } // namespace fst.
 
 int main(int argc, char** argv) {
+  fst::print("MEMORY PAGE SIZE", fst::memory::get_page_size());
   constexpr std::size_t m_size = 64 * sizeof(int);
   using memory_buffer = std::array<std::uint8_t, m_size>;
   memory_buffer& mb = fst::get_thread_local_instance<memory_buffer>();

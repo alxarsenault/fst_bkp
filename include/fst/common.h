@@ -198,7 +198,7 @@ namespace fst::config {
     inline constexpr platform_type platform = platform_type::android;
 
   // BSD.
-  #elif defined(BSD) || defined(__FreeBSD__)
+  #elif defined(BSD) || defined(__DragonFly__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
     #define __FST_ANDROID__ 0
     #define __FST_BSD__     1
     #define __FST_IOS__     0
@@ -294,10 +294,27 @@ namespace fst::config {
   #endif
 
   //
+  // unistd.h
+  //
+  #undef __FST_UNISTD__
+
+  #if !defined(_WIN32) && (defined(__unix__) || defined(__unix) || (defined(__APPLE__) && defined(__MACH__)))
+    #define __FST_UNISTD__ 1
+    inline constexpr bool has_unistd = true;
+  #else
+    #define __FST_UNISTD__ 0
+    inline constexpr bool has_unistd = false;
+  #endif
+
+  //
   // Exceptions.
   //
   #if defined(__FST_NO_EXCEPTIONS__) || !(defined(__cpp_exceptions) || defined(__EXCEPTIONS) || defined(_CPPUNWIND))
     inline constexpr bool has_exceptions = false;
+
+    #if !defined(__FST_NO_EXCEPTIONS__)
+      #define __FST_NO_EXCEPTIONS__
+    #endif
   #else
     inline constexpr bool has_exceptions = true;
   #endif // __FST_NO_EXCEPTIONS__
@@ -313,3 +330,5 @@ namespace fst::config {
 #endif
 
 // clang-format on
+
+// "https://web.archive.org/web/20140625123925/http://nadeausoftware.com/articles/2012/01/c_c_tip_how_use_compiler_predefined_macros_detect_operating_system"
