@@ -129,22 +129,22 @@ private:
   iterator_type __i = nullptr;
 
   template <class It1, class It2>
-  friend bool ::operator==(const wrap_iterator<It1>& lhs, const wrap_iterator& rhs);
+  friend bool operator==(const wrap_iterator<It1>& lhs, const wrap_iterator& rhs);
 
   template <class It1, class It2>
-  friend bool ::operator!=(const wrap_iterator<It1>& lhs, const wrap_iterator& rhs);
+  friend bool operator!=(const wrap_iterator<It1>& lhs, const wrap_iterator& rhs);
 
   template <class It1, class It2>
-  friend bool ::operator>(const wrap_iterator<It1>& lhs, const wrap_iterator& rhs);
+  friend bool operator>(const wrap_iterator<It1>& lhs, const wrap_iterator& rhs);
 
   template <class It1, class It2>
-  friend bool ::operator>=(const wrap_iterator<It1>& lhs, const wrap_iterator& rhs);
+  friend bool operator>=(const wrap_iterator<It1>& lhs, const wrap_iterator& rhs);
 
   template <class It1, class It2>
-  friend bool ::operator<(const wrap_iterator<It1>& lhs, const wrap_iterator& rhs);
+  friend bool operator<(const wrap_iterator<It1>& lhs, const wrap_iterator& rhs);
 
   template <class It1, class It2>
-  friend bool ::operator<=(const wrap_iterator<It1>& lhs, const wrap_iterator& rhs);
+  friend bool operator<=(const wrap_iterator<It1>& lhs, const wrap_iterator& rhs);
 
   template <class It>
   friend wrap_iterator<It> operator+(typename wrap_iterator<It>::difference_type n, const wrap_iterator<It>& it);
