@@ -78,18 +78,21 @@ namespace fst::config {
     #define __FST_32_BIT__ 1
     #define __FST_64_BIT__ 0
     inline constexpr bitness_type bitness = bitness_type::b_32;
+    inline constexpr std::size_t bitness_byte_size = 4;
 
   // 64 bit.
   #elif INTPTR_MAX == INT64_MAX
     #define __FST_32_BIT__ 0
     #define __FST_64_BIT__ 1
     inline constexpr bitness_type bitness = bitness_type::b_64;
+    inline constexpr std::size_t bitness_byte_size = 8;
 
   // Unknown.
   #else
     #define __FST_32_BIT__ 0
     #define __FST_64_BIT__ 0
     inline constexpr bitness_type bitness = bitness_type::unknown;
+    inline constexpr std::size_t bitness_byte_size = 0;
     #error "fst only support 32 and 64 bit architecture."
   #endif
 

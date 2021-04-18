@@ -118,7 +118,7 @@ TEST(byte_vector, file_open) {
   fst::byte_vector bv = fst::byte_vector::from_file(FST_TEST_RESOURCES_DIRECTORY "/test.txt");
   EXPECT_EQ(bv.empty(), false);
 
-  if(bv.size()) {
+  if (bv.size()) {
     EXPECT_EQ(bv[0], 'T');
     EXPECT_EQ(bv[1], 'e');
     EXPECT_EQ(bv[2], 's');

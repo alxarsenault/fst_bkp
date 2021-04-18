@@ -121,6 +121,7 @@ namespace detail {
     alignas(alignment) value_type _data[maximum_size];
   };
 
+  // Specialized for heap allocation.
   template <typename _Tp, std::size_t _Size, std::size_t _Alignement, bool _IsFondamental>
   class aligned_buffer<_Tp, _Size, _Alignement, true, _IsFondamental> {
   public:

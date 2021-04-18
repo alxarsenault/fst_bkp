@@ -65,13 +65,6 @@ template <typename _Iterator>
 using is_random_access_iterator
     = std::is_same<typename std::iterator_traits<_Iterator>::iterator_category, std::random_access_iterator_tag>;
 
-template <class T>
-inline constexpr std::conditional_t<!std::is_move_constructible<T>::value && std::is_copy_constructible<T>::value,
-    const T&, T&&>
-maybe_move(T& arg) noexcept {
-  return std::move(arg);
-}
-
 template <class _Tp>
 struct type_identity {
   using type = _Tp;
@@ -230,25 +223,59 @@ constexpr typename std::underlying_type<T>::type integral(T value) {
   return static_cast<typename std::underlying_type<T>::type>(value);
 }
 
-// Fold expressions for c++ < 17.
-// Calls your function with each of the provided variadic argument.
-template <class Func, class... Args>
-constexpr void fold(Func&& func, Args&&... args) {
-  (func(args), ...);
-}
+namespace traits {
+  /// Check if a container can use memcpy when copying a buffer of T.
+  template <typename T>
+  struct is_memcopyable {
+    static constexpr bool value = std::is_trivially_copy_constructible_v<T> && std::is_trivially_destructible_v<T>;
+  };
 
-namespace static_for_detail {
-  template <class Func, size_t... I>
-  constexpr void static_for(Func&& func, std::index_sequence<I...>) {
-    return (func(std::integral_constant<size_t, I>{}), ...);
-  }
-} // namespace static_for_detail.
+  struct faster_without_const_reference_tag {};
 
-// Call a for loop at compile time.
-// Your lambda is provided with an integral_constant.
-// Accept it with auto, access the index with '::value'.
-template <size_t N, class Func>
-constexpr void static_for(Func&& func) {
-  static_for_detail::static_for(std::forward<Func>(func), std::make_index_sequence<N>{});
-}
+  namespace detail {
+    template <class T>
+    using is_faster_without_const_reference_t = typename T::is_faster_without_const_reference;
+
+    template <typename T>
+    using has_is_faster_without_const_reference_defined = fst::is_detected<is_faster_without_const_reference_t, T>;
+
+    template <typename T>
+    inline constexpr bool get_is_faster_without_const_reference() {
+      if constexpr (detail::has_is_faster_without_const_reference_defined<T>::value) {
+        constexpr bool value
+            = std::is_same<typename T::is_faster_without_const_reference, faster_without_const_reference_tag>::value;
+        static_assert(value,
+            "T has implemented is_faster_without_const_reference with the wrong tag. Use 'using "
+            "is_faster_without_const_reference = fst::dtraits::faster_without_const_reference_tag;");
+        return value;
+      }
+      else {
+        return std::is_fundamental_v<
+                   T> || (std::is_trivially_copy_constructible_v<T> && sizeof(T) <= fst::config::bitness_byte_size);
+      }
+    }
+  } // namespace detail.
+
+  template <typename T>
+  struct is_faster_without_const_reference {
+    static constexpr bool value = detail::get_is_faster_without_const_reference<T>();
+  };
+
+  ///
+  /// Fast vector resize.
+  ///
+  /// Ensures your class is optimized to be stored in a vector.
+  /// Checks whether it is trivially destructible (skips destructor call on resize)
+  /// and trivially copy constructible (use memcpy on resive).
+  /// If not, falls back to ensure your class is noexcept move constructible.
+  ///
+  /// In vector::resize(size), if T's move constructor is not noexcept and T is not
+  /// CopyInsertable into *this, vector will use the throwing move constructor. If it throws,
+  /// the guarantee is waived and the effects are unspecified.
+  ///
+  template <typename T>
+  struct is_fast_vector_resize {
+    static constexpr bool value = is_memcopyable<T>::value || std::is_nothrow_move_constructible_v<T>;
+  };
+} // namespace traits
 } // namespace fst.

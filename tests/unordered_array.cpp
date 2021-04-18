@@ -39,12 +39,12 @@ TEST(unordered_array, push_back) {
   EXPECT_EQ(buffer_2[0], 1);
   EXPECT_EQ(buffer_2[1], 2);
 
-  #if !__FST_WINDOWS__
+#if !__FST_WINDOWS__
   // Adding another element should assert.
   if constexpr (fst::config::has_assert) {
     EXPECT_DEATH({ buffer_2.push_back(3); }, "");
   }
-  #endif
+#endif
 
   // Content should still be valid with only two elements.
   EXPECT_EQ(buffer_2.size(), 2);
@@ -61,12 +61,12 @@ TEST(unordered_array, push_back) {
   EXPECT_EQ(buffer_2.size(), 0);
   EXPECT_EQ(buffer_2.empty(), true);
 
-  #if !__FST_WINDOWS__
+#if !__FST_WINDOWS__
   // Removing another element should assert.
   if constexpr (fst::config::has_assert) {
     EXPECT_DEATH({ buffer_2.pop_back(); }, "");
   }
-  #endif
+#endif
 
   // Content should still be valid with no element.
   EXPECT_EQ(buffer_2.size(), 0);

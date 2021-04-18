@@ -50,7 +50,7 @@ if (${FST_BUILD_TESTS})
 
     #Test Project
     set(FST_TEST_NAME ${PROJECT_NAME}_tests)
-    file(GLOB_RECURSE FST_TEST_SOURCES "tests/*.cpp")
+    file(GLOB_RECURSE FST_TEST_SOURCES "tests/*.cpp" "tests/*.h")
 
     add_executable(${FST_TEST_NAME} ${FST_TEST_SOURCES})
 
@@ -58,6 +58,8 @@ if (${FST_BUILD_TESTS})
         GTest::gtest
         fst
     )
+
+    target_include_directories(${FST_TEST_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
     set(FST_TEST_RESOURCES_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/tests/resources")
     add_definitions(-DFST_TEST_RESOURCES_DIRECTORY="${FST_TEST_RESOURCES_DIRECTORY}")
