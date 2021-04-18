@@ -39,32 +39,6 @@ template <class _Iter>
 class wrap_iterator;
 } // namespace fst.
 
-template <class Iterator1, class Iterator2>
-inline bool operator==(const fst::wrap_iterator<Iterator1>& lhs, const fst::wrap_iterator<Iterator2>& rhs);
-
-template <class Iterator1, class Iterator2>
-inline bool operator!=(const fst::wrap_iterator<Iterator1>& lhs, const fst::wrap_iterator<Iterator2>& rhs);
-
-template <class Iterator1, class Iterator2>
-inline bool operator>(const fst::wrap_iterator<Iterator1>& lhs, const fst::wrap_iterator<Iterator2>& rhs);
-
-template <class Iterator1, class Iterator2>
-inline bool operator>=(const fst::wrap_iterator<Iterator1>& lhs, const fst::wrap_iterator<Iterator2>& rhs);
-
-template <class Iterator1, class Iterator2>
-inline bool operator<(const fst::wrap_iterator<Iterator1>& lhs, const fst::wrap_iterator<Iterator2>& rhs);
-
-template <class Iterator1, class Iterator2>
-inline bool operator<=(const fst::wrap_iterator<Iterator1>& lhs, const fst::wrap_iterator<Iterator2>& rhs);
-
-template <class Iterator>
-inline fst::wrap_iterator<Iterator> operator+(
-    typename fst::wrap_iterator<Iterator>::difference_type n, const fst::wrap_iterator<Iterator>& it);
-
-template <class Iterator1, class Iterator2>
-inline typename fst::wrap_iterator<Iterator1>::difference_type operator-(
-    const fst::wrap_iterator<Iterator1>& lhs, const fst::wrap_iterator<Iterator2>& rhs);
-
 namespace fst {
 template <typename _Tp>
 class wrap_iterator {
@@ -76,82 +50,61 @@ public:
   using pointer = typename std::iterator_traits<iterator_type>::pointer;
   using reference = typename std::iterator_traits<iterator_type>::reference;
 
-  wrap_iterator() = default;
+  wrap_iterator() noexcept = default;
+  ~wrap_iterator() noexcept = default;
 
   // Should be explicit.
-  wrap_iterator(iterator_type x)
+  inline wrap_iterator(iterator_type x) noexcept
       : __i(x) {}
 
   template <class U>
-  inline wrap_iterator(
-      const wrap_iterator<U>& other, typename std::enable_if<std::is_convertible<U, iterator_type>::value>::type* = 0)
+  inline wrap_iterator(const wrap_iterator<U>& other,
+      typename std::enable_if<std::is_convertible<U, iterator_type>::value>::type* = 0) noexcept
       : __i(other.base()) {}
 
   template <class U, typename std::enable_if<std::is_convertible<U, iterator_type>::value>::type* = 0>
-  wrap_iterator& operator=(const wrap_iterator<U>& other) {
+  inline wrap_iterator& operator=(const wrap_iterator<U>& other) noexcept {
     __i = other.base();
     return *this;
   }
 
-  wrap_iterator operator++(int) { return __i++; }
-  wrap_iterator& operator++() {
+  inline wrap_iterator operator++(int) noexcept { return __i++; }
+  inline wrap_iterator& operator++() noexcept {
     ++__i;
     return *this;
   }
-  wrap_iterator operator--(int) { return __i--; }
-  wrap_iterator& operator--() {
+
+  inline wrap_iterator operator--(int) noexcept { return __i--; }
+  inline wrap_iterator& operator--() noexcept {
     --__i;
     return *this;
   }
-  wrap_iterator& operator+=(difference_type n) {
+
+  inline wrap_iterator& operator+=(difference_type n) noexcept {
     __i += n;
     return *this;
   };
-  wrap_iterator& operator-=(difference_type n) {
+
+  inline wrap_iterator& operator-=(difference_type n) noexcept {
     __i -= n;
     return *this;
   };
-  wrap_iterator operator+(difference_type v) const { return __i + v; }
-  wrap_iterator operator-(difference_type v) const { return __i - v; }
+  inline wrap_iterator operator+(difference_type v) const noexcept { return __i + v; }
+  inline wrap_iterator operator-(difference_type v) const noexcept { return __i - v; }
 
-  reference operator*() const { return *__i; }
-  pointer operator->() const { return __i; }
+  inline reference operator*() const noexcept { return *__i; }
+  inline pointer operator->() const noexcept { return __i; }
 
-  inline operator pointer() { return __i; }
+  inline operator pointer() noexcept { return __i; }
 
-  inline reference operator[](difference_type __n) const { return __i[__n]; }
+  inline reference operator[](difference_type __n) const noexcept { return __i[__n]; }
 
-  bool operator==(const wrap_iterator& rhs) const { return __i == rhs.__i; }
-  bool operator!=(const wrap_iterator& rhs) const { return __i != rhs.__i; }
-  inline iterator_type base() const { return __i; }
+  inline bool operator==(const wrap_iterator& rhs) const noexcept { return __i == rhs.__i; }
+  inline bool operator!=(const wrap_iterator& rhs) const noexcept { return __i != rhs.__i; }
+  inline iterator_type base() const noexcept { return __i; }
 
 private:
   iterator_type __i = nullptr;
-
-  template <class It1, class It2>
-  friend bool operator==(const wrap_iterator<It1>& lhs, const wrap_iterator& rhs);
-
-  template <class It1, class It2>
-  friend bool operator!=(const wrap_iterator<It1>& lhs, const wrap_iterator& rhs);
-
-  template <class It1, class It2>
-  friend bool operator>(const wrap_iterator<It1>& lhs, const wrap_iterator& rhs);
-
-  template <class It1, class It2>
-  friend bool operator>=(const wrap_iterator<It1>& lhs, const wrap_iterator& rhs);
-
-  template <class It1, class It2>
-  friend bool operator<(const wrap_iterator<It1>& lhs, const wrap_iterator& rhs);
-
-  template <class It1, class It2>
-  friend bool operator<=(const wrap_iterator<It1>& lhs, const wrap_iterator& rhs);
-
-  template <class It>
-  friend wrap_iterator<It> operator+(typename wrap_iterator<It>::difference_type n, const wrap_iterator<It>& it);
-
-  template <class It1, class It2>
-  friend typename wrap_iterator<It1>::difference_type operator-(
-      const wrap_iterator<It1>& lhs, const wrap_iterator<It2>& rhs);
 };
 
 } // namespace fst.
@@ -168,41 +121,41 @@ inline fst::wrap_iterator<T> end(T* val, Tsize size) {
 
 template <class Iterator1, class Iterator2>
 inline bool operator==(const fst::wrap_iterator<Iterator1>& lhs, const fst::wrap_iterator<Iterator2>& rhs) {
-  return lhs.__i != rhs.__i;
+  return lhs.base() != rhs.base();
 }
 template <class Iterator1, class Iterator2>
 inline bool operator!=(const fst::wrap_iterator<Iterator1>& lhs, const fst::wrap_iterator<Iterator2>& rhs) {
-  return lhs.__i != rhs.__i;
+  return lhs.base() != rhs.base();
 }
 
 template <class Iterator1, class Iterator2>
 inline bool operator>(const fst::wrap_iterator<Iterator1>& lhs, const fst::wrap_iterator<Iterator2>& rhs) {
-  return lhs.__i > rhs.__i;
+  return lhs.base() > rhs.base();
 }
 
 template <class Iterator1, class Iterator2>
 inline bool operator>=(const fst::wrap_iterator<Iterator1>& lhs, const fst::wrap_iterator<Iterator2>& rhs) {
-  return lhs.__i >= rhs.__i;
+  return lhs.base() >= rhs.base();
 }
 
 template <class Iterator1, class Iterator2>
 inline bool operator<(const fst::wrap_iterator<Iterator1>& lhs, const fst::wrap_iterator<Iterator2>& rhs) {
-  return lhs.__i < rhs.__i;
+  return lhs.base() < rhs.base();
 }
 
 template <class Iterator1, class Iterator2>
 inline bool operator<=(const fst::wrap_iterator<Iterator1>& lhs, const fst::wrap_iterator<Iterator2>& rhs) {
-  return lhs.__i <= rhs.__i;
+  return lhs.base() <= rhs.base();
 }
 
 template <class Iterator>
 inline fst::wrap_iterator<Iterator> operator+(
     typename fst::wrap_iterator<Iterator>::difference_type n, const fst::wrap_iterator<Iterator>& it) {
-  return it.__i + n;
+  return it.base() + n;
 }
 
 template <class Iterator1, class Iterator2>
 inline typename fst::wrap_iterator<Iterator1>::difference_type operator-(
     const fst::wrap_iterator<Iterator1>& lhs, const fst::wrap_iterator<Iterator2>& rhs) {
-  return lhs.__i - rhs.__i;
+  return lhs.base() - rhs.base();
 }
