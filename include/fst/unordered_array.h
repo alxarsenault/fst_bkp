@@ -34,6 +34,7 @@
 #pragma once
 #include "fst/assert.h"
 #include "fst/traits.h"
+#include "fst/meta.h"
 #include <array>
 #include <exception>
 #include <initializer_list>

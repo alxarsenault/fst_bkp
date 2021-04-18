@@ -32,8 +32,7 @@ static_assert(std::is_trivially_copy_assignable<fully_trivial_type>::value, "Sho
 static_assert(std::is_trivially_move_assignable<fully_trivial_type>::value, "Should be trivially move assignable");
 static_assert(std::is_trivially_destructible<fully_trivial_type>::value, "Should be trivially destructible");
 static_assert(std::is_nothrow_destructible<fully_trivial_type>::value, "Should be nothrow destructible");
-static_assert(
-    fst::traits::is_fast_vector_resize<fully_trivial_type>::value, "Should be trivially default constructible");
+static_assert(fst::is_fast_vector_resize<fully_trivial_type>::value, "Should be trivially default constructible");
 
 //
 // trivial_type_no_move.
@@ -64,6 +63,5 @@ static_assert(
     !std::is_trivially_move_assignable<trivial_type_no_move>::value, "Should not be trivially move assignable");
 static_assert(std::is_trivially_destructible<trivial_type_no_move>::value, "Should be trivially destructible");
 static_assert(std::is_nothrow_destructible<trivial_type_no_move>::value, "Should be nothrow destructible");
-static_assert(
-    fst::traits::is_fast_vector_resize<trivial_type_no_move>::value, "Should be trivially default constructible");
+static_assert(fst::is_fast_vector_resize<trivial_type_no_move>::value, "Should be trivially default constructible");
 } // namespace test.

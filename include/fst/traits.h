@@ -223,59 +223,57 @@ constexpr typename std::underlying_type<T>::type integral(T value) {
   return static_cast<typename std::underlying_type<T>::type>(value);
 }
 
-namespace traits {
-  /// Check if a container can use memcpy when copying a buffer of T.
+/// Check if a container can use memcpy when copying a buffer of T.
+template <typename T>
+struct is_memcopyable {
+  static constexpr bool value = std::is_trivially_copy_constructible_v<T> && std::is_trivially_destructible_v<T>;
+};
+
+struct faster_without_const_reference_tag {};
+
+namespace detail {
+  template <class T>
+  using is_faster_without_const_reference_t = typename T::is_faster_without_const_reference;
+
   template <typename T>
-  struct is_memcopyable {
-    static constexpr bool value = std::is_trivially_copy_constructible_v<T> && std::is_trivially_destructible_v<T>;
-  };
+  using has_is_faster_without_const_reference_defined = fst::is_detected<is_faster_without_const_reference_t, T>;
 
-  struct faster_without_const_reference_tag {};
-
-  namespace detail {
-    template <class T>
-    using is_faster_without_const_reference_t = typename T::is_faster_without_const_reference;
-
-    template <typename T>
-    using has_is_faster_without_const_reference_defined = fst::is_detected<is_faster_without_const_reference_t, T>;
-
-    template <typename T>
-    inline constexpr bool get_is_faster_without_const_reference() {
-      if constexpr (detail::has_is_faster_without_const_reference_defined<T>::value) {
-        constexpr bool value
-            = std::is_same<typename T::is_faster_without_const_reference, faster_without_const_reference_tag>::value;
-        static_assert(value,
-            "T has implemented is_faster_without_const_reference with the wrong tag. Use 'using "
-            "is_faster_without_const_reference = fst::dtraits::faster_without_const_reference_tag;");
-        return value;
-      }
-      else {
-        return std::is_fundamental_v<
-                   T> || (std::is_trivially_copy_constructible_v<T> && sizeof(T) <= fst::config::bitness_byte_size);
-      }
+  template <typename T>
+  inline constexpr bool get_is_faster_without_const_reference() {
+    if constexpr (detail::has_is_faster_without_const_reference_defined<T>::value) {
+      constexpr bool value
+          = std::is_same<typename T::is_faster_without_const_reference, faster_without_const_reference_tag>::value;
+      static_assert(value,
+          "T has implemented is_faster_without_const_reference with the wrong tag. Use 'using "
+          "is_faster_without_const_reference = fst::dtraits::faster_without_const_reference_tag;");
+      return value;
     }
-  } // namespace detail.
+    else {
+      return std::is_fundamental_v<
+                 T> || (std::is_trivially_copy_constructible_v<T> && sizeof(T) <= fst::config::bitness_byte_size);
+    }
+  }
+} // namespace detail.
 
-  template <typename T>
-  struct is_faster_without_const_reference {
-    static constexpr bool value = detail::get_is_faster_without_const_reference<T>();
-  };
+template <typename T>
+struct is_faster_without_const_reference {
+  static constexpr bool value = detail::get_is_faster_without_const_reference<T>();
+};
 
-  ///
-  /// Fast vector resize.
-  ///
-  /// Ensures your class is optimized to be stored in a vector.
-  /// Checks whether it is trivially destructible (skips destructor call on resize)
-  /// and trivially copy constructible (use memcpy on resive).
-  /// If not, falls back to ensure your class is noexcept move constructible.
-  ///
-  /// In vector::resize(size), if T's move constructor is not noexcept and T is not
-  /// CopyInsertable into *this, vector will use the throwing move constructor. If it throws,
-  /// the guarantee is waived and the effects are unspecified.
-  ///
-  template <typename T>
-  struct is_fast_vector_resize {
-    static constexpr bool value = is_memcopyable<T>::value || std::is_nothrow_move_constructible_v<T>;
-  };
-} // namespace traits
+///
+/// Fast vector resize.
+///
+/// Ensures your class is optimized to be stored in a vector.
+/// Checks whether it is trivially destructible (skips destructor call on resize)
+/// and trivially copy constructible (use memcpy on resive).
+/// If not, falls back to ensure your class is noexcept move constructible.
+///
+/// In vector::resize(size), if T's move constructor is not noexcept and T is not
+/// CopyInsertable into *this, vector will use the throwing move constructor. If it throws,
+/// the guarantee is waived and the effects are unspecified.
+///
+template <typename T>
+struct is_fast_vector_resize {
+  static constexpr bool value = is_memcopyable<T>::value || std::is_nothrow_move_constructible_v<T>;
+};
 } // namespace fst.

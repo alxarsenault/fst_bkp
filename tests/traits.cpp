@@ -5,13 +5,13 @@ namespace {
 TEST(dtraits, is_fastest_without_const_reference) {
   // Fundamental type.
   {
-    bool value = fst::traits::is_faster_without_const_reference<float>::value;
+    bool value = fst::is_faster_without_const_reference<float>::value;
     EXPECT_EQ(value, true);
   }
 
   // Fundamental type.
   {
-    bool value = fst::traits::is_faster_without_const_reference<long double>::value;
+    bool value = fst::is_faster_without_const_reference<long double>::value;
     EXPECT_EQ(value, true);
   }
 
@@ -21,7 +21,7 @@ TEST(dtraits, is_fastest_without_const_reference) {
       float a, b;
     };
 
-    bool value = fst::traits::is_faster_without_const_reference<type>::value;
+    bool value = fst::is_faster_without_const_reference<type>::value;
     EXPECT_EQ(value, sizeof(type) <= fst::config::bitness_byte_size);
   }
 
@@ -31,7 +31,7 @@ TEST(dtraits, is_fastest_without_const_reference) {
       double a;
       float b;
     };
-    bool value = fst::traits::is_faster_without_const_reference<type>::value;
+    bool value = fst::is_faster_without_const_reference<type>::value;
     EXPECT_EQ(value, sizeof(type) <= fst::config::bitness_byte_size);
   }
 
@@ -40,10 +40,10 @@ TEST(dtraits, is_fastest_without_const_reference) {
     struct type {
       double a;
       float b;
-      using is_faster_without_const_reference = fst::traits::faster_without_const_reference_tag;
+      using is_faster_without_const_reference = fst::faster_without_const_reference_tag;
     };
 
-    bool value = fst::traits::is_faster_without_const_reference<type>::value;
+    bool value = fst::is_faster_without_const_reference<type>::value;
     EXPECT_EQ(value, true);
   }
 
@@ -55,7 +55,7 @@ TEST(dtraits, is_fastest_without_const_reference) {
       float a, b;
     };
 
-    bool value = fst::traits::is_faster_without_const_reference<type>::value;
+    bool value = fst::is_faster_without_const_reference<type>::value;
     EXPECT_EQ(value, false);
   }
 
@@ -67,7 +67,7 @@ TEST(dtraits, is_fastest_without_const_reference) {
       float a, b;
     };
 
-    bool value = fst::traits::is_faster_without_const_reference<type>::value;
+    bool value = fst::is_faster_without_const_reference<type>::value;
     EXPECT_EQ(value, false);
   }
 
@@ -79,7 +79,7 @@ TEST(dtraits, is_fastest_without_const_reference) {
       float a, b;
     };
 
-    bool value = fst::traits::is_faster_without_const_reference<type>::value;
+    bool value = fst::is_faster_without_const_reference<type>::value;
     EXPECT_EQ(value, true);
   }
 }

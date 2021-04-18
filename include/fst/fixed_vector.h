@@ -86,9 +86,6 @@ private:
   template <bool _Dummy, class _D = dependent_type_condition<_Dummy, is_not_copy_constructible>>
   using enable_if_is_not_copy_constructible = enable_if_same<_Dummy, _D>;
 
-  //  template <bool _Dummy, class _D = dependent_type_condition<_Dummy, is_move_constructible>>
-  //  using enable_if_is_move_constructible = enable_if_same<_Dummy, _D>;
-
   template <bool _Dummy,
       class _D = dependent_type_condition<_Dummy,
           typename std::conjunction<is_move_constructible, typename std::negation<is_fundamental>::type>>>
