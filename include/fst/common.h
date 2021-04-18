@@ -324,7 +324,7 @@ namespace fst::config {
 
 } // namespace fst::config.
 
-#if __FST_MSVC__ == 1
+#if __FST_MSVC__
   #define fst_inline __forceinline
 #elif __FST_CLANG__ || __FST_GCC__ || __FST_INTEL__
   #define fst_inline __attribute__((always_inline))
@@ -332,6 +332,30 @@ namespace fst::config {
   #define fst_inline inline
 #endif
 
-// clang-format on
+#if __FST_MSVC__
+  #define __FST_DIAGNOSTIC_PUSH__ __pragma(warning(push))
+  #define __FST_DIAGNOSTIC_POP__ __pragma(warning(pop))
+#elif __FST_CLANG__
+  #define __FST_DIAGNOSTIC_PUSH__ _Pragma("clang diagnostic push")
+  #define __FST_DIAGNOSTIC_POP__ _Pragma("clang diagnostic pop")
+#elif __FST_GCC__
+  #define __FST_DIAGNOSTIC_PUSH__ _Pragma("GCC diagnostic push")
+  #define __FST_DIAGNOSTIC_POP__ _Pragma("GCC diagnostic pop")
+#else
+  #define __FST_DIAGNOSTIC_PUSH__
+  #define __FST_DIAGNOSTIC_POP__
+#endif
+
+#if __FST_MSVC__
+  #define __FST_BEGIN_DISABLED_SWITCH_WARNING__ __FST_DIAGNOSTIC_PUSH__ __pragma(warning( disable : 4062 ))
+#elif __FST_CLANG__
+  #define __FST_BEGIN_DISABLED_SWITCH_WARNING__ __FST_DIAGNOSTIC_PUSH__ _Pragma("clang diagnostic ignored \"-Wswitch\"")
+#elif __FST_GCC__
+  #define __FST_BEGIN_DISABLED_SWITCH_WARNING__ __FST_DIAGNOSTIC_PUSH__ _Pragma("GCC diagnostic ignored \"-Wswitch\"")
+#else
+  #define __FST_BEGIN_DISABLED_SWITCH_WARNING__
+#endif
+
+#define __FST_END_DISABLED_SWITCH_WARNING__ __FST_DIAGNOSTIC_POP__
 
 // "https://web.archive.org/web/20140625123925/http://nadeausoftware.com/articles/2012/01/c_c_tip_how_use_compiler_predefined_macros_detect_operating_system"
