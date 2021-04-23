@@ -70,6 +70,7 @@
 #define fst_release_assert(Expr, Msg) __FST_CALL_RELEASE_ASSERT(#Expr, Expr, __FILE__, __LINE__, Msg)
 #undef __FST_CALL_RELEASE_ASSERT
 
+// https://akrzemi1.wordpress.com/2017/05/18/asserts-in-constexpr-functions/
 #if __FST_CLANG__ || __FST_GCC__
   #define fst_likely(EXPR) __builtin_expect(!!(EXPR), 1)
 #else
