@@ -33,6 +33,7 @@
 
 #pragma once
 #include "fst/common.h"
+#include <cassert>
 #include <cstddef>
 #include <cstdlib>
 #include <iostream>
@@ -68,10 +69,23 @@
 #define __FST_CALL_RELEASE_ASSERT fst::assert_detail::global_release_assert::call_assert
 #define fst_release_assert(Expr, Msg) __FST_CALL_RELEASE_ASSERT(#Expr, Expr, __FILE__, __LINE__, Msg)
 #undef __FST_CALL_RELEASE_ASSERT
+
+#if __FST_CLANG__ || __FST_GCC__
+  #define fst_likely(EXPR) __builtin_expect(!!(EXPR), 1)
+#else
+  #define fst_likely(EXPR) (!!(EXPR))
+#endif
+
+#ifdef NDEBUG
+  #define fst_cexpr_assert(CHECK) void(0)
+#else
+  #define fst_cexpr_assert(CHECK) ( fst_likely(CHECK) ?  void(0) : []{assert(!#CHECK);}() )
+#endif
+
 // clang-format on
 
-namespace fst {
-namespace assert_detail {
+  namespace fst {
+  namespace assert_detail {
 #if __FST_HAS_DEBUG_ASSERT
   inline void custom_assert(const char* expr_str, bool expr, const char* file, int line, const std::string& msg) {
     if (expr) {
@@ -122,7 +136,7 @@ namespace assert_detail {
       return callback;
     }
   };
-} // namespace assert_detail.
+  } // namespace assert_detail.
 
 inline void set_release_assert_callback(assert_detail::global_release_assert::callback_ptr callback) {
   assert_detail::global_release_assert::set_callback(callback);
