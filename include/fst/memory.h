@@ -1,7 +1,7 @@
 ///
 /// BSD 3-Clause License
 ///
-/// Copyright (c) 2020, Alexandre Arsenault
+/// Copyright (c) 2021, Alexandre Arsenault
 /// All rights reserved.
 ///
 /// Redistribution and use in source and binary forms, with or without
@@ -34,27 +34,39 @@
 #pragma once
 #include "fst/common.h"
 
-#if __FST_UNISTD__
-#include <unistd.h>
-#elif __FST_WINDOWS__
-//#include <windows.h>
-//#include <sysinfoapi.h>
-#endif
-
 // clang-format off
+#if __FST_UNISTD__
+  #include <unistd.h>
+#endif // __FST_UNISTD__
+
+#if __FST_MACOS__
+  #include <sys/sysctl.h>
+#elif __FST_WINDOWS__
+  #include <stdlib.h>
+  #include <windows.h>
+  #include <sysinfoapi.h>
+#elif __FST_LINUX__
+  #include <stdio.h>
+#endif
+// clang-format on
+
 namespace fst::memory {
+namespace detail {
+//
+// get_page_size.
+//
 #if __FST_UNISTD__
 inline std::size_t get_page_size() {
   long pagesize = sysconf(_SC_PAGE_SIZE);
   return pagesize >= 0 ? (std::size_t)pagesize : 0;
 }
 
-//#elif __FST_WINDOWS__
-//inline std::size_t get_page_size() {
-//  SYSTEM_INFO sys_info;
-//  GetSystemInfo(&sys_info);
-//  return sys_info.dwPageSize >= 0 ? (std::size_t)sys_info.dwPageSize : 0;
-//}
+#elif __FST_WINDOWS__
+  inline std::size_t get_page_size() {
+    SYSTEM_INFO sys_info;
+    GetSystemInfo(&sys_info);
+    return sys_info.dwPageSize >= 0 ? (std::size_t)sys_info.dwPageSize : 0;
+  }
 
 #else
 inline std::size_t get_page_size() {
@@ -62,29 +74,21 @@ inline std::size_t get_page_size() {
 }
 #endif
 
-
-//https://stackoverflow.com/questions/794632/programmatically-get-the-cache-line-size
 //
-//sysconf (_SC_LEVEL1_DCACHE_LINESIZE)
+// get_cache_size.
+//
+// https://stackoverflow.com/questions/794632/programmatically-get-the-cache-line-size
 
-inline std::size_t get_cache_size();
-} // namespace fst::memory.
-
-#if defined(__APPLE__)
-
-#include <sys/sysctl.h>
-inline std::size_t fst::memory::get_cache_size() {
-    size_t line_size = 0;
-    size_t sizeof_line_size = sizeof(line_size);
-    sysctlbyname("hw.cachelinesize", &line_size, &sizeof_line_size, 0, 0);
-    return line_size;
+#if __FST_MACOS__
+inline std::size_t get_cache_size() {
+  size_t line_size = 0;
+  size_t sizeof_line_size = sizeof(line_size);
+  sysctlbyname("hw.cachelinesize", &line_size, &sizeof_line_size, 0, 0);
+  return line_size;
 }
 
-#elif defined(_WIN32)
-
-#include <stdlib.h>
-#include <windows.h>
-inline std::size_t fst::memory::get_cache_size() {
+#elif __FST_WINDOWS__
+  inline std::size_t get_cache_size() {
     size_t line_size = 0;
     DWORD buffer_size = 0;
     DWORD i = 0;
@@ -103,24 +107,33 @@ inline std::size_t fst::memory::get_cache_size() {
 
     free(buffer);
     return line_size;
-}
+  }
 
-#elif defined(linux)
-
-#include <stdio.h>
-inline std::size_t fst::memory::get_cache_size() {
-    FILE * p = 0;
-    p = fopen("/sys/devices/system/cpu/cpu0/cache/index0/coherency_line_size", "r");
-    unsigned int i = 0;
-    if (p) {
-        fscanf(p, "%d", &i);
-        fclose(p);
-    }
-    return i;
+#elif __FST_LINUX__
+inline std::size_t get_cache_size() {
+  FILE* p = 0;
+  p = fopen("/sys/devices/system/cpu/cpu0/cache/index0/coherency_line_size", "r");
+  unsigned int i = 0;
+  if (p) {
+    fscanf(p, "%d", &i);
+    fclose(p);
+  }
+  return i;
 }
 
 #else
-#error Unrecognized platform
+#warning "Unsupported platform."
+  inline std::size_t get_cache_size() { return 0; }
 #endif
+} // namespace detail.
 
-// clang-format on
+inline std::size_t get_page_size() {
+  static std::size_t size = detail::get_page_size();
+  return size;
+}
+
+inline std::size_t get_cache_size() {
+  static std::size_t size = detail::get_cache_size();
+  return size;
+}
+} // namespace fst::memory
