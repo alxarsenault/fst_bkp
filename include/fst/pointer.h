@@ -180,7 +180,7 @@ public:
       : _ptr(ptr)
       , _is_owned(_ptr == nullptr ? false : owned) {}
 
-  optional_owned_ptr(std::nullptr_t, bool owned) noexcept
+  optional_owned_ptr(std::nullptr_t, bool /*owned*/) noexcept
       : optional_owned_ptr() {}
 
   optional_owned_ptr(std::unique_ptr<element_type>&& ptr) noexcept
@@ -254,7 +254,7 @@ public:
     _is_owned = _ptr == nullptr ? false : owned;
   }
 
-  inline void reset(std::nullptr_t ptr, bool owned) {
+  inline void reset(std::nullptr_t ptr, bool /*owned*/) {
     reset();
 
     _ptr = ptr;

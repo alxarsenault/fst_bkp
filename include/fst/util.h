@@ -114,6 +114,16 @@ struct is_only_one_true_t {
   static constexpr bool value = (Bs ^ ...);
 };
 
+template <typename... Ts>
+inline constexpr bool is_more_than_one_true(Ts... ts) {
+  return (int(ts) + ...) > 1;
+}
+
+template <bool... Bs>
+struct is_more_than_one_true_t {
+  static constexpr bool value = is_more_than_one_true(Bs...);
+};
+
 // Boolean only one false.
 template <typename... Ts>
 inline constexpr bool is_only_one_false(Ts... ts) {
