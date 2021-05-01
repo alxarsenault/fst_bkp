@@ -256,6 +256,22 @@ namespace detail {
 } // namespace detail.
 
 template <typename T>
+struct is_integer_convertible {
+  static constexpr bool value = std::is_unsigned_v<T> || std::is_signed_v<T>;
+};
+
+template <typename T>
+inline constexpr bool is_integer_convertible_v = is_integer_convertible<T>::value;
+
+template <typename T>
+struct is_integer_convertiable_but_not_bool {
+  static constexpr bool value = fst::is_integer_convertible_v<T> && !std::is_same_v<T, bool>;
+};
+
+template <typename T>
+inline constexpr bool is_integer_convertiable_but_not_bool_v = is_integer_convertiable_but_not_bool<T>::value;
+
+template <typename T>
 struct is_faster_without_const_reference {
   static constexpr bool value = detail::get_is_faster_without_const_reference<T>();
 };

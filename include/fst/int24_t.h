@@ -32,58 +32,86 @@
 ///
 
 #pragma once
-#include <iostream>
-#include <type_traits>
-#include <cstdint>
 #include "fst/assert.h"
+#include "fst/traits.h"
+
+#include <iostream>
+#include <cstdint>
 
 namespace fst {
-
+#pragma pack(push, 1)
 class int24_t {
 private:
-#pragma pack(push, 1)
-  union {
+  std::uint8_t _data[3];
+
+  struct int24_t_bit {
     std::int32_t _int24 : 24;
-    std::uint8_t _data[3];
-  };
-#pragma pack(pop)
-
-  template <typename T>
-  struct is_integer_convertible {
-    static constexpr bool value = std::is_unsigned_v<T> || std::is_signed_v<T>;
   };
 
+  inline int24_t_bit& to_24_bits() { return *(int24_t_bit*)(void*)(&_data[0]); }
+
+  inline const int24_t_bit& to_24_bits() const { return *(int24_t_bit*)(void*)(&_data[0]); }
+
   template <typename T>
-  struct is_integer_but_not_bool {
-    static constexpr bool value = is_integer_convertible<T>::value && !std::is_same_v<T, bool>;
-  };
+  using enable_if_int_convertiable = typename std::enable_if_t<fst::is_integer_convertible_v<T>, T>;
+
+  template <typename T>
+  using enable_if_int_convertiable_but_not_bool =
+      typename std::enable_if_t<fst::is_integer_convertiable_but_not_bool_v<T>, T>;
 
 public:
-  int24_t() = default;
-  int24_t(const int24_t&) = default;
-  int24_t(int24_t&&) = default;
+  int24_t() noexcept = default;
+  int24_t(const int24_t&) noexcept = default;
+  int24_t(int24_t&&) noexcept = default;
 
-  template <typename T, typename = typename std::enable_if_t<is_integer_convertible<T>::value, T>>
-  inline int24_t(T integer)
-      : _int24((std::int32_t)integer) {}
+  template <typename T, typename = enable_if_int_convertiable<T>>
+  inline int24_t(T integer) noexcept {
+    to_24_bits()._int24 = (std::int32_t)integer;
+  }
 
-  int24_t& operator=(const int24_t&) = default;
-  int24_t& operator=(int24_t&&) = default;
+  ~int24_t() noexcept = default;
 
-  template <typename T, typename = typename std::enable_if_t<is_integer_convertible<T>::value, T>>
-  inline int24_t& operator=(T integer) {
-    _int24 = (std::int32_t)integer;
+  int24_t& operator=(const int24_t&) noexcept = default;
+  int24_t& operator=(int24_t&&) noexcept = default;
+
+  template <typename T, typename = enable_if_int_convertiable<T>>
+  inline int24_t& operator=(T integer) noexcept {
+    to_24_bits()._int24 = (std::int32_t)integer;
     return *this;
   }
 
-  template <typename T, typename = typename std::enable_if_t<is_integer_but_not_bool<T>::value, T>>
-  inline operator T() const {
-    return _int24;
+  template <typename T, typename = enable_if_int_convertiable<T>>
+  inline int24_t& operator+=(T integer) noexcept {
+    to_24_bits()._int24 += (std::int32_t)integer;
+    return *this;
   }
 
-  inline explicit operator bool() const { return (std::int32_t)_int24; }
+  template <typename T, typename = enable_if_int_convertiable<T>>
+  inline int24_t& operator-=(T integer) noexcept {
+    to_24_bits()._int24 -= (std::int32_t)integer;
+    return *this;
+  }
 
-  inline std::uint8_t operator[](std::size_t __index) const {
+  template <typename T, typename = enable_if_int_convertiable<T>>
+  inline int24_t& operator*=(T integer) noexcept {
+    to_24_bits()._int24 *= (std::int32_t)integer;
+    return *this;
+  }
+
+  template <typename T, typename = enable_if_int_convertiable<T>>
+  inline int24_t& operator/=(T integer) noexcept {
+    to_24_bits()._int24 /= (std::int32_t)integer;
+    return *this;
+  }
+
+  template <typename T, typename = enable_if_int_convertiable_but_not_bool<T>>
+  inline operator T() const noexcept {
+    return to_24_bits()._int24;
+  }
+
+  inline explicit operator bool() const noexcept { return (std::int32_t)to_24_bits()._int24; }
+
+  inline std::uint8_t operator[](std::size_t __index) const noexcept {
     fst_assert(__index < 3, "Out of bounds index");
     return _data[__index];
   }
@@ -93,6 +121,85 @@ public:
     return stream;
   }
 };
+#pragma pack(pop)
+
+//
+// Operator ==
+//
+template <typename T, typename = typename std::enable_if_t<fst::is_integer_convertible_v<T>, T>>
+inline bool operator==(const int24_t& __lhs, T __rhs) noexcept {
+  return T(__lhs) == __rhs;
+}
+
+template <typename T, typename = typename std::enable_if_t<fst::is_integer_convertible_v<T>, T>>
+inline bool operator==(T __lhs, const int24_t& __rhs) noexcept {
+  return __lhs == T(__rhs);
+}
+
+//
+// Operator !=
+//
+template <typename T, typename = typename std::enable_if_t<fst::is_integer_convertible_v<T>, T>>
+inline bool operator!=(const int24_t& __lhs, T __rhs) noexcept {
+  return T(__lhs) != __rhs;
+}
+
+template <typename T, typename = typename std::enable_if_t<fst::is_integer_convertible_v<T>, T>>
+inline bool operator!=(T __lhs, const int24_t& __rhs) noexcept {
+  return __lhs != T(__rhs);
+}
+
+//
+// Operator <
+//
+template <typename T, typename = typename std::enable_if_t<fst::is_integer_convertible_v<T>, T>>
+inline bool operator<(const int24_t& __lhs, T __rhs) noexcept {
+  return T(__lhs) < __rhs;
+}
+
+template <typename T, typename = typename std::enable_if_t<fst::is_integer_convertible_v<T>, T>>
+inline bool operator<(T __lhs, const int24_t& __rhs) noexcept {
+  return __lhs < T(__rhs);
+}
+
+//
+// Operator >
+//
+template <typename T, typename = typename std::enable_if_t<fst::is_integer_convertible_v<T>, T>>
+inline bool operator>(const int24_t& __lhs, T __rhs) noexcept {
+  return T(__lhs) > __rhs;
+}
+
+template <typename T, typename = typename std::enable_if_t<fst::is_integer_convertible_v<T>, T>>
+inline bool operator>(T __lhs, const int24_t& __rhs) noexcept {
+  return __lhs > T(__rhs);
+}
+
+//
+// Operator <=
+//
+template <typename T, typename = typename std::enable_if_t<fst::is_integer_convertible_v<T>, T>>
+inline bool operator<=(const int24_t& __lhs, T __rhs) noexcept {
+  return T(__lhs) <= __rhs;
+}
+
+template <typename T, typename = typename std::enable_if_t<fst::is_integer_convertible_v<T>, T>>
+inline bool operator<=(T __lhs, const int24_t& __rhs) noexcept {
+  return __lhs <= T(__rhs);
+}
+
+//
+// Operator >=
+//
+template <typename T, typename = typename std::enable_if_t<fst::is_integer_convertible_v<T>, T>>
+inline bool operator>=(const int24_t& __lhs, T __rhs) noexcept {
+  return T(__lhs) >= __rhs;
+}
+
+template <typename T, typename = typename std::enable_if_t<fst::is_integer_convertible_v<T>, T>>
+inline bool operator>=(T __lhs, const int24_t& __rhs) noexcept {
+  return __lhs >= T(__rhs);
+}
 
 static_assert(sizeof(int24_t) == 3, "int24_t size should be 3");
 } // namespace fst.
