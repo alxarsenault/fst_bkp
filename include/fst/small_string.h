@@ -649,10 +649,27 @@ public:
     return string_conv::to_number(_data.data(), string_conv::type_to_format<fst::remove_cvref_t<T>>(), value);
   }
 
+  //  template <typename T, std::size_t _Precision, class = typename std::enable_if<std::is_arithmetic<T>::value,
+  //  void>::type> inline bool to_number(T& value) const {
+  //    return string_conv::to_number(_data.data(), string_conv::type_to_format<fst::remove_cvref_t<T>, _Precision>(),
+  //    value);
+  //  }
+
   template <typename T, class = typename std::enable_if<std::is_arithmetic<T>::value, void>::type>
   inline basic_small_string& from_number(T value) {
-    _size = string_conv::from_number(
+    std::size_t r_size = string_conv::from_number(
         value, _data.data(), string_conv::type_to_format<fst::remove_cvref_t<T>>(), maximum_size_with_escape_char);
+    _size = fst::minimum(maximum_size, r_size);
+    _data[_size] = 0;
+    return *this;
+  }
+
+  template <typename T, class = typename std::enable_if<std::is_arithmetic<T>::value, void>::type>
+  inline basic_small_string& from_number(T value, bool& is_completely_written) {
+    std::size_t r_size = string_conv::from_number(
+        value, _data.data(), string_conv::type_to_format<fst::remove_cvref_t<T>>(), maximum_size_with_escape_char);
+    is_completely_written = r_size && r_size <= maximum_size;
+    _size = fst::minimum(maximum_size, r_size);
     _data[_size] = 0;
     return *this;
   }
@@ -661,7 +678,19 @@ public:
       class = typename std::enable_if<std::is_arithmetic<T>::value, void>::type>
   inline basic_small_string& from_number(T value) {
     constexpr auto format = string_conv::type_to_format<fst::remove_cvref_t<T>, Precision>();
-    _size = string_conv::from_number(value, _data.data(), format.data(), maximum_size_with_escape_char);
+    std::size_t r_size = string_conv::from_number(value, _data.data(), format.data(), maximum_size_with_escape_char);
+    _size = fst::minimum(maximum_size, r_size);
+    _data[_size] = 0;
+    return *this;
+  }
+
+  template <std::size_t Precision, typename T,
+      class = typename std::enable_if<std::is_arithmetic<T>::value, void>::type>
+  inline basic_small_string& from_number(T value, bool& is_completely_written) {
+    constexpr auto format = string_conv::type_to_format<fst::remove_cvref_t<T>, Precision>();
+    std::size_t r_size = string_conv::from_number(value, _data.data(), format.data(), maximum_size_with_escape_char);
+    is_completely_written = r_size && r_size <= maximum_size;
+    _size = fst::minimum(maximum_size, r_size);
     _data[_size] = 0;
     return *this;
   }

@@ -38,13 +38,15 @@
 #include "fst/assert.h"
 
 namespace fst {
-#pragma pack(push, 1)
+
 class int24_t {
 private:
+#pragma pack(push, 1)
   union {
     std::int32_t _int24 : 24;
     std::uint8_t _data[3];
   };
+#pragma pack(pop)
 
   template <typename T>
   struct is_integer_convertible {
@@ -91,7 +93,6 @@ public:
     return stream;
   }
 };
-#pragma pack(pop)
 
 static_assert(sizeof(int24_t) == 3, "int24_t size should be 3");
 } // namespace fst.

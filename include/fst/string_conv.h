@@ -51,7 +51,7 @@
 
 namespace fst::string_conv {
 template <typename T, class = typename std::enable_if<std::is_arithmetic<T>::value, void>::type>
-inline const char* type_to_format() {
+inline constexpr const char* type_to_format() {
   if constexpr (std::is_integral<T>::value) {
     if constexpr (std::is_same<T, std::size_t>::value) {
       return "%zu";
