@@ -1,395 +1,241 @@
 #include "fst/print.h"
 #include "fst/span.h"
-#include "fst/memory.h"
-#include <array>
-#include <unordered_map>
-#include <thread>
-#include <memory>
-#include <vector>
+#include "fst/math.h"
+//#include "dragonbox/dragonbox_to_chars.h"
+//#include "dragonbox/dragonbox.h"
 
-#include <new>
-
-// Replace new and delete just for the purpose of demonstrating that
-//  they are not called.
-
-std::size_t memory = 0;
-std::size_t alloc = 0;
-
-void* operator new(std::size_t s) {
-  memory += s;
-  ++alloc;
-  return malloc(s);
-}
-
-void operator delete(void* p) throw() {
-  //  fst::print("---alloc", alloc, p);
-  --alloc;
-  free(p);
-}
-
-void memuse() {
-  std::cout << "memory = " << memory << '\n';
-  std::cout << "alloc = " << alloc << '\n';
-}
+#include "fst/detail/dragonbox/dragonbox_to_chars.h"
+//#include "fst/detail/dragonbox/dragonbox.h"
+//#include "fmt/format.h"
+#include "fst/string_conv.h"
+#include "fst/unmanaged_string.h"
 
 namespace fst {
+template <std::size_t _Precision>
+inline constexpr long get_precision_mul() {
+  long v = 1;
+  for (std::size_t i = 0; i < _Precision; i++) {
+    v *= 10;
+  }
+  return v;
+}
+
+template <std::size_t _Precision, typename T>
+T round_to_precision(T value) {
+  if constexpr (_Precision == 0) {
+    return value;
+  }
+  else {
+    constexpr long mult = get_precision_mul<_Precision>();
+    value = (long)(value * mult + (T)0.5);
+    return (T)value / mult;
+  }
+}
+
 template <typename T>
-static T& get_thread_local_instance() // no thread_local needed here
-    noexcept(std::is_nothrow_constructible<T>::value) {
-  // Guaranteed to be destroyed.
-  // Instantiated on first use.
-  // Thread safe in C++11.
-  thread_local static T instance;
-  return instance;
+inline std::string_view real_to_string(fst::span<char> buffer, T value) {
+  auto dec = fst::dragonbox::to_decimal(value);
+  std::string_view str = fst::string_conv_v2::to_string(buffer, dec.significand);
+  //  fst::print("BANANNA", str, dec.significand, dec.exponent, typeid(dec.significand).name(), typeid(unsigned long
+  //  long).name());
+  if (dec.exponent == 0) {
+    return str;
+  }
+
+  fst::unmanaged_string u_str(buffer, str.size());
+
+  if (dec.exponent > 0) {
+    u_str.append(dec.exponent, '0');
+    //    fst::print("SING", dec.significand, dec.exponent);
+  }
+  else {
+    int exp = -dec.exponent;
+    if (exp >= str.size()) {
+      std::size_t s_size = str.size();
+      u_str.insert(0, "0.");
+      u_str.insert(2, exp - s_size, '0');
+    }
+    else {
+      u_str.insert(str.size() - exp, 1, '.');
+    }
+  }
+
+  return std::string_view(u_str.data(), u_str.size());
 }
 
-// template <class T, std::size_t N, class Allocator = std::allocator<T>>
-// class stack_allocator
-//{
-//	public:
-//
-//	typedef typename std::allocator_traits<Allocator>::value_type value_type;
-//	typedef typename std::allocator_traits<Allocator>::pointer pointer;
-//	typedef typename std::allocator_traits<Allocator>::const_pointer const_pointer;
-//	typedef typename Allocator::reference reference;
-//	typedef typename Allocator::const_reference const_reference;
-//	typedef typename std::allocator_traits<Allocator>::size_type size_type;
-//	typedef typename std::allocator_traits<Allocator>::difference_type difference_type;
-//
-//	typedef typename std::allocator_traits<Allocator>::const_void_pointer const_void_pointer;
-//	typedef Allocator allocator_type;
-//
-//	public:
-//
-//	explicit stack_allocator(const allocator_type& alloc = allocator_type())
-//		: m_allocator(alloc), m_begin(nullptr), m_end(nullptr), m_stack_pointer(nullptr)
-//	{ }
-//
-//	explicit stack_allocator(pointer buffer, const allocator_type& alloc = allocator_type())
-//		: m_allocator(alloc), m_begin(buffer), m_end(buffer + N),
-//			m_stack_pointer(buffer)
-//	{ }
-//
-//	template <class U>
-//	stack_allocator(const stack_allocator<U, N, Allocator>& other)
-//		: m_allocator(other.m_allocator), m_begin(other.m_begin), m_end(other.m_end),
-//			m_stack_pointer(other.m_stack_pointer)
-//	{ }
-//
-//	constexpr static size_type capacity()
-//	{
-//		return N;
-//	}
-//
-//	pointer allocate(size_type n, const_void_pointer hint = const_void_pointer())
-//	{
-//		if (n <= size_type(std::distance(m_stack_pointer, m_end)))
-//		{
-//			pointer result = m_stack_pointer;
-//			m_stack_pointer += n;
-//			return result;
-//		}
-//
-//		return m_allocator.allocate(n, hint);
-//	}
-//
-//	void deallocate(pointer p, size_type n)
-//	{
-//		if (pointer_to_internal_buffer(p))
-//		{
-//			m_stack_pointer -= n;
-//		}
-//		else m_allocator.deallocate(p, n);
-//	}
-//
-//	size_type max_size() const noexcept
-//	{
-//		return m_allocator.max_size();
-//	}
-//
-//	template <class U, class... Args>
-//	void construct(U* p, Args&&... args)
-//	{
-//		m_allocator.construct(p, std::forward<Args>(args)...);
-//	}
-//
-//	template <class U>
-//	void destroy(U* p)
-//	{
-//		m_allocator.destroy(p);
-//	}
-//
-//	pointer address(reference x) const noexcept
-//	{
-//		if (pointer_to_internal_buffer(std::addressof(x)))
-//		{
-//			return std::addressof(x);
-//		}
-//
-//		return m_allocator.address(x);
-//	}
-//
-//	const_pointer address(const_reference x) const noexcept
-//	{
-//		if (pointer_to_internal_buffer(std::addressof(x)))
-//		{
-//			return std::addressof(x);
-//		}
-//
-//		return m_allocator.address(x);
-//	}
-//
-//	template <class U>
-//	struct rebind { typedef stack_allocator<U, N, allocator_type> other; };
-//
-//	pointer buffer() const noexcept
-//	{
-//		return m_begin;
-//	}
-//
-//	private:
-//
-//	bool pointer_to_internal_buffer(const_pointer p) const
-//	{
-//		return (!(std::less<const_pointer>()(p, m_begin)) && (std::less<const_pointer>()(p, m_end)));
-//	}
-//
-//	allocator_type m_allocator;
-//	pointer m_begin;
-//	pointer m_end;
-//	pointer m_stack_pointer;
-//};
-//
-// template <class T1, std::size_t N, class Allocator, class T2>
-// bool operator == (const stack_allocator<T1, N, Allocator>& lhs,
-//	const stack_allocator<T2, N, Allocator>& rhs) noexcept
-//{
-//	return lhs.buffer() == rhs.buffer();
-//}
-//
-// template <class T1, std::size_t N, class Allocator, class T2>
-// bool operator != (const stack_allocator<T1, N, Allocator>& lhs,
-//	const stack_allocator<T2, N, Allocator>& rhs) noexcept
-//{
-//	return !(lhs == rhs);
-//}
-//
-//// -------- Specialization for void
-////
-// template <std::size_t N, class Allocator>
-// class stack_allocator<void, N, Allocator>
-//{
-//	public:
-//
-//	typedef std::size_t size_type;
-//	typedef std::ptrdiff_t difference_type;
-//	typedef void* pointer;
-//	typedef const void* const_pointer;
-//	typedef void value_type;
-//
-//	constexpr pointer buffer() const noexcept
-//	{
-//		return nullptr;
-//	}
-//
-//	template <class U>
-//	struct rebind
-//	{
-//		typedef stack_allocator<U, N, typename Allocator::template rebind<U>::other> other;
-//	};
-//};
-
-template <class T>
-class stack_allocator {
-  template <typename AA>
-  friend class stack_allocator;
-
-public:
-  using Allocator = std::allocator<T>;
-  typedef typename std::allocator_traits<Allocator>::value_type value_type;
-  typedef typename std::allocator_traits<Allocator>::pointer pointer;
-  typedef typename std::allocator_traits<Allocator>::const_pointer const_pointer;
-  typedef typename Allocator::reference reference;
-  typedef typename Allocator::const_reference const_reference;
-  typedef typename std::allocator_traits<Allocator>::size_type size_type;
-  typedef typename std::allocator_traits<Allocator>::difference_type difference_type;
-
-  typedef typename std::allocator_traits<Allocator>::const_void_pointer const_void_pointer;
-  typedef Allocator allocator_type;
-
-public:
-  explicit stack_allocator(const allocator_type& alloc = allocator_type())
-      : m_allocator(alloc)
-      , m_begin(nullptr)
-      , m_end(nullptr)
-      , m_stack_pointer(nullptr) {}
-
-  explicit stack_allocator(fst::span<T> buffer, const allocator_type& alloc = allocator_type())
-      : m_allocator(alloc)
-      , m_begin(buffer.begin())
-      , m_end(buffer.end())
-      , m_stack_pointer(buffer.begin()) {}
-
-  template <class U>
-  stack_allocator(const stack_allocator<U>& other)
-      : m_allocator(other.m_allocator)
-      , m_begin((pointer)other.m_begin)
-      , m_end((pointer)other.m_end)
-      , m_stack_pointer((pointer)other.m_stack_pointer) {
-    fst::print("FDLJK", (std::size_t)m_begin, (std::size_t)m_stack_pointer, std::distance(m_stack_pointer, m_end),
-        m_stack_pointer - m_begin);
+template <std::size_t _Precision, typename T>
+inline std::string_view real_to_string(fst::span<char> buffer, T value) {
+  value = round_to_precision<_Precision>(value);
+  auto dec = fst::dragonbox::to_decimal(value);
+  std::string_view str = fst::string_conv_v2::to_string(buffer, dec.significand);
+  //  fst::print("BANANNA", str, dec.significand, dec.exponent, typeid(dec.significand).name(), typeid(unsigned long
+  //  long).name());
+  if (dec.exponent == 0) {
+    return str;
   }
 
-  //	constexpr static size_type capacity()
-  //	{
-  //		return 0;
-  //	}
+  fst::unmanaged_string u_str(buffer, str.size());
 
-  pointer allocate(size_type n, const_void_pointer hint = const_void_pointer()) {
-    fst::print("allocate", n, m_stack_pointer - m_begin);
-    if (n <= size_type(std::distance(m_stack_pointer, m_end))) {
-      pointer result = m_stack_pointer;
-      m_stack_pointer += n;
-      fst::print("allocate--", m_stack_pointer - m_begin);
-      return result;
+  if (dec.exponent > 0) {
+    u_str.append(dec.exponent, '0');
+    u_str.append('.');
+    u_str.append(_Precision, '0');
+  }
+  else {
+    int exp = -dec.exponent;
+    if (exp >= str.size()) {
+      std::size_t s_size = str.size();
+      u_str.insert(0, "0.");
+      u_str.insert(2, exp - s_size, '0');
     }
+    else {
+      u_str.insert(str.size() - exp, 1, '.');
 
-    return m_allocator.allocate(n, hint);
-  }
-
-  void deallocate(pointer p, size_type n) {
-    fst::print("deallocate", n);
-    if (pointer_to_internal_buffer(p)) {
-      m_stack_pointer -= n;
+      if (exp < _Precision) {
+        u_str.append(_Precision - exp, '0');
+      }
     }
-    else
-      m_allocator.deallocate(p, n);
   }
 
-  size_type max_size() const noexcept { return m_allocator.max_size(); }
-
-  template <class U, class... Args>
-  void construct(U* p, Args&&... args) {
-    m_allocator.construct(p, std::forward<Args>(args)...);
-  }
-
-  template <class U>
-  void destroy(U* p) {
-    m_allocator.destroy(p);
-  }
-
-  pointer address(reference x) const noexcept {
-    if (pointer_to_internal_buffer(std::addressof(x))) {
-      return std::addressof(x);
-    }
-
-    return m_allocator.address(x);
-  }
-
-  const_pointer address(const_reference x) const noexcept {
-    if (pointer_to_internal_buffer(std::addressof(x))) {
-      return std::addressof(x);
-    }
-
-    return m_allocator.address(x);
-  }
-
-  template <class U>
-  struct rebind {
-    typedef stack_allocator<U> other;
-  };
-
-  pointer buffer() const noexcept { return m_begin; }
-
-private:
-  bool pointer_to_internal_buffer(const_pointer p) const {
-    return (!(std::less<const_pointer>()(p, m_begin)) && (std::less<const_pointer>()(p, m_end)));
-  }
-
-  allocator_type m_allocator;
-  pointer m_begin;
-  pointer m_end;
-  pointer m_stack_pointer;
-};
-
-template <class T1, class T2>
-bool operator==(const stack_allocator<T1>& lhs, const stack_allocator<T2>& rhs) noexcept {
-  return lhs.buffer() == rhs.buffer();
-}
-
-template <class T1, class T2>
-bool operator!=(const stack_allocator<T1>& lhs, const stack_allocator<T2>& rhs) noexcept {
-  return !(lhs == rhs);
+  return std::string_view(u_str.data(), u_str.size());
 }
 } // namespace fst.
 
-int main(int argc, char** argv) {
-  fst::print("MEMORY PAGE SIZE", fst::memory::get_page_size());
-  constexpr std::size_t m_size = 64 * sizeof(int);
-  using memory_buffer = std::array<std::uint8_t, m_size>;
-  memory_buffer& mb = fst::get_thread_local_instance<memory_buffer>();
+int main() {
+  std::array<char, 32> buffer;
+  //  std::cout << std::setprecision(5) << -123.458f << std::endl;
+  //  fst::print(fst::string_conv_v2::detail::round_to_precision<2>(-123.458f));
+  //  fst::print(fst::string_conv_v2::detail::round_to_precision<2>(123.458f));
+  //  fst::print(fst::string_conv_v2::detail::round_to_precision<2>(123.4f));
+  fst::print(fst::string_conv_v2::to_string<0>(buffer, 123.458f));
+  fst::print(fst::string_conv_v2::to_string<0>(buffer, -123.458f));
 
-  std::vector<int, fst::stack_allocator<int>> vec((fst::stack_allocator<int>(fst::stack_allocator<std::uint8_t>(mb))));
+  fst::print(fst::string_conv_v2::to_string<2>(buffer, 123.458f));
+  fst::print(fst::string_conv_v2::to_string<2>(buffer, 123.4f));
+  fst::print(fst::string_conv_v2::to_string<2>(buffer, -123.458f));
+  fst::print(fst::string_conv_v2::to_string<2>(buffer, -123.4f));
 
-  vec.push_back(32);
-  vec.push_back(33);
-  vec.push_back(34);
+  fst::print(fst::string_conv_v2::to_string(buffer, fst::math::pi<float>));
+  fst::print(fst::string_conv_v2::to_string(buffer, fst::math::pi<double>));
 
-  fst::print(sizeof(int), sizeof(float));
+  //  fst::print(fst::real_to_string(buffer, 0.000932f));
+  //  fst::print(fst::real_to_string(buffer, 2.00932f));
+  //  fst::print(fst::real_to_string(buffer, 32.932f));
+  //  fst::print(fst::real_to_string(buffer, 32.0f));
+  //  fst::print(fst::real_to_string(buffer, 32000.932f));
+  //  fst::print(fst::real_to_string(buffer, 320000.932f));
+  //  fst::print(fst::real_to_string(buffer, 320000000.932f));
+  //  fst::print(fst::real_to_string(buffer, 32000000000.932f));
+  //  fst::print(fst::real_to_string(buffer, 44100.90189f));
+  //  fst::print(fst::real_to_string(buffer, 44100.90189));
+  //  fst::print(std::to_string(44100.90189f));
+  //  fst::print(std::to_string(44100.90189));
+  //
+  //
+  //  fst::print(fst::real_to_string(buffer, fst::round_to_precision<2>(44100.92189f)));
+  //  fst::print(fst::real_to_string(buffer, fst::round_to_precision<2>(44100.0f)));
 
-  std::vector<float, fst::stack_allocator<float>> dvec((fst::stack_allocator<float>(vec.get_allocator())));
+  //  fst::print(fst::real_to_string<2>(buffer, 44100.0f));
+  //  fst::print(fst::real_to_string<2>(buffer, 44100.90189f));
+  //  fst::print(fst::real_to_string<3>(buffer, 44100.90189f));
+  //  fst::print(fst::real_to_string<4>(buffer, 44100.90189f));
+  //
+  ////  round_to_precision
+  //  double x = 1.234;  // Also works for float
+  //  char buffer2[31];   // Should be long enough
+  //
+  //  // Null-terminate the buffer and return the pointer to the null character
+  //  // Hence, the length of the string is (end_ptr - buffer)
+  //  // buffer is now { '1', '.', '2', '3', '4', 'E', '0', '\0', (garbages) }
+  //  char* end_ptr = fst::dragonbox::to_chars(x, buffer2);
 
-  dvec.push_back(42);
-  dvec.push_back(43);
-  dvec.push_back(44);
-  memuse();
-
-  fst::print(vec[0], vec[1], vec[2]);
-  fst::print(dvec[0], dvec[1], dvec[2]);
   return 0;
 }
 
-// int main(int argc, char** argv) {
-//  constexpr std::size_t m_size = 64 * sizeof(int);
-//  using memory_buffer = std::array<std::uint8_t, m_size>;
-//  memory_buffer& mb = fst::get_thread_local_instance<memory_buffer>();
-//  using s_allocator = fst::stack_allocator<int>;
+// int main() {
+//  fst::print("Dev");
 //
-//  fst::stack_allocator<std::uint8_t> allocator(mb);
-////  s_allocator bb(allocator);
+//  double x = 1.234;  // Also works for float
+//  char buffer[31];   // Should be long enough
 //
-//  std::vector<int, fst::stack_allocator<int>> vec((fst::stack_allocator<int>(allocator)));
-//  vec.resize(10);
-//  vec[0] = 86;
-//  fst::print(vec[0]);
-////  std::vector<int, s_allocator> vvec((s_allocator(allocator)));
+//  // Null-terminate the buffer and return the pointer to the null character
+//  // Hence, the length of the string is (end_ptr - buffer)
+//  // buffer is now { '1', '.', '2', '3', '4', 'E', '0', '\0', (garbages) }
+//  char* end_ptr = jkj::dragonbox::to_chars(x, buffer);
 //
-//
-////  using s_allocator = fst::stack_allocator<int, m_size / sizeof(int)>;
-////  std::vector<int, s_allocator> ab((fst::stack_allocator<int, 32>(mb.data())));
-//
-////  std::vector<int, s_allocator> vec((s_allocator(fst::span<int>((int*) mb.data(), m_size / sizeof(int)))));
-////  vec.resize(64);
-////  vec[0] = 86;
+////  // Does not null-terminate the buffer; returns the next-to-end pointer
+////  // buffer is now { '1', '.', '2', '3', '4', 'E', '0', (garbages) }
+////  // you can wrap the buffer with things like std::string_view
+////  end_ptr = jkj::dragonbox::to_chars_n(x, buffer);
 ////
-////  using c_allocator = fst::stack_allocator<char>;
-////  int hj = 32;
-////  std::vector<int, fst::stack_allocator<int>> kkk;
-////  vec = decltype(vec)();
-////  std::vector<int, fst::stack_allocator<int>>().swap(vec);
-////  std::vector<int, fst::stack_allocator<int>> vec2;
-//  std::vector<char, fst::stack_allocator<char>> cvec((fst::stack_allocator<char>(vec.get_allocator())));
-//  cvec.resize(10);
-//  cvec[0] = 78;
+////  fst::print(std::string_view(buffer, end_ptr - buffer));
 ////
-//   fst::print(vec[0], vec.size());
-//   memuse();
+////  {
+////    auto dec = jkj::dragonbox::to_decimal(32.23f);
+////    fst::print(dec.significand, dec.exponent);
+////  }
+////
+////  {
+////    auto dec = jkj::dragonbox::to_decimal(12345.6789f);
+////    fst::print(dec.significand, dec.exponent, typeid(dec.significand).name(), typeid(unsigned int).name());
+////  }
+////
+////  {
+////    std::array<char, 32> buffer;
+////
+////    std::string_view str = fst::string_conv_v2::uint_to_string(buffer, 234);
+////    fst::print("BANANA", str);
+////  }
+////
+//  {
+//    float value = 29000.06789f;
+//    auto dec = jkj::dragonbox::to_decimal(value);
 //
-////   memuse();
-//  std::vector<int, fst::stack_allocator<int>>(fst::stack_allocator<int>(vec.get_allocator())).swap(vec);
-////  memuse();
+////    fst::print("nm", dec.significand >> dec.exponent);
 //
-//  fst::print((int)cvec[0]);
-//  memuse();
+//    std::array<char, 32> buffer;
+//    end_ptr = jkj::dragonbox::to_chars_n(value, buffer.data());
+//    fst::print(std::string_view(buffer.data(), end_ptr - buffer.data()));
+//
+//    std::string_view str = fst::string_conv_v2::uint_to_string(buffer, dec.significand);
+//    fst::print("BANANA", str, dec.significand, dec.exponent);
+//
+//    std::string sstr(str);
+//
+//    if(dec.exponent > 0) {
+//
+//    }
+//    else {
+//      int exp = std::abs(dec.exponent);
+//      if(exp >= sstr.size()) {
+//        std::size_t s_size = sstr.size();
+//        sstr.insert(0, "0.");
+//        sstr.insert(sstr.begin() + 2, exp - s_size, '0');
+//      }
+//      else {
+//        sstr.insert(sstr.end() + dec.exponent, '.');
+//      }
+//
+//    }
+//
+//    fst::print("VACON", sstr);
+//  }
+//
+////  fst::print(round_2(23.3456f));
+//
+////  fst::print(fst::round_to_precision<1>(512.891278f));
+////  fst::print(fst::round_to_precision<2>(512.891278f));
+////  fst::print(fst::round_to_precision<3>(512.891278f));
+////  fst::print(fst::round_to_precision<4>(512.891278f));
+////  fst::print(fst::round_to_precision<5>(512.891278f));
+////  fst::print(fst::round_to_precision<6>(512.891278f));
+////
+////  end_ptr = jkj::dragonbox::to_chars_n(fst::round_to_precision<1>(512.891278f), buffer,
+/// jkj::dragonbox::policy::rounding_mode::nearest_to_even); /  fst::print(std::string_view(buffer, end_ptr - buffer));
+//
+//
+////  std::cout << std::setprecision(6) << round_to_precision<3>(512.891278f) << std::endl;
+////  std::cout << std::setprecision(7) << round_to_precision<4>(512.891278f) << std::endl;
+////  std::cout << std::setprecision(9) << round_to_precision<6>(512.891278f) << std::endl;
 //  return 0;
 //}

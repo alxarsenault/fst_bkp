@@ -29,8 +29,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 #User options
 option(FST_BUILD_TESTS "Build and run tests." ON) 
-option(FST_BUILD_BENCH "Build and run benchmarks." OFF)
-option(FST_BUILD_DEV "Build dev." OFF)
+option(FST_BUILD_BENCH "Build and run benchmarks." ON)
+option(FST_BUILD_DEV "Build dev." ON)
 
 set(FST_INCLUDE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
@@ -112,7 +112,7 @@ if (${FST_BUILD_DEV})
     # )
 
     target_compile_definitions(${FST_DEV_NAME} PUBLIC
-        NDEBUG
+        # NDEBUG
     )
 
     target_link_libraries(${FST_DEV_NAME} PUBLIC
