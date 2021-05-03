@@ -780,12 +780,227 @@ inline float to_float2(std::string_view str) { return detail::to_real2<float>(st
 
 namespace fst::string_conv_v2 {
 template <typename T, typename = typename std::enable_if_t<std::is_arithmetic_v<T>, T>>
+inline fst::verified_value<T> to_number(std::string_view str);
+
+template <typename T, typename = typename std::enable_if_t<std::is_arithmetic_v<T>, T>>
 inline std::string_view to_string(fst::span<char> buffer, T value);
 
 template <std::size_t _Precision, typename T, typename = typename std::enable_if_t<std::is_floating_point_v<T>, T>>
 inline std::string_view to_string(fst::span<char> buffer, T value);
 
 namespace detail {
+  //
+  // String to number.
+  //
+  inline std::size_t get_first_digit_index(std::string_view str) {
+    for (std::size_t i = 0; i < str.size(); i++) {
+      if (fst::is_digit(str[i])) {
+        return i;
+      }
+    }
+
+    return str.size();
+  }
+
+  inline std::size_t get_dot_or_space_index(std::size_t begin_index, std::string_view str) {
+    for (std::size_t i = begin_index; i < str.size(); i++) {
+      if (!fst::is_digit(str[i])) {
+        return i;
+      }
+    }
+
+    return str.size();
+  }
+
+  inline std::size_t get_first_not_digit_index(std::size_t begin_index, std::string_view str) {
+    for (std::size_t i = begin_index; i < str.size(); i++) {
+      if (!fst::is_digit(str[i])) {
+        return i;
+      }
+    }
+
+    return str.size();
+  }
+
+  template <typename T>
+  struct integer_mult_values {};
+
+  template <>
+  struct integer_mult_values<char> {
+    static constexpr const char values[] = { 1, 10, 100 };
+  };
+
+  template <>
+  struct integer_mult_values<unsigned char> {
+    static constexpr const unsigned char values[] = { 1, 10, 100 };
+  };
+
+  template <>
+  struct integer_mult_values<short> {
+    static constexpr const short values[] = { 1, 10, 100, 1000, 10000 };
+  };
+
+  template <>
+  struct integer_mult_values<unsigned short> {
+    static constexpr const unsigned short values[] = { 1, 10, 100, 1000, 10000 };
+  };
+
+  template <>
+  struct integer_mult_values<int> {
+    static constexpr const int values[] = { 1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000 };
+  };
+
+  template <>
+  struct integer_mult_values<unsigned int> {
+    static constexpr const unsigned int values[]
+        = { 1u, 10u, 100u, 1000u, 10000u, 100000u, 1000000u, 10000000u, 100000000u, 1000000000u };
+  };
+
+  template <>
+  struct integer_mult_values<long> {
+    static constexpr const long values[] = { 1L, 10L, 100L, 1000L, 10000L, 100000L, 1000000L, 10000000L, 100000000L,
+      1000000000L, 10000000000L, 100000000000L, 1000000000000L, 10000000000000L, 100000000000000L, 1000000000000000L,
+      10000000000000000L, 100000000000000000L, 1000000000000000000L };
+  };
+
+  template <>
+  struct integer_mult_values<unsigned long> {
+    static constexpr const unsigned long values[]
+        = { 1UL, 10UL, 100UL, 1000UL, 10000UL, 100000UL, 1000000UL, 10000000UL, 100000000UL, 1000000000UL,
+            10000000000UL, 100000000000UL, 1000000000000UL, 10000000000000UL, 100000000000000UL, 1000000000000000UL,
+            10000000000000000UL, 100000000000000000UL, 1000000000000000000UL, 10000000000000000000UL };
+  };
+
+  template <>
+  struct integer_mult_values<long long> {
+    static constexpr const long long values[] = { 1LL, 10LL, 100LL, 1000LL, 10000LL, 100000LL, 1000000LL, 10000000LL,
+      100000000LL, 1000000000LL, 10000000000LL, 100000000000LL, 1000000000000LL, 10000000000000LL, 100000000000000LL,
+      1000000000000000LL, 10000000000000000LL, 100000000000000000LL, 1000000000000000000LL };
+  };
+
+  template <>
+  struct integer_mult_values<unsigned long long> {
+    static constexpr const unsigned long long values[] = { 1ULL, 10ULL, 100ULL, 1000ULL, 10000ULL, 100000ULL,
+      1000000ULL, 10000000ULL, 100000000ULL, 1000000000ULL, 10000000000ULL, 100000000000ULL, 1000000000000ULL,
+      10000000000000ULL, 100000000000000ULL, 1000000000000000ULL, 10000000000000000ULL, 100000000000000000ULL,
+      1000000000000000000ULL, 10000000000000000000ULL };
+  };
+
+  template <typename T>
+  inline T to_signed_integer(std::string_view str) {
+    std::size_t begin_index = detail::get_first_digit_index(str);
+    std::size_t dot_or_space_index = detail::get_dot_or_space_index(begin_index, str);
+
+    T value = 0;
+    std::size_t mul_index = dot_or_space_index - begin_index - 1;
+    for (std::size_t i = begin_index; i < dot_or_space_index; i++) {
+      value += (str[i] - '0') * integer_mult_values<T>::values[mul_index--];
+    }
+
+    if (begin_index == 0) {
+      return value;
+    }
+
+    return str[begin_index - 1] == '-' ? -value : value;
+  }
+
+  template <typename T>
+  inline T to_unsigned_integer(std::string_view str) {
+    std::size_t begin_index = detail::get_first_digit_index(str);
+    std::size_t dot_or_space_index = detail::get_dot_or_space_index(begin_index, str);
+
+    T value = 0;
+    std::size_t mul_index = dot_or_space_index - begin_index - 1;
+    for (std::size_t i = begin_index; i < dot_or_space_index; i++) {
+      value += (str[i] - '0') * integer_mult_values<T>::values[mul_index--];
+    }
+
+    return value;
+  }
+
+  inline constexpr std::size_t c_to_n_size = '9' + 1;
+  inline constexpr std::array<double, c_to_n_size> get_char_to_number_array() {
+    return { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+  }
+
+  inline constexpr std::array<char, 10> get_number_to_char_array() {
+    return { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+  }
+
+  template <typename T>
+  inline T to_real(std::string_view str) {
+    std::size_t begin_index = detail::get_first_digit_index(str);
+    std::size_t dot_or_space_index = detail::get_dot_or_space_index(begin_index, str);
+    const double sign = begin_index == 0 ? 1 : str[begin_index - 1] == '-' ? -1 : 1;
+
+    // clang-format off
+    static constexpr const double values[] = {
+      1000000000000000000.0L,
+      100000000000000000.0L,
+      10000000000000000.0L,
+      1000000000000000.0L,
+      100000000000000.0L,
+      10000000000000.0L,
+      1000000000000.0L,
+      100000000000.0L,
+      10000000000.0L,
+      1000000000.0L,
+      100000000.0L,
+      10000000.0L,
+      1000000.0L,
+      100000.0L,
+      10000.0L,
+      1000.0L,
+      100.0L,
+      10.0L,
+      1.0L
+    };
+    static constexpr std::size_t v_size = sizeof(values) / sizeof(double);
+    // clang-format on
+
+    double value = 0;
+    static constexpr auto c_to_n = get_char_to_number_array();
+    for (std::size_t i = begin_index, k = v_size - dot_or_space_index + begin_index; i < dot_or_space_index; i++, k++) {
+      value += c_to_n[str[i]] * values[k];
+    }
+
+    // Is actually an integer.
+    const bool is_dot = str[dot_or_space_index] == '.';
+    if (dot_or_space_index >= str.size() - 1 || (is_dot && !fst::is_digit(str[dot_or_space_index + 1]))) {
+      return sign * value;
+    }
+
+    // clang-format off
+    static constexpr const double inv_mults[] = {
+      1.0L / 10.0L,
+      1.0L / 100.0L,
+      1.0L / 1000.0L,
+      1.0L / 10000.0L,
+      1.0L / 100000.0L,
+      1.0L / 1000000.0L,
+      1.0L / 10000000.0L,
+      1.0L / 100000000.0L,
+      1.0L / 1000000000.0L,
+      1.0L / 10000000000.0L,
+      1.0L / 100000000000.0L,
+      1.0L / 1000000000000.0L,
+    };
+    // clang-format on
+
+    const std::size_t end_index = detail::get_first_not_digit_index(dot_or_space_index + 1, str);
+    for (std::size_t i = dot_or_space_index + 1, k = 0; i < end_index; i++, k++) {
+      value += c_to_n[str[i]] * inv_mults[k];
+    }
+
+    // TODO: Handle exponent.
+
+    return sign * value;
+  }
+
+  //
+  // Number to string.
+  //
 
   template <typename T>
   inline std::string_view signed_to_string(fst::span<char> buffer, T value) {
@@ -995,6 +1210,22 @@ namespace detail {
     }
   }
 } // namespace detail.
+
+template <typename T, typename>
+inline fst::verified_value<T> to_number(std::string_view str) {
+  if constexpr (std::is_floating_point_v<T>) {
+    return detail::to_real<T>(str);
+  }
+  else if constexpr (std::is_signed_v<T>) {
+    return detail::to_signed_integer<T>(str);
+  }
+  else if constexpr (std::is_unsigned_v<T>) {
+    return detail::to_unsigned_integer<T>(str);
+  }
+  else {
+    return fst::verified_value<T>::invalid();
+  }
+}
 
 template <typename T, typename>
 inline std::string_view to_string(fst::span<char> buffer, T value) {

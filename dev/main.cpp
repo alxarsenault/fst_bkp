@@ -102,6 +102,17 @@ inline std::string_view real_to_string(fst::span<char> buffer, T value) {
 } // namespace fst.
 
 int main() {
+  int a = fst::string_conv_v2::to_number<int>("32");
+  fst::print(a);
+  fst::verified_value<int> va = fst::string_conv_v2::to_number<int>("32");
+  fst::print(va.is_valid(), va);
+
+  fst::verified_value<char> vb = fst::string_conv_v2::to_number<char>("-9");
+  fst::print(vb.is_valid(), (int)vb);
+
+  fst::verified_value<unsigned char> vc = fst::string_conv_v2::to_number<unsigned char>("9");
+  fst::print(vc.is_valid(), (int)vc);
+
   fst::print(sizeof(decltype(1000000000000000000L)), sizeof(long));
   std::array<char, 32> buffer;
   //  std::cout << std::setprecision(5) << -123.458f << std::endl;
