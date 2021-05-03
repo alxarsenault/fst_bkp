@@ -102,6 +102,7 @@ inline std::string_view real_to_string(fst::span<char> buffer, T value) {
 } // namespace fst.
 
 int main() {
+  fst::print(sizeof(decltype(1000000000000000000L)), sizeof(long));
   std::array<char, 32> buffer;
   //  std::cout << std::setprecision(5) << -123.458f << std::endl;
   //  fst::print(fst::string_conv_v2::detail::round_to_precision<2>(-123.458f));

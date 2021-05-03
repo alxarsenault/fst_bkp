@@ -215,27 +215,28 @@ namespace detail {
 
   template <>
   struct integer_mult_values<int> {
-    static constexpr int values[] = { 1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000 };
+    static constexpr const int values[] = { 1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000 };
   };
 
   template <>
   struct integer_mult_values<unsigned int> {
-    static constexpr unsigned int values[]
+    static constexpr const unsigned int values[]
         = { 1u, 10u, 100u, 1000u, 10000u, 100000u, 1000000u, 10000000u, 100000000u, 1000000000u };
   };
 
   template <>
   struct integer_mult_values<long> {
-    static constexpr long values[] = { 1L, 10L, 100L, 1000L, 10000L, 100000L, 1000000L, 10000000L, 100000000L,
+    static constexpr const long values[] = { 1L, 10L, 100L, 1000L, 10000L, 100000L, 1000000L, 10000000L, 100000000L,
       1000000000L, 10000000000L, 100000000000L, 1000000000000L, 10000000000000L, 100000000000000L, 1000000000000000L,
       10000000000000000L, 100000000000000000L, 1000000000000000000L };
   };
 
   template <>
   struct integer_mult_values<unsigned long> {
-    static constexpr unsigned long values[] = { 1UL, 10UL, 100UL, 1000UL, 10000UL, 100000UL, 1000000UL, 10000000UL,
-      100000000UL, 1000000000UL, 10000000000UL, 100000000000UL, 1000000000000UL, 10000000000000UL, 100000000000000UL,
-      1000000000000000UL, 10000000000000000UL, 100000000000000000UL, 1000000000000000000UL, 10000000000000000000UL };
+    static constexpr const unsigned long values[]
+        = { 1UL, 10UL, 100UL, 1000UL, 10000UL, 100000UL, 1000000UL, 10000000UL, 100000000UL, 1000000000UL,
+            10000000000UL, 100000000000UL, 1000000000000UL, 10000000000000UL, 100000000000000UL, 1000000000000000UL,
+            10000000000000000UL, 100000000000000000UL, 1000000000000000000UL, 10000000000000000000UL };
   };
 
   template <typename T>
@@ -287,7 +288,7 @@ namespace detail {
     const double sign = begin_index == 0 ? 1 : str[begin_index - 1] == '-' ? -1 : 1;
 
     // clang-format off
-    static constexpr double values[] = {
+    static constexpr const double values[] = {
       1000000000000000000.0L,
       100000000000000000.0L,
       10000000000000000.0L,
@@ -324,7 +325,7 @@ namespace detail {
     }
 
     // clang-format off
-    static constexpr double inv_mults[] = {
+    static constexpr const double inv_mults[] = {
       1.0L / 10.0L,
       1.0L / 100.0L,
       1.0L / 1000.0L,
@@ -355,7 +356,7 @@ namespace detail {
     const double sign = begin_index == 0 ? 1 : str[begin_index - 1] == '-' ? -1 : 1;
 
     // clang-format off
-    static constexpr double values[] = {
+    static constexpr const double values[] = {
       1000000000000000000.0L,
       100000000000000000.0L,
       10000000000000000.0L,
@@ -399,7 +400,7 @@ namespace detail {
     }
 
     // clang-format off
-    static constexpr double inv_mults[] = {
+    static constexpr const double inv_mults[] = {
       1.0L / 10.0L,
       1.0L / 100.0L,
       1.0L / 1000.0L,
