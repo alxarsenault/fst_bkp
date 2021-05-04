@@ -463,7 +463,7 @@ namespace detail {
     // Is actually an integer.
     const bool is_dot = str[dot_or_space_index] == '.';
     if (dot_or_space_index >= str.size() - 1 || (is_dot && !fst::is_digit(str[dot_or_space_index + 1]))) {
-      return (T)sign * value;
+      return (T)(sign * value);
     }
 
     // clang-format off
@@ -601,7 +601,7 @@ namespace detail {
     }
 
     if(val) {
-      *(((char*)it) + 1) = '0' + val;
+      *(((char*)it) + 1) = (T)('0' + val);
     }
 
     return std::string_view(buffer.data(), size);
@@ -643,7 +643,7 @@ namespace detail {
     }
 
     if (val) {
-      *c = '0' + val;
+      *c = (T)('0' + val);
     }
 
     return std::string_view(buffer.data(), size);
