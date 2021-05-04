@@ -149,10 +149,11 @@ public:
 #if __FST_MAPPED_FILE_USE_WINDOWS_MEMORY_MAP
     std::filesystem::path w_path = file_path;
     w_path.make_preferred();
-    HANDLE hFile = CreateFileA((LPCSTR)w_path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING,
+
+    HANDLE hFile = CreateFileW(
+        (LPCWSTR)w_path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING,
         FILE_ATTRIBUTE_NORMAL, nullptr);
     if (hFile == INVALID_HANDLE_VALUE) {
-      //DWORD GetLastError();
       fst::print("mapped_file : CreateFileA -> INVALID_HANDLE_VALUE");
       return false;
     }
