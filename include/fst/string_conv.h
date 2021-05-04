@@ -601,7 +601,7 @@ namespace detail {
     }
 
     if(val) {
-      *(((char*)it) + 1) = (T)('0' + val);
+      *(((char*)it) + 1) = '0' + (char)val;
     }
 
     return std::string_view(buffer.data(), size);
@@ -643,7 +643,7 @@ namespace detail {
     }
 
     if (val) {
-      *c = (T)('0' + val);
+      *c = '0' + (char)val;
     }
 
     return std::string_view(buffer.data(), size);
@@ -666,10 +666,10 @@ namespace detail {
     else {
       constexpr long mult = get_precision_mul<_Precision>();
       if (value < 0) {
-        value = (long)(-value * mult + (T)0.5);
+        value = (T)(long)(-value * mult + (T)0.5);
         return -((T)value / mult);
       }
-      value = (long)(value * mult + (T)0.5);
+      value = (T)(long)(value * mult + (T)0.5);
       return (T)value / mult;
     }
   }
