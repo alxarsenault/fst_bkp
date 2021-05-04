@@ -52,6 +52,7 @@ TEST(string_conv_v2, to_string_float_precision) {
   EXPECT_EQ("123.46", fst::string_conv_v2::to_string<2>(buffer, 123.456f));
   EXPECT_EQ("-123.46", fst::string_conv_v2::to_string<2>(buffer, -123.456f));
 }
+
 // inline std::vector<std::string> init_int_numbers() {
 //  std::vector<std::string> numbers;
 //  numbers.resize(buffer_size);
@@ -71,37 +72,38 @@ TEST(string_conv_v2, to_string_float_precision) {
 //  return numbers;
 //}
 
-// TEST(string_conv, to_int) {
-//  {
-//    std::string str = std::to_string(-1000);
-//    EXPECT_EQ(std::atoi(str.c_str()), fst::string_conv::to_int(str));
-//  }
-//
-//  {
-//    std::string str = std::to_string(1000);
-//    EXPECT_EQ(std::atoi(str.c_str()), fst::string_conv::to_int(str));
-//  }
-//
-//  {
-//    std::string str = std::to_string(0);
-//    EXPECT_EQ(std::atoi(str.c_str()), fst::string_conv::to_int(str));
-//  }
-//
-//  {
-//    std::string str = std::to_string(-0);
-//    EXPECT_EQ(std::atoi(str.c_str()), fst::string_conv::to_int(str));
-//  }
-//
-//  {
-//    std::string str = std::to_string(std::numeric_limits<int>::max());
-//    EXPECT_EQ(std::atoi(str.c_str()), fst::string_conv::to_int(str));
-//  }
-//
-//  {
-//    std::string str = std::to_string(std::numeric_limits<int>::min());
-//    EXPECT_EQ(std::atoi(str.c_str()), fst::string_conv::to_int(str));
-//  }
-//}
+ TEST(string_conv, to_int) {
+  {
+    std::string str = std::to_string(-1000);
+    EXPECT_EQ(std::atoi(str.c_str()), fst::string_conv_v2::to_number<int>(str));
+  }
+
+  {
+    std::string str = std::to_string(1000);
+    EXPECT_EQ(std::atoi(str.c_str()), fst::string_conv_v2::to_number<int>(str));
+  }
+
+  {
+    std::string str = std::to_string(0);
+    EXPECT_EQ(std::atoi(str.c_str()), fst::string_conv_v2::to_number<int>(str));
+  }
+
+  {
+    std::string str = std::to_string(-0);
+    EXPECT_EQ(std::atoi(str.c_str()), fst::string_conv_v2::to_number<int>(str));
+  }
+
+  {
+    std::string str = std::to_string(std::numeric_limits<int>::max());
+    EXPECT_EQ(std::atoi(str.c_str()), fst::string_conv_v2::to_number<int>(str));
+  }
+
+  {
+    std::string str = std::to_string(std::numeric_limits<int>::min());
+    EXPECT_EQ(std::atoi(str.c_str()), fst::string_conv_v2::to_number<int>(str));
+  }
+}
+
 //
 // TEST(string_conv, to_long) {
 //  {

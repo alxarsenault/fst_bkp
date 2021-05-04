@@ -102,64 +102,65 @@ inline std::string_view real_to_string(fst::span<char> buffer, T value) {
 } // namespace fst.
 
 int main() {
-  int a = fst::string_conv_v2::to_number<int>("32");
+  std::string a = fst::string_conv_v2::to_string(32323434);
   fst::print(a);
-  fst::verified_value<int> va = fst::string_conv_v2::to_number<int>("32");
-  fst::print(va.is_valid(), va);
-
-  fst::verified_value<char> vb = fst::string_conv_v2::to_number<char>("-9");
-  fst::print(vb.is_valid(), (int)vb);
-
-  fst::verified_value<unsigned char> vc = fst::string_conv_v2::to_number<unsigned char>("9");
-  fst::print(vc.is_valid(), (int)vc);
-
-  fst::print(sizeof(decltype(1000000000000000000L)), sizeof(long));
-  std::array<char, 32> buffer;
-  //  std::cout << std::setprecision(5) << -123.458f << std::endl;
-  //  fst::print(fst::string_conv_v2::detail::round_to_precision<2>(-123.458f));
-  //  fst::print(fst::string_conv_v2::detail::round_to_precision<2>(123.458f));
-  //  fst::print(fst::string_conv_v2::detail::round_to_precision<2>(123.4f));
-  fst::print(fst::string_conv_v2::to_string<0>(buffer, 123.458f));
-  fst::print(fst::string_conv_v2::to_string<0>(buffer, -123.458f));
-
-  fst::print(fst::string_conv_v2::to_string<2>(buffer, 123.458f));
-  fst::print(fst::string_conv_v2::to_string<2>(buffer, 123.4f));
-  fst::print(fst::string_conv_v2::to_string<2>(buffer, -123.458f));
-  fst::print(fst::string_conv_v2::to_string<2>(buffer, -123.4f));
-
-  fst::print(fst::string_conv_v2::to_string(buffer, fst::math::pi<float>));
-  fst::print(fst::string_conv_v2::to_string(buffer, fst::math::pi<double>));
-
-  //  fst::print(fst::real_to_string(buffer, 0.000932f));
-  //  fst::print(fst::real_to_string(buffer, 2.00932f));
-  //  fst::print(fst::real_to_string(buffer, 32.932f));
-  //  fst::print(fst::real_to_string(buffer, 32.0f));
-  //  fst::print(fst::real_to_string(buffer, 32000.932f));
-  //  fst::print(fst::real_to_string(buffer, 320000.932f));
-  //  fst::print(fst::real_to_string(buffer, 320000000.932f));
-  //  fst::print(fst::real_to_string(buffer, 32000000000.932f));
-  //  fst::print(fst::real_to_string(buffer, 44100.90189f));
-  //  fst::print(fst::real_to_string(buffer, 44100.90189));
-  //  fst::print(std::to_string(44100.90189f));
-  //  fst::print(std::to_string(44100.90189));
-  //
-  //
-  //  fst::print(fst::real_to_string(buffer, fst::round_to_precision<2>(44100.92189f)));
-  //  fst::print(fst::real_to_string(buffer, fst::round_to_precision<2>(44100.0f)));
-
-  //  fst::print(fst::real_to_string<2>(buffer, 44100.0f));
-  //  fst::print(fst::real_to_string<2>(buffer, 44100.90189f));
-  //  fst::print(fst::real_to_string<3>(buffer, 44100.90189f));
-  //  fst::print(fst::real_to_string<4>(buffer, 44100.90189f));
-  //
-  ////  round_to_precision
-  //  double x = 1.234;  // Also works for float
-  //  char buffer2[31];   // Should be long enough
-  //
-  //  // Null-terminate the buffer and return the pointer to the null character
-  //  // Hence, the length of the string is (end_ptr - buffer)
-  //  // buffer is now { '1', '.', '2', '3', '4', 'E', '0', '\0', (garbages) }
-  //  char* end_ptr = fst::dragonbox::to_chars(x, buffer2);
+//  fst::print(a);
+//  fst::verified_value<int> va = fst::string_conv_v2::to_number<int>("32");
+//  fst::print(va.is_valid(), va);
+//
+//  fst::verified_value<char> vb = fst::string_conv_v2::to_number<char>("-9");
+//  fst::print(vb.is_valid(), (int)vb);
+//
+//  fst::verified_value<unsigned char> vc = fst::string_conv_v2::to_number<unsigned char>("9");
+//  fst::print(vc.is_valid(), (int)vc);
+//
+//  fst::print(sizeof(decltype(1000000000000000000L)), sizeof(long));
+//  std::array<char, 32> buffer;
+//  //  std::cout << std::setprecision(5) << -123.458f << std::endl;
+//  //  fst::print(fst::string_conv_v2::detail::round_to_precision<2>(-123.458f));
+//  //  fst::print(fst::string_conv_v2::detail::round_to_precision<2>(123.458f));
+//  //  fst::print(fst::string_conv_v2::detail::round_to_precision<2>(123.4f));
+//  fst::print(fst::string_conv_v2::to_string<0>(buffer, 123.458f));
+//  fst::print(fst::string_conv_v2::to_string<0>(buffer, -123.458f));
+//
+//  fst::print(fst::string_conv_v2::to_string<2>(buffer, 123.458f));
+//  fst::print(fst::string_conv_v2::to_string<2>(buffer, 123.4f));
+//  fst::print(fst::string_conv_v2::to_string<2>(buffer, -123.458f));
+//  fst::print(fst::string_conv_v2::to_string<2>(buffer, -123.4f));
+//
+//  fst::print(fst::string_conv_v2::to_string(buffer, fst::math::pi<float>));
+//  fst::print(fst::string_conv_v2::to_string(buffer, fst::math::pi<double>));
+//
+//  //  fst::print(fst::real_to_string(buffer, 0.000932f));
+//  //  fst::print(fst::real_to_string(buffer, 2.00932f));
+//  //  fst::print(fst::real_to_string(buffer, 32.932f));
+//  //  fst::print(fst::real_to_string(buffer, 32.0f));
+//  //  fst::print(fst::real_to_string(buffer, 32000.932f));
+//  //  fst::print(fst::real_to_string(buffer, 320000.932f));
+//  //  fst::print(fst::real_to_string(buffer, 320000000.932f));
+//  //  fst::print(fst::real_to_string(buffer, 32000000000.932f));
+//  //  fst::print(fst::real_to_string(buffer, 44100.90189f));
+//  //  fst::print(fst::real_to_string(buffer, 44100.90189));
+//  //  fst::print(std::to_string(44100.90189f));
+//  //  fst::print(std::to_string(44100.90189));
+//  //
+//  //
+//  //  fst::print(fst::real_to_string(buffer, fst::round_to_precision<2>(44100.92189f)));
+//  //  fst::print(fst::real_to_string(buffer, fst::round_to_precision<2>(44100.0f)));
+//
+//  //  fst::print(fst::real_to_string<2>(buffer, 44100.0f));
+//  //  fst::print(fst::real_to_string<2>(buffer, 44100.90189f));
+//  //  fst::print(fst::real_to_string<3>(buffer, 44100.90189f));
+//  //  fst::print(fst::real_to_string<4>(buffer, 44100.90189f));
+//  //
+//  ////  round_to_precision
+//  //  double x = 1.234;  // Also works for float
+//  //  char buffer2[31];   // Should be long enough
+//  //
+//  //  // Null-terminate the buffer and return the pointer to the null character
+//  //  // Hence, the length of the string is (end_ptr - buffer)
+//  //  // buffer is now { '1', '.', '2', '3', '4', 'E', '0', '\0', (garbages) }
+//  //  char* end_ptr = fst::dragonbox::to_chars(x, buffer2);
 
   return 0;
 }
