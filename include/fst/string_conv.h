@@ -181,19 +181,26 @@ inline std::size_t from_number(T value, char* buffer, const char* format, std::s
 } // namespace fst::string_conv.
 
 namespace fst::string_conv_v2 {
-template <typename T, typename = typename std::enable_if_t<std::is_arithmetic_v<T>, T>>
+namespace detail {
+  struct arithmetic_tag {};
+  struct floating_point_tag {};
+} // namespace detail.
+
+template <typename T, typename = typename std::enable_if_t<std::is_arithmetic_v<T>, detail::arithmetic_tag>>
 inline fst::verified_value<T> to_number(std::string_view str);
 
-template <typename T, typename = typename std::enable_if_t<std::is_arithmetic_v<T>, T>>
+template <typename T, typename = typename std::enable_if_t<std::is_arithmetic_v<T>, detail::arithmetic_tag>>
 inline std::string_view to_string(fst::span<char> buffer, T value);
 
-template <std::size_t _Precision, typename T, typename = typename std::enable_if_t<std::is_floating_point_v<T>, T>>
+template <std::size_t _Precision, typename T,
+    typename = typename std::enable_if_t<std::is_floating_point_v<T>, detail::floating_point_tag>>
 inline std::string_view to_string(fst::span<char> buffer, T value);
 
-template <typename T, typename = typename std::enable_if_t<std::is_arithmetic_v<T>, T>>
+template <typename T, typename = typename std::enable_if_t<std::is_arithmetic_v<T>, detail::arithmetic_tag>>
 inline std::string to_string(T value);
 
-template <std::size_t _Precision, typename T, typename = typename std::enable_if_t<std::is_floating_point_v<T>, T>>
+template <std::size_t _Precision, typename T,
+    typename = typename std::enable_if_t<std::is_floating_point_v<T>, detail::floating_point_tag>>
 inline std::string to_string(T value);
 
 namespace detail {
@@ -483,7 +490,7 @@ namespace detail {
 
     // TODO: Handle exponent.
 
-    return (T)sign * value;
+    return (T)(sign * value);
   }
 
   //
@@ -587,7 +594,7 @@ namespace detail {
     short* it = (short*)(buffer.data() + size - 2);
     const short* pairs = (const short*)digit_pairs;
     while (val > 9) {
-      T v100 = val / 100;
+      T v100 = (T)(val / 100);
       *it = pairs[val - v100 * 100];
       val = v100;
       it--;
@@ -769,7 +776,7 @@ namespace detail {
   }
 } // namespace detail.
 
-template <typename T, typename>
+template <typename T, typename _ArithmeticTag>
 inline fst::verified_value<T> to_number(std::string_view str) {
   if constexpr (std::is_floating_point_v<T>) {
     return detail::to_real<T>(str);
@@ -785,7 +792,7 @@ inline fst::verified_value<T> to_number(std::string_view str) {
   }
 }
 
-template <typename T, typename>
+template <typename T, typename _ArithmeticTag>
 inline std::string_view to_string(fst::span<char> buffer, T value) {
   if constexpr (std::is_floating_point_v<T>) {
     return detail::real_to_string<T>(buffer, value);
@@ -798,18 +805,18 @@ inline std::string_view to_string(fst::span<char> buffer, T value) {
   }
 }
 
-template <std::size_t _Precision, typename T, typename>
+template <std::size_t _Precision, typename T, typename _FloatingPointTag>
 inline std::string_view to_string(fst::span<char> buffer, T value) {
   return detail::real_to_string<_Precision, T>(buffer, value);
 }
 
-template <typename T, typename>
+template <typename T, typename _ArithmeticTag>
 inline std::string to_string(T value) {
   std::array<char, 32> buffer;
   return std::string(to_string<T>(buffer, value));
 }
 
-template <std::size_t _Precision, typename T, typename>
+template <std::size_t _Precision, typename T, typename _FloatingPointTag>
 inline std::string to_string(T value) {
   std::array<char, 32> buffer;
   return std::string(to_string<_Precision, T>(buffer, value));
