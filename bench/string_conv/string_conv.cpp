@@ -309,7 +309,7 @@ inline float to_float(std::string_view str) {
   float value = 0;
 
   for (std::size_t i = 0; i < dot_or_space_index; i++) {
-    value += (str[i] - '0') * std::pow(10, dot_or_space_index - i - 1);
+    value += (str[i] - '0') * std::pow(10.0f, dot_or_space_index - i - 1);
   }
 
   //  fst::print("KKKK", value);
@@ -411,7 +411,7 @@ static void fst_bench_gt_atof(benchmark::State& state) {
   float f = 0;
   for (auto _ : state) {
     for (std::size_t i = 0; i < helper::buffer_size; i++) {
-      f = fst_bench::GT_atof(numbers[i].c_str());
+      f = (float)fst_bench::GT_atof(numbers[i].c_str());
     }
     benchmark::ClobberMemory();
   }
@@ -426,7 +426,7 @@ static void fst_bench_fast_atof(benchmark::State& state) {
   float f = 0;
   for (auto _ : state) {
     for (std::size_t i = 0; i < helper::buffer_size; i++) {
-      f = fst_bench::fast_atof(numbers[i].c_str());
+      f = (float)fst_bench::fast_atof(numbers[i].c_str());
     }
     benchmark::ClobberMemory();
   }
@@ -472,7 +472,7 @@ static void fst_bench_atof(benchmark::State& state) {
   float f = 0;
   for (auto _ : state) {
     for (std::size_t i = 0; i < helper::buffer_size; i++) {
-      f = std::atof(numbers[i].c_str());
+      f = (float)std::atof(numbers[i].c_str());
     }
     benchmark::ClobberMemory();
   }
@@ -514,7 +514,7 @@ static void fst_bench_atoi(benchmark::State& state) {
   int f = 0;
   for (auto _ : state) {
     for (std::size_t i = 0; i < helper::buffer_size; i++) {
-      f = std::atof(numbers[i].c_str());
+      f = std::atoi(numbers[i].c_str());
     }
     benchmark::ClobberMemory();
   }

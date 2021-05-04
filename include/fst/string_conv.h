@@ -234,13 +234,13 @@ namespace detail {
   struct integer_mult_values {};
 
 #define APPEND(x, y) x##y
-#define I(n) (const int)P##n()
+#define NOARG
+#define I(n) (const int)P##n(NOARG)
 #define U(n) (const unsigned int)P##n(u)
 #define L(n) (const long)P##n(l)
 #define UL(n) (const unsigned long)P##n(ul)
 #define LL(n) (const long long)P##n(ll)
 #define ULL(n) (const unsigned long long)P##n(ull)
-
 #define P20(suffix) APPEND(100000000000000000000, suffix)
 #define P19(suffix) APPEND(10000000000000000000, suffix)
 #define P18(suffix) APPEND(1000000000000000000, suffix)
@@ -344,6 +344,7 @@ namespace detail {
   };
 
 #undef APPEND
+#undef NOARG
 #undef I
 #undef U
 #undef L
@@ -455,7 +456,7 @@ namespace detail {
     // Is actually an integer.
     const bool is_dot = str[dot_or_space_index] == '.';
     if (dot_or_space_index >= str.size() - 1 || (is_dot && !fst::is_digit(str[dot_or_space_index + 1]))) {
-      return sign * value;
+      return (T)sign * value;
     }
 
     // clang-format off
@@ -482,7 +483,7 @@ namespace detail {
 
     // TODO: Handle exponent.
 
-    return sign * value;
+    return (T)sign * value;
   }
 
   //
@@ -573,7 +574,7 @@ namespace detail {
     const unsigned long long sign = -(value < 0);
     unsigned long long val = (value ^ sign) - sign;
 
-    T size = 1 - sign;
+    T size = (T)(1 - sign);
 
     static constexpr std::size_t max_size
         = sizeof(integer_mult_values<unsigned long long>::values) / sizeof(unsigned long long);
