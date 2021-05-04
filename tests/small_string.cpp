@@ -28,97 +28,97 @@ TEST(small_string, append) {
   }
 }
 
-TEST(small_string, convert_from_float_to_string) {
-  using string_type = fst::basic_small_string<char, 32>;
-
-  string_type s0 = string_type::to_string<0>(32.2326);
-  EXPECT_EQ(s0, "32");
-
-  string_type s0_rounded = string_type::to_string<0>(32.7326);
-  EXPECT_EQ(s0_rounded, "33");
-
-  string_type s1 = string_type::to_string<1>(32.2326);
-  EXPECT_EQ(s1, "32.2");
-
-  string_type s2 = string_type::to_string<2>(32.2326);
-  EXPECT_EQ(s2, "32.23");
-
-  string_type s3 = string_type::to_string<3>(32.2326);
-  EXPECT_EQ(s3, "32.233");
-
-  string_type ss3 = string_type().from_number<3>(32.2326);
-  EXPECT_EQ(ss3, "32.233");
-}
-
-TEST(small_string, convert_from_int) {
-  fst::basic_small_string<char, 32> s = "122";
-  EXPECT_EQ(3, s.size());
-
-  char vc = s.to_number<char>();
-  EXPECT_EQ(vc, 122);
-
-  unsigned char vuc = s.to_number<unsigned char>();
-  EXPECT_EQ(vuc, 122);
-
-  int vi = s.to_number<int>();
-  EXPECT_EQ(vi, 122);
-
-  long vl = s.to_number<long>();
-  EXPECT_EQ(vl, 122);
-
-  unsigned int vui = s.to_number<unsigned int>();
-  EXPECT_EQ(vui, 122);
-
-  unsigned long vul = s.to_number<unsigned long>();
-  EXPECT_EQ(vul, 122);
-
-  std::size_t vst = s.to_number<std::size_t>();
-  EXPECT_EQ(vst, 122);
-}
-
-TEST(small_string, convert_from_float) {
-  fst::basic_small_string<char, 32> s = "32.2356";
-  EXPECT_EQ(7, s.size());
-
-  fst::verified_value<float> v = s.to_number<float>();
-  EXPECT_EQ(v.get(), 32.2356f);
-
-  float vf = s.to_number<float>();
-  EXPECT_EQ(vf, 32.2356f);
-
-  double vd = s.to_number<double>();
-  EXPECT_EQ(vd, 32.2356);
-
-  long double vld = s.to_number<long double>();
-  EXPECT_EQ(vld, 32.2356L);
-
-  {
-    fst::verified_value<float> v = s.to_number<float>();
-    EXPECT_EQ(v.is_valid(), true);
-    EXPECT_EQ(v.get(), 32.2356f);
-  }
-
-  {
-    float v;
-    bool is_valid = s.to_number(v);
-    EXPECT_EQ(is_valid, true);
-    EXPECT_EQ(v, 32.2356f);
-  }
-
-  {
-    int v;
-    bool is_valid = s.to_number(v);
-    EXPECT_EQ(is_valid, true);
-    EXPECT_EQ(v, 32);
-  }
-
-  {
-    unsigned char v;
-    bool is_valid = s.to_number(v);
-    EXPECT_EQ(is_valid, true);
-    EXPECT_EQ(v, 32);
-  }
-}
+// TEST(small_string, convert_from_float_to_string) {
+//  using string_type = fst::basic_small_string<char, 32>;
+//
+//  string_type s0 = string_type::to_string<0>(32.2326);
+//  EXPECT_EQ(s0, "32");
+//
+//  string_type s0_rounded = string_type::to_string<0>(32.7326);
+//  EXPECT_EQ(s0_rounded, "33");
+//
+//  string_type s1 = string_type::to_string<1>(32.2326);
+//  EXPECT_EQ(s1, "32.2");
+//
+//  string_type s2 = string_type::to_string<2>(32.2326);
+//  EXPECT_EQ(s2, "32.23");
+//
+//  string_type s3 = string_type::to_string<3>(32.2326);
+//  EXPECT_EQ(s3, "32.233");
+//
+//  string_type ss3 = string_type().from_number<3>(32.2326);
+//  EXPECT_EQ(ss3, "32.233");
+//}
+//
+// TEST(small_string, convert_from_int) {
+//  fst::basic_small_string<char, 32> s = "122";
+//  EXPECT_EQ(3, s.size());
+//
+//  char vc = s.to_number<char>();
+//  EXPECT_EQ(vc, 122);
+//
+//  unsigned char vuc = s.to_number<unsigned char>();
+//  EXPECT_EQ(vuc, 122);
+//
+//  int vi = s.to_number<int>();
+//  EXPECT_EQ(vi, 122);
+//
+//  long vl = s.to_number<long>();
+//  EXPECT_EQ(vl, 122);
+//
+//  unsigned int vui = s.to_number<unsigned int>();
+//  EXPECT_EQ(vui, 122);
+//
+//  unsigned long vul = s.to_number<unsigned long>();
+//  EXPECT_EQ(vul, 122);
+//
+//  std::size_t vst = s.to_number<std::size_t>();
+//  EXPECT_EQ(vst, 122);
+//}
+//
+// TEST(small_string, convert_from_float) {
+//  fst::basic_small_string<char, 32> s = "32.2356";
+//  EXPECT_EQ(7, s.size());
+//
+//  fst::verified_value<float> v = s.to_number<float>();
+//  EXPECT_EQ(v.get(), 32.2356f);
+//
+//  float vf = s.to_number<float>();
+//  EXPECT_EQ(vf, 32.2356f);
+//
+//  double vd = s.to_number<double>();
+//  EXPECT_EQ(vd, 32.2356);
+//
+//  long double vld = s.to_number<long double>();
+//  EXPECT_EQ(vld, 32.2356L);
+//
+//  {
+//    fst::verified_value<float> v = s.to_number<float>();
+//    EXPECT_EQ(v.is_valid(), true);
+//    EXPECT_EQ(v.get(), 32.2356f);
+//  }
+//
+//  {
+//    float v;
+//    bool is_valid = s.to_number(v);
+//    EXPECT_EQ(is_valid, true);
+//    EXPECT_EQ(v, 32.2356f);
+//  }
+//
+//  {
+//    int v;
+//    bool is_valid = s.to_number(v);
+//    EXPECT_EQ(is_valid, true);
+//    EXPECT_EQ(v, 32);
+//  }
+//
+//  {
+//    unsigned char v;
+//    bool is_valid = s.to_number(v);
+//    EXPECT_EQ(is_valid, true);
+//    EXPECT_EQ(v, 32);
+//  }
+//}
 
 TEST(small_string, insert_char) {
   {

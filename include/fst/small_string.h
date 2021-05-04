@@ -36,8 +36,8 @@
 #include "fst/assert.h"
 #include "fst/traits.h"
 #include "fst/util.h"
-#include "fst/verified_value.h"
-#include "fst/string_conv.h"
+//#include "fst/verified_value.h"
+//#include "fst/string_conv.h"
 #include <algorithm>
 #include <array>
 #include <cstring>
@@ -635,76 +635,66 @@ public:
   inline constexpr view_type to_view() const { return view_type(data(), size()); }
   inline constexpr operator view_type() const { return to_view(); }
 
-  template <typename T, class = typename std::enable_if<std::is_arithmetic<T>::value, void>::type>
-  inline fst::verified_value<fst::remove_cvref_t<T>> to_number() const {
-    using t_type = fst::remove_cvref_t<T>;
-    using v_value = fst::verified_value<t_type>;
-    t_type value;
-    bool is_valid = string_conv::to_number(_data.data(), string_conv::type_to_format<t_type>(), value);
-    return is_valid ? v_value(value) : v_value::invalid();
-  }
-
-  template <typename T, class = typename std::enable_if<std::is_arithmetic<T>::value, void>::type>
-  inline bool to_number(T& value) const {
-    return string_conv::to_number(_data.data(), string_conv::type_to_format<fst::remove_cvref_t<T>>(), value);
-  }
-
-  //  template <typename T, std::size_t _Precision, class = typename std::enable_if<std::is_arithmetic<T>::value,
-  //  void>::type> inline bool to_number(T& value) const {
-  //    return string_conv::to_number(_data.data(), string_conv::type_to_format<fst::remove_cvref_t<T>, _Precision>(),
-  //    value);
+  //  template <typename T, class = typename std::enable_if<std::is_arithmetic<T>::value, void>::type>
+  //  inline fst::verified_value<fst::remove_cvref_t<T>> to_number() const {
+  //    using t_type = fst::remove_cvref_t<T>;
+  //    using v_value = fst::verified_value<t_type>;
+  //    t_type value;
+  //    bool is_valid = string_conv::to_number(_data.data(), string_conv::type_to_format<t_type>(), value);
+  //    return is_valid ? v_value(value) : v_value::invalid();
   //  }
-
-  template <typename T, class = typename std::enable_if<std::is_arithmetic<T>::value, void>::type>
-  inline basic_small_string& from_number(T value) {
-    std::size_t r_size = string_conv::from_number(
-        value, _data.data(), string_conv::type_to_format<fst::remove_cvref_t<T>>(), maximum_size_with_escape_char);
-    _size = fst::minimum(maximum_size, r_size);
-    _data[_size] = 0;
-    return *this;
-  }
-
-  template <typename T, class = typename std::enable_if<std::is_arithmetic<T>::value, void>::type>
-  inline basic_small_string& from_number(T value, bool& is_completely_written) {
-    std::size_t r_size = string_conv::from_number(
-        value, _data.data(), string_conv::type_to_format<fst::remove_cvref_t<T>>(), maximum_size_with_escape_char);
-    is_completely_written = r_size && r_size <= maximum_size;
-    _size = fst::minimum(maximum_size, r_size);
-    _data[_size] = 0;
-    return *this;
-  }
-
-  template <std::size_t Precision, typename T,
-      class = typename std::enable_if<std::is_arithmetic<T>::value, void>::type>
-  inline basic_small_string& from_number(T value) {
-    constexpr auto format = string_conv::type_to_format<fst::remove_cvref_t<T>, Precision>();
-    std::size_t r_size = string_conv::from_number(value, _data.data(), format.data(), maximum_size_with_escape_char);
-    _size = fst::minimum(maximum_size, r_size);
-    _data[_size] = 0;
-    return *this;
-  }
-
-  template <std::size_t Precision, typename T,
-      class = typename std::enable_if<std::is_arithmetic<T>::value, void>::type>
-  inline basic_small_string& from_number(T value, bool& is_completely_written) {
-    constexpr auto format = string_conv::type_to_format<fst::remove_cvref_t<T>, Precision>();
-    std::size_t r_size = string_conv::from_number(value, _data.data(), format.data(), maximum_size_with_escape_char);
-    is_completely_written = r_size && r_size <= maximum_size;
-    _size = fst::minimum(maximum_size, r_size);
-    _data[_size] = 0;
-    return *this;
-  }
-
-  template <typename T, class = typename std::enable_if<std::is_arithmetic<T>::value, void>::type>
-  inline static basic_small_string to_string(T value) {
-    return basic_small_string().from_number<T>(value);
-  }
-
-  template <std::size_t Precision, typename T,
-      class = typename std::enable_if<std::is_arithmetic<T>::value, void>::type>
-  inline static basic_small_string to_string(T value) {
-    return basic_small_string().from_number<Precision, T>(value);
-  }
+  //
+  //  template <typename T, class = typename std::enable_if<std::is_arithmetic<T>::value, void>::type>
+  //  inline bool to_number(T& value) const {
+  //    return string_conv::to_number(_data.data(), string_conv::type_to_format<fst::remove_cvref_t<T>>(), value);
+  //  }
+  //
+  //  template <typename T, class = typename std::enable_if<std::is_arithmetic<T>::value, void>::type>
+  //  inline basic_small_string& from_number(T value) {
+  //    std::size_t r_size = string_conv::from_number(
+  //        value, _data.data(), string_conv::type_to_format<fst::remove_cvref_t<T>>(), maximum_size_with_escape_char);
+  //    _size = fst::minimum(maximum_size, r_size);
+  //    _data[_size] = 0;
+  //    return *this;
+  //  }
+  //
+  //  template <typename T, class = typename std::enable_if<std::is_arithmetic<T>::value, void>::type>
+  //  inline basic_small_string& from_number(T value, bool& is_completely_written) {
+  //    std::size_t r_size = string_conv::from_number(
+  //        value, _data.data(), string_conv::type_to_format<fst::remove_cvref_t<T>>(), maximum_size_with_escape_char);
+  //    is_completely_written = r_size && r_size <= maximum_size;
+  //    _size = fst::minimum(maximum_size, r_size);
+  //    _data[_size] = 0;
+  //    return *this;
+  //  }
+  //
+  //  template <std::size_t Precision, typename T,
+  //      class = typename std::enable_if<std::is_arithmetic<T>::value, void>::type>
+  //  inline basic_small_string& from_number(T value) {
+  //    constexpr auto format = string_conv::type_to_format<fst::remove_cvref_t<T>, Precision>();
+  //    std::size_t r_size = string_conv::from_number(value, _data.data(), format.data(),
+  //    maximum_size_with_escape_char); _size = fst::minimum(maximum_size, r_size); _data[_size] = 0; return *this;
+  //  }
+  //
+  //  template <std::size_t Precision, typename T,
+  //      class = typename std::enable_if<std::is_arithmetic<T>::value, void>::type>
+  //  inline basic_small_string& from_number(T value, bool& is_completely_written) {
+  //    constexpr auto format = string_conv::type_to_format<fst::remove_cvref_t<T>, Precision>();
+  //    std::size_t r_size = string_conv::from_number(value, _data.data(), format.data(),
+  //    maximum_size_with_escape_char); is_completely_written = r_size && r_size <= maximum_size; _size =
+  //    fst::minimum(maximum_size, r_size); _data[_size] = 0; return *this;
+  //  }
+  //
+  //  template <typename T, class = typename std::enable_if<std::is_arithmetic<T>::value, void>::type>
+  //  inline static basic_small_string to_string(T value) {
+  //    return basic_small_string().from_number<T>(value);
+  //  }
+  //
+  //  template <std::size_t Precision, typename T,
+  //      class = typename std::enable_if<std::is_arithmetic<T>::value, void>::type>
+  //  inline static basic_small_string to_string(T value) {
+  //    return basic_small_string().from_number<Precision, T>(value);
+  //  }
 
   friend std::ostream& operator<<(std::ostream& stream, const basic_small_string& bss) {
     return stream << bss.to_view();
