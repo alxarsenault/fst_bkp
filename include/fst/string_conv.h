@@ -57,7 +57,7 @@
 #include <sstream>
 #include <stdexcept>
 
-namespace fst::string_conv {
+namespace fst::string_conv_v1 {
 template <typename T, class = typename std::enable_if<std::is_arithmetic<T>::value, void>::type>
 inline constexpr const char* type_to_format() {
   if constexpr (std::is_integral<T>::value) {
@@ -169,16 +169,18 @@ inline constexpr std::array<char, 8> type_to_format() {
 }
 
 template <typename T, class = typename std::enable_if<std::is_arithmetic<T>::value, void>::type>
-inline bool to_number(const char* str, const char* format, T& value) {
+[[deprecated("Use fst::string_conv::to_number in fst::string_conv_v2")]] inline bool to_number(
+    const char* str, const char* format, T& value) {
   return std::sscanf(str, format, &value) != EOF;
 }
 
 template <typename T, class = typename std::enable_if<std::is_arithmetic<T>::value, void>::type>
-inline std::size_t from_number(T value, char* buffer, const char* format, std::size_t maximum_size) {
+[[deprecated("Use fst::string_conv::to_string in fst::string_conv_v2")]] inline std::size_t from_number(
+    T value, char* buffer, const char* format, std::size_t maximum_size) {
   int result = std::snprintf(buffer, maximum_size, format, value);
   return fst::maximum(result, 0);
 }
-} // namespace fst::string_conv.
+} // namespace fst::string_conv_v1.
 
 namespace fst::string_conv_v2 {
 namespace detail {
@@ -821,3 +823,7 @@ inline std::string to_string(T value) {
   return std::string(to_string<_Precision, T>(buffer, value));
 }
 } // namespace fst::string_conv_v2.
+
+namespace fst {
+namespace string_conv = string_conv_v2;
+} // namespace fst.

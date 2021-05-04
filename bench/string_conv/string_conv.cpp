@@ -441,7 +441,7 @@ static void fst_bench_to_float(benchmark::State& state) {
   float f = 0;
   for (auto _ : state) {
     for (std::size_t i = 0; i < helper::buffer_size; i++) {
-      f = fst::string_conv_v2::to_number<float>(numbers[i]);
+      f = fst::string_conv::to_number<float>(numbers[i]);
     }
     benchmark::ClobberMemory();
   }
@@ -500,7 +500,7 @@ static void fst_bench_to_int(benchmark::State& state) {
   int f = 0;
   for (auto _ : state) {
     for (std::size_t i = 0; i < helper::buffer_size; i++) {
-      f = fst::string_conv_v2::to_number<int>(numbers[i]);
+      f = fst::string_conv::to_number<int>(numbers[i]);
     }
     benchmark::ClobberMemory();
   }
@@ -523,12 +523,12 @@ static void fst_bench_atoi(benchmark::State& state) {
 }
 BENCHMARK(fst_bench_atoi);
 
-//static void fst_bench_int_to_string(benchmark::State& state) {
+// static void fst_bench_int_to_string(benchmark::State& state) {
 //  //  const std::vector<std::string>& numbers = helper::get_str_real_numbers();
 //  std::string_view s;
 //  for (auto _ : state) {
 //    for (std::size_t i = 0; i < helper::buffer_size; i++) {
-//       s = fst::string_conv_v2::to_string(i);
+//       s = fst::string_conv::to_string(i);
 ////      s = fst::string_conv::detail::int_to_string(i);
 //      //      f = std::atof(numbers[i].c_str());
 //    }
@@ -537,22 +537,22 @@ BENCHMARK(fst_bench_atoi);
 //  //  fst::print(f);
 //  benchmark::DoNotOptimize(s);
 //}
-//BENCHMARK(fst_bench_int_to_string);
+// BENCHMARK(fst_bench_int_to_string);
 
-//static void fst_bench_int_to_string_with_buffer(benchmark::State& state) {
+// static void fst_bench_int_to_string_with_buffer(benchmark::State& state) {
 //  //  const std::vector<std::string>& numbers = helper::get_str_real_numbers();
 //  std::array<char, 32> array;
 //  std::string_view s;
 //  for (auto _ : state) {
 //    for (std::size_t i = 0; i < helper::buffer_size; i++) {
-//      s = fst::string_conv_v2::to_string(fst::span<char>(array), (int)i);
+//      s = fst::string_conv::to_string(fst::span<char>(array), (int)i);
 //    }
 //    benchmark::ClobberMemory();
 //  }
 //  //  fst::print(f);
 //  benchmark::DoNotOptimize(s);
 //}
-//BENCHMARK(fst_bench_int_to_string_with_buffer);
+// BENCHMARK(fst_bench_int_to_string_with_buffer);
 
 static void fst_bench_fst_to_string_int(benchmark::State& state) {
   //  const std::vector<std::string>& numbers = helper::get_str_real_numbers();
@@ -560,8 +560,8 @@ static void fst_bench_fst_to_string_int(benchmark::State& state) {
   std::string_view s;
   for (auto _ : state) {
     for (std::size_t i = 0; i < helper::buffer_size; i++) {
-      s = fst::string_conv_v2::to_string(array, (int)i);
-      //      s = fst::string_conv_v2::to_string(fst::span<char>(array), (int)i);
+      s = fst::string_conv::to_string(array, (int)i);
+      //      s = fst::string_conv::to_string(fst::span<char>(array), (int)i);
     }
     benchmark::ClobberMemory();
   }
@@ -576,8 +576,8 @@ static void fst_bench_fst_to_string_int_with_std_string(benchmark::State& state)
   std::string s;
   for (auto _ : state) {
     for (std::size_t i = 0; i < helper::buffer_size; i++) {
-      s = fst::string_conv_v2::to_string((int)i);
-      //      s = fst::string_conv_v2::to_string(fst::span<char>(array), (int)i);
+      s = fst::string_conv::to_string((int)i);
+      //      s = fst::string_conv::to_string(fst::span<char>(array), (int)i);
     }
     benchmark::ClobberMemory();
   }
@@ -607,8 +607,8 @@ static void fst_bench_fst_to_string_float(benchmark::State& state) {
   std::string_view s;
   for (auto _ : state) {
     for (std::size_t i = 0; i < helper::buffer_size; i++) {
-      s = fst::string_conv_v2::to_string(array, (float)i);
-      //      s = fst::string_conv_v2::to_string(fst::span<char>(array), (int)i);
+      s = fst::string_conv::to_string(array, (float)i);
+      //      s = fst::string_conv::to_string(fst::span<char>(array), (int)i);
     }
     benchmark::ClobberMemory();
   }
