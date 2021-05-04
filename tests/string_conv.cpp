@@ -107,6 +107,8 @@ TEST(string_conv_v2, to_string_float_precision) {
 
   EXPECT_EQ("123.46", fst::string_conv_v2::to_string<2>(buffer, 123.456f));
   EXPECT_EQ("-123.46", fst::string_conv_v2::to_string<2>(buffer, -123.456f));
+
+  EXPECT_EQ("0.70", fst::string_conv_v2::to_string<2>(buffer, 0.70f));
 }
 
 // inline std::vector<std::string> init_int_numbers() {

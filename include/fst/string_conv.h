@@ -746,24 +746,23 @@ namespace detail {
 
       if (dec.exponent > 0) {
         u_str.append(dec.exponent, '0');
-
         u_str.append('.');
         u_str.append(_Precision, '0');
       }
       else {
         int exp = -dec.exponent;
+
         if (exp >= str.size()) {
           std::size_t s_size = str.size();
           u_str.insert(0, "0.");
           u_str.insert(2, exp - s_size, '0');
         }
         else {
-
           u_str.insert(str.size() - exp, 1, '.');
+        }
 
-          if (exp < _Precision) {
-            u_str.append(_Precision - exp, '0');
-          }
+        if (exp < _Precision) {
+          u_str.append(_Precision - exp, '0');
         }
       }
 
