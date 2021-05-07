@@ -406,7 +406,17 @@ public:
     _size--;
   }
 
-  void clear() { resize(0); }
+  inline void clear() {
+    if constexpr (std::is_default_constructible_v<value_type>) {
+      resize(0);
+    }
+    if constexpr (std::is_copy_constructible_v<value_type>) {
+      resize(0, value_type());
+    }
+    else {
+      resize(0);
+    }
+  }
 
 private:
   buffer_type _data;
