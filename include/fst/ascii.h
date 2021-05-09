@@ -59,6 +59,10 @@ inline constexpr bool is_upper_case_letter(char c) { return c >= 'A' && c <= 'Z'
 
 inline constexpr bool is_alphanumeric(char c) { return is_digit(c) || is_letter(c); }
 
+inline constexpr bool is_letter_or_underscore(char c) { return is_letter(c) || c == '_'; }
+
+inline constexpr bool is_alphanumeric_or_underscore(char c) { return is_alphanumeric(c) || c == '_'; }
+
 inline constexpr bool is_control(char c) { return (c >= 0 && c <= 31) || c == 127; }
 
 inline constexpr bool is_end_of_line(char c) { return c == '\n' || c == '\r'; }
