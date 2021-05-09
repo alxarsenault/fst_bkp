@@ -77,6 +77,16 @@ inline constexpr bool is_alphanumeric_with_spaces(std::string_view s) {
   return true;
 }
 
+inline constexpr bool is_alphanumeric_or_underscore(std::string_view s) {
+  for (std::size_t i = 0; i < s.size(); i++) {
+    if (!fst::is_alphanumeric_or_underscore(s[i])) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 inline constexpr bool has_leading_spaces(std::string_view s) { return s.empty() ? false : fst::is_space(s[0]); }
 
 inline constexpr bool has_trailing_spaces(std::string_view s) { return s.empty() ? false : fst::is_space(s.back()); }
