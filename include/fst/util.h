@@ -135,8 +135,8 @@ struct is_only_one_false_t {
   static constexpr bool value = (!Bs ^ ...);
 };
 
-template<typename T>
-[[nodiscard]] inline constexpr bool assign(T& dst, T src) {
+template <typename T, typename P>
+[[nodiscard]] inline constexpr bool assign(T& dst, const P& src) {
   if(dst == src) {
     return false;
   }

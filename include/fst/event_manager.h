@@ -155,6 +155,7 @@ private:
       bool is_recurrent;
     };
 
+    //    using vector_type = std::vector<event_data>;
     using vector_type = fst::stack_fixed_vector<event_data, maximum_events_count>;
 
     inline std::size_t add(
@@ -171,6 +172,7 @@ private:
       for (std::size_t i = 0; i < _data.size(); i++) {
         if (_data[i].id == id) {
           _data.erase(i);
+          //          _data.erase(_data.begin() + i);
           return true;
         }
       }
