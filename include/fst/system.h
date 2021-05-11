@@ -88,7 +88,7 @@ inline std::filesystem::path get_common_app_data_directory() {
 }
 
 inline std::filesystem::path get_global_app_directory() {
-  return syspath_detail::get_window_special_folder_path(CSIDL_PROGRAM_FILES);
+  return system_detail::get_window_special_folder_path(CSIDL_PROGRAM_FILES);
 }
 #else
 
