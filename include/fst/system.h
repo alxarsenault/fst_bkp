@@ -71,13 +71,18 @@ inline std::filesystem::path get_global_app_directory() { return "/Applications"
 namespace system_detail {
   inline std::filesystem::path get_window_special_folder_path(int type) {
     WCHAR path[MAX_PATH + 256];
-    if (SHGetSpecialFolderPath(nullptr, path, type, FALSE)) {
+    if (SHGetSpecialFolderPath(nullptr, &path[0], type, FALSE)) {
       return std::filesystem::path(path);
     }
 
     return "";
   }
 } // namespace system_detail.
+
+
+inline std::filesystem::path get_home_directory() {
+  return system_detail::get_window_special_folder_path(CSIDL_PROFILE);
+}
 
 inline std::filesystem::path get_user_app_data_directory() {
   return system_detail::get_window_special_folder_path(CSIDL_APPDATA);
