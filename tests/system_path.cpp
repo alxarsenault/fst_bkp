@@ -2,7 +2,6 @@
 
 #include "fst/print.h"
 #include "fst/system.h"
-#include "pwd.h"
 
 namespace {
 TEST(system_path, constructor) {

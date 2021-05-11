@@ -79,7 +79,6 @@ namespace system_detail {
   }
 } // namespace system_detail.
 
-
 inline std::filesystem::path get_home_directory() {
   return system_detail::get_window_special_folder_path(CSIDL_PROFILE);
 }
